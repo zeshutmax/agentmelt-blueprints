@@ -1,0 +1,584 @@
+{
+  "name": "Agentmelt — Candidate Outreach Automation Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Candidate Outreach Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: A candidate added to a sourcing project in the ATS or a row added to the outreach sheet starts a sequence for that person.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Only public, professional information is used; nothing personal, nothing inferred about protected characteristics.\n   - Sending limits: 40 new messages a day per mailbox, spaced, so the recruiter's domain reputation is protected.\n   - Every message is sent from a person's address and signed by that person; replies go to them.\n   - Opt-out language in every message; an opt-out suppresses the candidate across all roles.\n   - Follow-ups stop on any reply, including 'not now', which is logged as a future-contact date.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/candidate-outreach-automation/\nWant it built and run for you? $197/month · custom $2,000–3,500 one-time",
+        "height": 520,
+        "width": 460,
+        "color": 4
+      },
+      "id": "candidate-outreach-automation-note",
+      "name": "Read me first",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "candidate-outreach-automation",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "candidate-outreach-automation-01",
+      "name": "Webhook: Receive the candidate",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        300
+      ],
+      "notes": "Receive the candidate\n\nName, current title and company, profile URL, and the role they are being sourced for.",
+      "webhookId": "candidate-outreach-automation-webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-1",
+              "name": "config.your_name",
+              "value": "Your name — signs every outgoing message",
+              "type": "string"
+            },
+            {
+              "id": "cfg-2",
+              "name": "config.your_email",
+              "value": "you@example.com",
+              "type": "string"
+            },
+            {
+              "id": "cfg-3",
+              "name": "config.your_company",
+              "value": "Your company or brokerage",
+              "type": "string"
+            },
+            {
+              "id": "cfg-4",
+              "name": "config.timezone",
+              "value": "Europe/London",
+              "type": "string"
+            },
+            {
+              "id": "cfg-5",
+              "name": "config.quiet_hours_start",
+              "value": 21,
+              "type": "number"
+            },
+            {
+              "id": "cfg-6",
+              "name": "config.quiet_hours_end",
+              "value": 8,
+              "type": "number"
+            },
+            {
+              "id": "cfg-7",
+              "name": "config.approval_mode",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "cfg-8",
+              "name": "config.approver",
+              "value": "#approvals — a Slack channel, or an email address",
+              "type": "string"
+            },
+            {
+              "id": "cfg-9",
+              "name": "config.test_mode",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "candidate-outreach-automation-config",
+      "name": "Config (edit me)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        300
+      ],
+      "notes": "Fill these in once; every later node reads them as $('Config (edit me)').item.json.config.*\n\ntest_mode = true: log what the workflow would write, without writing it, for the first week.\napproval_mode = true: the approval node waits for a person; switch off per message type once it has earned it.\n\nAlso point the nodes at your own sources:\n- Sourcing list (ATS project, Google Sheet, CSV)\n- Public profiles and company pages\n- Role brief\n- Recruiter voice samples\n- ATS for logging"
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/replace-me",
+        "method": "GET",
+        "options": {},
+        "notes": "Public profile, company page, recent talks or posts, open-source or portfolio work — three to five facts, with sources."
+      },
+      "id": "candidate-outreach-automation-02",
+      "name": "HTTP Request: Research",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        640,
+        300
+      ],
+      "notes": "Research\n\nPublic profile, company page, recent talks or posts, open-source or portfolio work — three to five facts, with sources."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the \"Pick the hook\" step of the Candidate Outreach Automation Workflow workflow run by Agentmelt.\nTask: One specific, recent, professional thing the candidate did that relates to the role. Not their title, not their employer's tagline.\n\nRules:\n- Only public, professional information is used; nothing personal, nothing inferred about protected characteristics.\n- Sending limits: 40 new messages a day per mailbox, spaced, so the recruiter's domain reputation is protected.\n- Every message is sent from a person's address and signed by that person; replies go to them.\n- Opt-out language in every message; an opt-out suppresses the candidate across all roles.\n- Follow-ups stop on any reply, including 'not now', which is logged as a future-contact date.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON."
+        }
+      },
+      "id": "candidate-outreach-automation-03",
+      "name": "AI Agent: Pick the hook",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        960,
+        300
+      ],
+      "notes": "Pick the hook\n\nOne specific, recent, professional thing the candidate did that relates to the role. Not their title, not their employer's tagline."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "candidate-outreach-automation-03-llm",
+      "name": "Claude (Anthropic Chat Model)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1280,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"summary\": { \"type\": \"string\" },\n    \"draft\": { \"type\": \"string\", \"description\": \"The message or document text this step produced, ready to send or review\" },\n    \"subject\": { \"type\": \"string\" },\n    \"confidence\": { \"type\": \"number\" },\n    \"needs_human\": { \"type\": \"boolean\" },\n    \"reasons\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } }\n  },\n  \"required\": [\"summary\", \"confidence\", \"needs_human\"]\n}"
+      },
+      "id": "candidate-outreach-automation-03-parser",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        1480,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "candidate-outreach-automation-03-gate",
+      "name": "Needs a person?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1280,
+        300
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "candidate-outreach-automation-needs-a-person-pick-the-hook",
+      "name": "Needs a person: Pick the hook",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        80
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the \"Draft the message\" step of the Candidate Outreach Automation Workflow workflow run by Agentmelt.\nTask: Under 90 words: the hook, why the role is relevant to it, one question. Plain text, no tracking pixels, no 'I hope this finds you well'.\n\nRules:\n- Only public, professional information is used; nothing personal, nothing inferred about protected characteristics.\n- Sending limits: 40 new messages a day per mailbox, spaced, so the recruiter's domain reputation is protected.\n- Every message is sent from a person's address and signed by that person; replies go to them.\n- Opt-out language in every message; an opt-out suppresses the candidate across all roles.\n- Follow-ups stop on any reply, including 'not now', which is logged as a future-contact date.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON."
+        }
+      },
+      "id": "candidate-outreach-automation-04",
+      "name": "AI Agent: Draft the message",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        1600,
+        300
+      ],
+      "notes": "Draft the message\n\nUnder 90 words: the hook, why the role is relevant to it, one question. Plain text, no tracking pixels, no 'I hope this finds you well'."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "candidate-outreach-automation-04-llm",
+      "name": "Claude (Anthropic Chat Model) 2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1920,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"summary\": { \"type\": \"string\" },\n    \"draft\": { \"type\": \"string\", \"description\": \"The message or document text this step produced, ready to send or review\" },\n    \"subject\": { \"type\": \"string\" },\n    \"confidence\": { \"type\": \"number\" },\n    \"needs_human\": { \"type\": \"boolean\" },\n    \"reasons\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } }\n  },\n  \"required\": [\"summary\", \"confidence\", \"needs_human\"]\n}"
+      },
+      "id": "candidate-outreach-automation-04-parser",
+      "name": "Structured Output Parser 2",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        2120,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "candidate-outreach-automation-04-gate",
+      "name": "Needs a person? 2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1920,
+        300
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "candidate-outreach-automation-needs-a-person-draft-the-message",
+      "name": "Needs a person: Draft the message",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        80
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $json.email || $json.output?.email || '' }}",
+        "subject": "={{ $json.output?.subject || $json.subject || 'Re: your enquiry' }}",
+        "emailType": "text",
+        "message": "={{ $json.output?.draft || $json.draft || $json.summary || '' }}",
+        "options": {}
+      },
+      "id": "candidate-outreach-automation-05",
+      "name": "Gmail: Send from the recruiter",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2240,
+        300
+      ],
+      "notes": "Send from the recruiter\n\nFrom the recruiter's own address, spaced to stay under daily limits; the ATS gets the message logged against the candidate."
+    },
+    {
+      "parameters": {
+        "resume": "webhook",
+        "options": {}
+      },
+      "id": "candidate-outreach-automation-06",
+      "name": "Wait: Follow up twice",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2560,
+        300
+      ],
+      "notes": "Follow up twice\n\nDay 4 and day 10, each a different angle (the team, the problem, the timing), each shorter than the last."
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {}
+      },
+      "id": "candidate-outreach-automation-07",
+      "name": "Gmail Trigger: Stop on reply",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        860
+      ],
+      "notes": "Stop on reply\n\nAny reply ends the sequence and forwards the thread with the research to the recruiter; an out-of-office pauses it."
+    },
+    {
+      "parameters": {
+        "resource": "sheet",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ 'replace-with-your-spreadsheet-id' }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "candidate-outreach-automation-08",
+      "name": "Google Sheets: Measure",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        320,
+        860
+      ],
+      "notes": "Measure\n\nPer role: sent, replied, positive, interviews — by hook type, so the recruiter learns which angles work for which roles."
+    }
+  ],
+  "connections": {
+    "Webhook: Receive the candidate": {
+      "main": [
+        [
+          {
+            "node": "Config (edit me)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config (edit me)": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Research",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Research": {
+      "main": [
+        [
+          {
+            "node": "AI Agent: Pick the hook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent: Pick the hook",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent: Pick the hook",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent: Pick the hook": {
+      "main": [
+        [
+          {
+            "node": "Needs a person?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person?": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Pick the hook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent: Draft the message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model) 2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent: Draft the message",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser 2": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent: Draft the message",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent: Draft the message": {
+      "main": [
+        [
+          {
+            "node": "Needs a person? 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person? 2": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Draft the message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Gmail: Send from the recruiter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail: Send from the recruiter": {
+      "main": [
+        [
+          {
+            "node": "Wait: Follow up twice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger: Stop on reply": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets: Measure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "source": "https://agentmelt.com/workflows/candidate-outreach-automation/"
+  }
+}

@@ -1,0 +1,487 @@
+{
+  "name": "Agentmelt — Data Migration Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Data Migration Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Each phase — profile, map, validate, dry-run, cutover — starts on an explicit click; no phase runs unattended.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - No phase runs without an explicit trigger; cutover requires a dry run that passed.\n   - The mapping is confirmed by a person; the agent proposes with confidence, it does not decide.\n   - The source is read-only during cutover and a tested rollback exists before the first production batch.\n   - Every transformed record carries its source id for traceability.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/data-migration-automation/\nWant it built and run for you? $297/month · custom $5,000–12,000 one-time",
+        "height": 520,
+        "width": 460,
+        "color": 4
+      },
+      "id": "data-migration-automation-note",
+      "name": "Read me first",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        40
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "data-migration-automation-00",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        300
+      ],
+      "notes": "Manual trigger per phase\n\nEach phase — profile, map, validate, dry-run, cutover — starts on an explicit click; no phase runs unattended."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-1",
+              "name": "config.your_name",
+              "value": "Your name — signs every outgoing message",
+              "type": "string"
+            },
+            {
+              "id": "cfg-2",
+              "name": "config.your_email",
+              "value": "you@example.com",
+              "type": "string"
+            },
+            {
+              "id": "cfg-3",
+              "name": "config.your_company",
+              "value": "Your company or brokerage",
+              "type": "string"
+            },
+            {
+              "id": "cfg-4",
+              "name": "config.timezone",
+              "value": "Europe/London",
+              "type": "string"
+            },
+            {
+              "id": "cfg-5",
+              "name": "config.quiet_hours_start",
+              "value": 21,
+              "type": "number"
+            },
+            {
+              "id": "cfg-6",
+              "name": "config.quiet_hours_end",
+              "value": 8,
+              "type": "number"
+            },
+            {
+              "id": "cfg-7",
+              "name": "config.approval_mode",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "cfg-8",
+              "name": "config.approver",
+              "value": "#approvals — a Slack channel, or an email address",
+              "type": "string"
+            },
+            {
+              "id": "cfg-9",
+              "name": "config.test_mode",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "data-migration-automation-config",
+      "name": "Config (edit me)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        300
+      ],
+      "notes": "Fill these in once; every later node reads them as $('Config (edit me)').item.json.config.*\n\ntest_mode = true: log what the workflow would write, without writing it, for the first week.\napproval_mode = true: the approval node waits for a person; switch off per message type once it has earned it.\n\nAlso point the nodes at your own sources:\n- Source system (database, CRM/helpdesk export or API)\n- Target system API or import\n- Mapping sheet (owner-confirmed)\n- Validation rules"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT 1; -- replace with your query",
+        "options": {}
+      },
+      "id": "data-migration-automation-01",
+      "name": "Postgres: Profile the source",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        640,
+        300
+      ],
+      "notes": "Profile the source\n\nTables, fields, types, null rates, distinct values and sample rows from the source system (database, CRM export, API)."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the \"Propose the mapping\" step of the Data Migration Workflow workflow run by Agentmelt.\nTask: Reads source and target schemas with sample values and proposes field-by-field mappings with transformation notes (date formats, picklist translation, splits/merges) and a confidence per field.\n\nRules:\n- No phase runs without an explicit trigger; cutover requires a dry run that passed.\n- The mapping is confirmed by a person; the agent proposes with confidence, it does not decide.\n- The source is read-only during cutover and a tested rollback exists before the first production batch.\n- Every transformed record carries its source id for traceability.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON."
+        }
+      },
+      "id": "data-migration-automation-02",
+      "name": "AI Agent: Propose the mapping",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        960,
+        300
+      ],
+      "notes": "Propose the mapping\n\nReads source and target schemas with sample values and proposes field-by-field mappings with transformation notes (date formats, picklist translation, splits/merges) and a confidence per field."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "data-migration-automation-02-llm",
+      "name": "Claude (Anthropic Chat Model)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1280,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"summary\": { \"type\": \"string\" },\n    \"draft\": { \"type\": \"string\", \"description\": \"The message or document text this step produced, ready to send or review\" },\n    \"subject\": { \"type\": \"string\" },\n    \"confidence\": { \"type\": \"number\" },\n    \"needs_human\": { \"type\": \"boolean\" },\n    \"reasons\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } }\n  },\n  \"required\": [\"summary\", \"confidence\", \"needs_human\"]\n}"
+      },
+      "id": "data-migration-automation-02-parser",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        1480,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "data-migration-automation-02-gate",
+      "name": "Needs a person?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1280,
+        300
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "data-migration-automation-needs-a-person-propose-the-mapping",
+      "name": "Needs a person: Propose the mapping",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        80
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "resource": "sheet",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ 'replace-with-your-spreadsheet-id' }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "data-migration-automation-03",
+      "name": "Google Sheets: Confirm the mapping",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1600,
+        300
+      ],
+      "notes": "Confirm the mapping\n\nThe mapping sheet is reviewed and edited by the migration owner; it becomes the versioned source of truth for every later step."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Apply transformations\n// Transformations generated from the mapping sheet — type conversions, lookups, deduplication rules — applied to a sample batch.\nreturn $input.all();"
+      },
+      "id": "data-migration-automation-04",
+      "name": "Code: Apply transformations",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1920,
+        300
+      ],
+      "notes": "Apply transformations\n\nTransformations generated from the mapping sheet — type conversions, lookups, deduplication rules — applied to a sample batch."
+    },
+    {
+      "parameters": {
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "id",
+              "field2": "id"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "data-migration-automation-05",
+      "name": "Compare Datasets: Validate",
+      "type": "n8n-nodes-base.compareDatasets",
+      "typeVersion": 2.3,
+      "position": [
+        2240,
+        300
+      ],
+      "notes": "Validate\n\nRecord counts, sums of numeric fields, referential integrity and picklist coverage compared between source and transformed target sample; failures listed per rule."
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/replace-me",
+        "method": "GET",
+        "options": {},
+        "notes": "Full transformed dataset loaded into a target sandbox; reconciliation report produced; errors per batch."
+      },
+      "id": "data-migration-automation-06",
+      "name": "HTTP Request: Dry run",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2560,
+        300
+      ],
+      "notes": "Dry run\n\nFull transformed dataset loaded into a target sandbox; reconciliation report produced; errors per batch."
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "data-migration-automation-07",
+      "name": "Loop Over Items: Cut over in batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2880,
+        300
+      ],
+      "notes": "Cut over in batches\n\nProduction load in batches with progress, per-record error capture and retry; the source stays read-only during cutover."
+    },
+    {
+      "parameters": {
+        "resource": "document",
+        "operation": "create",
+        "driveId": "myDrive",
+        "folderId": "={{ 'replace-with-your-folder-id' }}",
+        "title": "={{ $json.output?.subject || $json.title || $json.summary || 'Untitled' }}"
+      },
+      "id": "data-migration-automation-08",
+      "name": "Google Docs: Reconcile and hand over",
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        3200,
+        300
+      ],
+      "notes": "Reconcile and hand over\n\nFinal reconciliation report, error log, the mapping sheet and the rollback procedure archived; the workflow can re-run deltas for late data."
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Config (edit me)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config (edit me)": {
+      "main": [
+        [
+          {
+            "node": "Postgres: Profile the source",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres: Profile the source": {
+      "main": [
+        [
+          {
+            "node": "AI Agent: Propose the mapping",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent: Propose the mapping",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent: Propose the mapping",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent: Propose the mapping": {
+      "main": [
+        [
+          {
+            "node": "Needs a person?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person?": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Propose the mapping",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Sheets: Confirm the mapping",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets: Confirm the mapping": {
+      "main": [
+        [
+          {
+            "node": "Code: Apply transformations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Apply transformations": {
+      "main": [
+        [
+          {
+            "node": "Compare Datasets: Validate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compare Datasets: Validate": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Dry run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Dry run": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items: Cut over in batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items: Cut over in batches": {
+      "main": [
+        [
+          {
+            "node": "Google Docs: Reconcile and hand over",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "source": "https://agentmelt.com/workflows/data-migration-automation/"
+  }
+}

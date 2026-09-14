@@ -1,0 +1,540 @@
+{
+  "name": "Agentmelt — Lead Nurture Automation Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Lead Nurture Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: A new listing in the CRM or MLS feed, a rate change from your lender's feed, an anniversary or birthday in the CRM, or a lead going quiet for N days each start a run for the leads they affect.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - No message without a reason the lead would recognise; the model cannot invent one.\n   - Frequency cap: at most one touch per lead per 14 days, at most three per quarter.\n   - Anyone in an active conversation or an active CRM stage is excluded automatically.\n   - Unsubscribe and STOP are honoured on the first word; suppression is written to the CRM.\n   - Fair-housing language check on every draft; flagged drafts cannot be sent.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/lead-nurture-automation/\nWant it built and run for you? $197/month · custom $2,000–3,500 one-time",
+        "height": 520,
+        "width": 460,
+        "color": 4
+      },
+      "id": "lead-nurture-automation-note",
+      "name": "Read me first",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "lead-nurture-automation-01",
+      "name": "Schedule Trigger: Detect the reason",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ],
+      "notes": "Detect the reason\n\nHourly: new listings, rate changes and CRM dates are compared against every lead's stated wants (area, beds, budget, timeline) and their history."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-1",
+              "name": "config.your_name",
+              "value": "Your name — signs every outgoing message",
+              "type": "string"
+            },
+            {
+              "id": "cfg-2",
+              "name": "config.your_email",
+              "value": "you@example.com",
+              "type": "string"
+            },
+            {
+              "id": "cfg-3",
+              "name": "config.your_company",
+              "value": "Your company or brokerage",
+              "type": "string"
+            },
+            {
+              "id": "cfg-4",
+              "name": "config.timezone",
+              "value": "Europe/London",
+              "type": "string"
+            },
+            {
+              "id": "cfg-5",
+              "name": "config.quiet_hours_start",
+              "value": 21,
+              "type": "number"
+            },
+            {
+              "id": "cfg-6",
+              "name": "config.quiet_hours_end",
+              "value": 8,
+              "type": "number"
+            },
+            {
+              "id": "cfg-7",
+              "name": "config.approval_mode",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "cfg-8",
+              "name": "config.approver",
+              "value": "#approvals — a Slack channel, or an email address",
+              "type": "string"
+            },
+            {
+              "id": "cfg-9",
+              "name": "config.test_mode",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "lead-nurture-automation-config",
+      "name": "Config (edit me)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        300
+      ],
+      "notes": "Fill these in once; every later node reads them as $('Config (edit me)').item.json.config.*\n\ntest_mode = true: log what the workflow would write, without writing it, for the first week.\napproval_mode = true: the approval node waits for a person; switch off per message type once it has earned it.\n\nAlso point the nodes at your own sources:\n- CRM leads with wants and history (Follow Up Boss, kvCORE, HubSpot)\n- Listing feed (CRM or MLS)\n- Rate feed or manual rate table\n- Agent voice samples\n- Calendar for showings"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Match leads to the signal\n// A listing matches a lead when area, price band and beds fit; a rate move matches leads whose budget was near the edge; an anniversary matches one person. No match, no message.\nreturn $input.all();"
+      },
+      "id": "lead-nurture-automation-02",
+      "name": "Code: Match leads to the signal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        300
+      ],
+      "notes": "Match leads to the signal\n\nA listing matches a lead when area, price band and beds fit; a rate move matches leads whose budget was near the edge; an anniversary matches one person. No match, no message."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check the guardrails\n// Skip anyone contacted in the last 14 days, anyone who unsubscribed, anyone with an open conversation, and anyone whose CRM stage is 'active' — the agent is already talking to them.\nreturn $input.all();"
+      },
+      "id": "lead-nurture-automation-03",
+      "name": "Code: Check the guardrails",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        300
+      ],
+      "notes": "Check the guardrails\n\nSkip anyone contacted in the last 14 days, anyone who unsubscribed, anyone with an open conversation, and anyone whose CRM stage is 'active' — the agent is already talking to them."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the \"Draft the message\" step of the Lead Nurture Automation Workflow workflow run by Agentmelt.\nTask: Two to four sentences in the agent's voice that name the reason, reference what the lead said last time, and ask one question. Fair-housing wordlist applied.\n\nRules:\n- No message without a reason the lead would recognise; the model cannot invent one.\n- Frequency cap: at most one touch per lead per 14 days, at most three per quarter.\n- Anyone in an active conversation or an active CRM stage is excluded automatically.\n- Unsubscribe and STOP are honoured on the first word; suppression is written to the CRM.\n- Fair-housing language check on every draft; flagged drafts cannot be sent.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON."
+        }
+      },
+      "id": "lead-nurture-automation-04",
+      "name": "AI Agent: Draft the message",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        1280,
+        300
+      ],
+      "notes": "Draft the message\n\nTwo to four sentences in the agent's voice that name the reason, reference what the lead said last time, and ask one question. Fair-housing wordlist applied."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "lead-nurture-automation-04-llm",
+      "name": "Claude (Anthropic Chat Model)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1600,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"summary\": { \"type\": \"string\" },\n    \"draft\": { \"type\": \"string\", \"description\": \"The message or document text this step produced, ready to send or review\" },\n    \"subject\": { \"type\": \"string\" },\n    \"confidence\": { \"type\": \"number\" },\n    \"needs_human\": { \"type\": \"boolean\" },\n    \"reasons\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } }\n  },\n  \"required\": [\"summary\", \"confidence\", \"needs_human\"]\n}"
+      },
+      "id": "lead-nurture-automation-04-parser",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        1800,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "lead-nurture-automation-04-gate",
+      "name": "Needs a person?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1600,
+        300
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "lead-nurture-automation-needs-a-person-draft-the-message",
+      "name": "Needs a person: Draft the message",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        80
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendAndWait",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Config (edit me)').item.json.config.approver }}"
+        },
+        "message": "={{ $json.output ? $json.output.summary : $json.summary }}",
+        "responseType": "approval",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "approveLabel": "Approve",
+            "disapproveLabel": "Reject"
+          }
+        },
+        "options": {}
+      },
+      "id": "lead-nurture-automation-05",
+      "name": "Slack approval: Approve or auto-send",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1920,
+        300
+      ],
+      "notes": "Approve or auto-send\n\nFor the first month every draft goes to the agent for a tap; afterwards, message types the agent has approved ten times run without review.\n\nSend-and-wait: the run pauses here until someone presses Approve or Reject. Set config.approver in \"Config (edit me)\"."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "ap",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "lead-nurture-automation-05-approved",
+      "name": "Approved?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2240,
+        300
+      ],
+      "notes": "True = approved → continue to the write-back. False = rejected → stop here; the item stays where it was."
+    },
+    {
+      "parameters": {},
+      "id": "lead-nurture-automation-rejected-approve-or-auto-send",
+      "name": "Rejected: Approve or auto-send",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2240,
+        80
+      ],
+      "notes": "Rejected by the approver. Nothing is written. Optionally log the rejection to your sheet so the weekly count of corrections is visible."
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $json.email || $json.output?.email || '' }}",
+        "subject": "={{ $json.output?.subject || $json.subject || 'Re: your enquiry' }}",
+        "emailType": "text",
+        "message": "={{ $json.output?.draft || $json.draft || $json.summary || '' }}",
+        "options": {}
+      },
+      "id": "lead-nurture-automation-06",
+      "name": "Gmail: Send and log",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2560,
+        300
+      ],
+      "notes": "Send and log\n\nSent from the agent's own address, threaded where a thread exists; the CRM gets a note and the 'last touched' date."
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {}
+      },
+      "id": "lead-nurture-automation-07",
+      "name": "Gmail Trigger: Stop on reply",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        860
+      ],
+      "notes": "Stop on reply\n\nA reply ends the sequence for that person and forwards the thread to the agent with the lead's history in three lines."
+    },
+    {
+      "parameters": {
+        "resource": "sheet",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ 'replace-with-your-spreadsheet-id' }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "lead-nurture-automation-08",
+      "name": "Google Sheets: Report",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        320,
+        860
+      ],
+      "notes": "Report\n\nMonthly: touches sent by reason, replies, showings and listings that came from a nurture touch, so the agent sees what a reason is worth."
+    }
+  ],
+  "connections": {
+    "Schedule Trigger: Detect the reason": {
+      "main": [
+        [
+          {
+            "node": "Config (edit me)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config (edit me)": {
+      "main": [
+        [
+          {
+            "node": "Code: Match leads to the signal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Match leads to the signal": {
+      "main": [
+        [
+          {
+            "node": "Code: Check the guardrails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Check the guardrails": {
+      "main": [
+        [
+          {
+            "node": "AI Agent: Draft the message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent: Draft the message",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent: Draft the message",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent: Draft the message": {
+      "main": [
+        [
+          {
+            "node": "Needs a person?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person?": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Draft the message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Slack approval: Approve or auto-send",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack approval: Approve or auto-send": {
+      "main": [
+        [
+          {
+            "node": "Approved?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approved?": {
+      "main": [
+        [
+          {
+            "node": "Gmail: Send and log",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Rejected: Approve or auto-send",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger: Stop on reply": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets: Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "source": "https://agentmelt.com/workflows/lead-nurture-automation/"
+  }
+}

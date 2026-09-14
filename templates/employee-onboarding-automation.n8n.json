@@ -1,0 +1,516 @@
+{
+  "name": "Agentmelt — Employee Onboarding Automation Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Employee Onboarding Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: BambooHR, Rippling, Workday or Personio sends a webhook when a candidate's status becomes Hired. A fallback Schedule Trigger polls the HRIS every hour for platforms without webhooks.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - The AI agent answers only from the handbook and cites the page; it refuses pay, performance and grievance topics and routes them to HR.\n   - Account provisioning is requested, never executed, by the workflow — IT approves in their own tool.\n   - Personal data stays in the HRIS; the workflow passes identifiers, not copies of documents.\n   - Every automated message is logged on the hire's board so HR can see exactly what was sent.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/employee-onboarding-automation/\nWant it built and run for you? $247/month · custom $3,500–5,000 one-time",
+        "height": 520,
+        "width": 460,
+        "color": 4
+      },
+      "id": "employee-onboarding-automation-note",
+      "name": "Read me first",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "employee-onboarding-automation",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "employee-onboarding-automation-01",
+      "name": "Webhook: Receive the new-hire event",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        300
+      ],
+      "notes": "Receive the new-hire event\n\nThe HRIS posts the new employee record: name, role, department, start date, manager, location. The workflow validates required fields and stops with an alert if the record is incomplete.",
+      "webhookId": "employee-onboarding-automation-webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-1",
+              "name": "config.your_name",
+              "value": "Your name — signs every outgoing message",
+              "type": "string"
+            },
+            {
+              "id": "cfg-2",
+              "name": "config.your_email",
+              "value": "you@example.com",
+              "type": "string"
+            },
+            {
+              "id": "cfg-3",
+              "name": "config.your_company",
+              "value": "Your company or brokerage",
+              "type": "string"
+            },
+            {
+              "id": "cfg-4",
+              "name": "config.timezone",
+              "value": "Europe/London",
+              "type": "string"
+            },
+            {
+              "id": "cfg-5",
+              "name": "config.quiet_hours_start",
+              "value": 21,
+              "type": "number"
+            },
+            {
+              "id": "cfg-6",
+              "name": "config.quiet_hours_end",
+              "value": 8,
+              "type": "number"
+            },
+            {
+              "id": "cfg-7",
+              "name": "config.approval_mode",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "cfg-8",
+              "name": "config.approver",
+              "value": "#approvals — a Slack channel, or an email address",
+              "type": "string"
+            },
+            {
+              "id": "cfg-9",
+              "name": "config.test_mode",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "employee-onboarding-automation-config",
+      "name": "Config (edit me)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        300
+      ],
+      "notes": "Fill these in once; every later node reads them as $('Config (edit me)').item.json.config.*\n\ntest_mode = true: log what the workflow would write, without writing it, for the first week.\napproval_mode = true: the approval node waits for a person; switch off per message type once it has earned it.\n\nAlso point the nodes at your own sources:\n- HRIS employee record (BambooHR, Rippling, Workday, Personio)\n- Role → checklist map (Google Sheet or Notion)\n- Employee handbook and policy documents (vector store)\n- IT ticketing system (Jira SM, ServiceNow, Freshservice)\n- Calendar and email (Google Workspace or Microsoft 365)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": []
+        },
+        "options": {}
+      },
+      "id": "employee-onboarding-automation-02",
+      "name": "Set: Build the checklist for this role",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        640,
+        300
+      ],
+      "notes": "Build the checklist for this role\n\nA role → checklist map (kept in a Google Sheet or Notion database so HR can edit it without touching the workflow) defines the tasks, owners and due dates relative to the start date: paperwork, equipment, accounts, training modules, introductions."
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ 'replace-with-your-notion-database-id' }}"
+        },
+        "title": "={{ $json.output?.subject || $json.title || $json.summary || 'Untitled' }}",
+        "options": {}
+      },
+      "id": "employee-onboarding-automation-03",
+      "name": "Notion: Create the tracking board",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        300
+      ],
+      "notes": "Create the tracking board\n\nOne page per hire with every task, owner and due date. Jira, Asana, ClickUp or a Google Sheet work the same way. This is the single place HR looks."
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/replace-me",
+        "method": "GET",
+        "options": {},
+        "notes": "Creates the IT tickets (Jira Service Management, ServiceNow, Freshservice) for laptop, email, SSO groups and role-specific tools, pre-filled from the HRIS record so IT never has to ask."
+      },
+      "id": "employee-onboarding-automation-04",
+      "name": "HTTP Request: Request accounts and equipment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1280,
+        300
+      ],
+      "notes": "Request accounts and equipment\n\nCreates the IT tickets (Jira Service Management, ServiceNow, Freshservice) for laptop, email, SSO groups and role-specific tools, pre-filled from the HRIS record so IT never has to ask."
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/replace-me",
+        "method": "GET",
+        "options": {},
+        "notes": "Generates the contract, NDA and policy acknowledgements from templates and sends them via DocuSign or PandaDoc. Signed copies land back in the HRIS."
+      },
+      "id": "employee-onboarding-automation-05",
+      "name": "HTTP Request: Send documents for signature",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1600,
+        300
+      ],
+      "notes": "Send documents for signature\n\nGenerates the contract, NDA and policy acknowledgements from templates and sends them via DocuSign or PandaDoc. Signed copies land back in the HRIS."
+    },
+    {
+      "parameters": {
+        "resource": "event",
+        "operation": "create",
+        "calendar": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Config (edit me)').item.json.config.your_email }}"
+        },
+        "start": "={{ $json.start || $now }}",
+        "end": "={{ $json.end || $now.plus(1, 'hour') }}",
+        "additionalFields": {}
+      },
+      "id": "employee-onboarding-automation-06",
+      "name": "Google Calendar: Schedule the first two weeks",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        1920,
+        300
+      ],
+      "notes": "Schedule the first two weeks\n\nBooks the manager 1:1, team introductions, IT setup slot and mandatory training from the checklist, inviting the right people with the right context."
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $json.email || $json.output?.email || '' }}",
+        "subject": "={{ $json.output?.subject || $json.subject || 'Re: your enquiry' }}",
+        "emailType": "text",
+        "message": "={{ $json.output?.draft || $json.draft || $json.summary || '' }}",
+        "options": {}
+      },
+      "id": "employee-onboarding-automation-07",
+      "name": "Gmail: Run the welcome sequence",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2240,
+        300
+      ],
+      "notes": "Run the welcome sequence\n\nDay −7, −1, 1, 7 and 30 emails, personalised from the record: what to expect, who to meet, where things are. Slack or Teams DMs once the account exists."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the \"Answer policy questions\" step of the Employee Onboarding Automation Workflow workflow run by Agentmelt.\nTask: A Slack bot backed by an AI Agent node with your handbook in a vector store. It answers PTO, benefits, expenses and equipment questions with citations to the handbook page, and hands anything about pay, performance or complaints to HR.\n\nRules:\n- The AI agent answers only from the handbook and cites the page; it refuses pay, performance and grievance topics and routes them to HR.\n- Account provisioning is requested, never executed, by the workflow — IT approves in their own tool.\n- Personal data stays in the HRIS; the workflow passes identifiers, not copies of documents.\n- Every automated message is logged on the hire's board so HR can see exactly what was sent.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON."
+        }
+      },
+      "id": "employee-onboarding-automation-08",
+      "name": "AI Agent: Answer policy questions",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        2560,
+        300
+      ],
+      "notes": "Answer policy questions\n\nA Slack bot backed by an AI Agent node with your handbook in a vector store. It answers PTO, benefits, expenses and equipment questions with citations to the handbook page, and hands anything about pay, performance or complaints to HR."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "employee-onboarding-automation-08-llm",
+      "name": "Claude (Anthropic Chat Model)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        2880,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"summary\": { \"type\": \"string\" },\n    \"draft\": { \"type\": \"string\", \"description\": \"The message or document text this step produced, ready to send or review\" },\n    \"subject\": { \"type\": \"string\" },\n    \"confidence\": { \"type\": \"number\" },\n    \"needs_human\": { \"type\": \"boolean\" },\n    \"reasons\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } }\n  },\n  \"required\": [\"summary\", \"confidence\", \"needs_human\"]\n}"
+      },
+      "id": "employee-onboarding-automation-08-parser",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        3080,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "employee-onboarding-automation-08-gate",
+      "name": "Needs a person?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2880,
+        300
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "employee-onboarding-automation-needs-a-person-answer-policy-questions",
+      "name": "Needs a person: Answer policy questions",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2880,
+        80
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "employee-onboarding-automation-09",
+      "name": "Schedule Trigger: Chase overdue tasks and check in",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        860
+      ],
+      "notes": "Chase overdue tasks and check in\n\nA daily run compares the board to today's date, nudges owners of overdue items, and sends the 30/60/90-day check-in survey to the hire and the manager. Results go on the board."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Chase overdue tasks and check in\n// A daily run compares the board to today's date, nudges owners of overdue items, and sends the 30/60/90-day check-in survey to the hire and the manager. Results go on the board.\n// Build this branch here: read what the main chain wrote, then report or act.\nreturn $input.all();"
+      },
+      "id": "employee-onboarding-automation-09-branch",
+      "name": "Code: Chase overdue tasks and check in",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        860
+      ],
+      "notes": "A daily run compares the board to today's date, nudges owners of overdue items, and sends the 30/60/90-day check-in survey to the hire and the manager. Results go on the board."
+    }
+  ],
+  "connections": {
+    "Webhook: Receive the new-hire event": {
+      "main": [
+        [
+          {
+            "node": "Config (edit me)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config (edit me)": {
+      "main": [
+        [
+          {
+            "node": "Set: Build the checklist for this role",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set: Build the checklist for this role": {
+      "main": [
+        [
+          {
+            "node": "Notion: Create the tracking board",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion: Create the tracking board": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Request accounts and equipment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Request accounts and equipment": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Send documents for signature",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Send documents for signature": {
+      "main": [
+        [
+          {
+            "node": "Google Calendar: Schedule the first two weeks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar: Schedule the first two weeks": {
+      "main": [
+        [
+          {
+            "node": "Gmail: Run the welcome sequence",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail: Run the welcome sequence": {
+      "main": [
+        [
+          {
+            "node": "AI Agent: Answer policy questions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent: Answer policy questions",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent: Answer policy questions",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent: Answer policy questions": {
+      "main": [
+        [
+          {
+            "node": "Needs a person?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person?": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Answer policy questions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger: Chase overdue tasks and check in": {
+      "main": [
+        [
+          {
+            "node": "Code: Chase overdue tasks and check in",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "source": "https://agentmelt.com/workflows/employee-onboarding-automation/"
+  }
+}

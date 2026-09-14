@@ -1,0 +1,481 @@
+{
+  "name": "Agentmelt — Interview Scheduling Automation Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Interview Scheduling Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Moving a candidate to an interview stage in Greenhouse, Lever or Ashby — or a row change in the tracking sheet — starts scheduling for that stage's panel.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Panel working hours and blocked times are respected; the workflow never books over a 'focus' block or outside hours.\n   - Candidates are never offered a slot less than 24 hours away unless the recruiter allows it for the stage.\n   - Every change is written to the same email thread, so the candidate has one conversation, not five.\n   - SMS only with a number the candidate gave; opt-out honoured.\n   - The recruiter is copied on every candidate-facing message and can take over any thread by replying.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/interview-scheduling-automation/\nWant it built and run for you? $197/month · custom $2,000–3,500 one-time",
+        "height": 520,
+        "width": 460,
+        "color": 4
+      },
+      "id": "interview-scheduling-automation-note",
+      "name": "Read me first",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "interview-scheduling-automation",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "interview-scheduling-automation-01",
+      "name": "Webhook: Read the stage",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        300
+      ],
+      "notes": "Read the stage\n\nCandidate, role, interview stage, the panel for that stage, duration, and whether it is video or on-site.",
+      "webhookId": "interview-scheduling-automation-webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-1",
+              "name": "config.your_name",
+              "value": "Your name — signs every outgoing message",
+              "type": "string"
+            },
+            {
+              "id": "cfg-2",
+              "name": "config.your_email",
+              "value": "you@example.com",
+              "type": "string"
+            },
+            {
+              "id": "cfg-3",
+              "name": "config.your_company",
+              "value": "Your company or brokerage",
+              "type": "string"
+            },
+            {
+              "id": "cfg-4",
+              "name": "config.timezone",
+              "value": "Europe/London",
+              "type": "string"
+            },
+            {
+              "id": "cfg-5",
+              "name": "config.quiet_hours_start",
+              "value": 21,
+              "type": "number"
+            },
+            {
+              "id": "cfg-6",
+              "name": "config.quiet_hours_end",
+              "value": 8,
+              "type": "number"
+            },
+            {
+              "id": "cfg-7",
+              "name": "config.approval_mode",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "cfg-8",
+              "name": "config.approver",
+              "value": "#approvals — a Slack channel, or an email address",
+              "type": "string"
+            },
+            {
+              "id": "cfg-9",
+              "name": "config.test_mode",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "interview-scheduling-automation-config",
+      "name": "Config (edit me)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        300
+      ],
+      "notes": "Fill these in once; every later node reads them as $('Config (edit me)').item.json.config.*\n\ntest_mode = true: log what the workflow would write, without writing it, for the first week.\napproval_mode = true: the approval node waits for a person; switch off per message type once it has earned it.\n\nAlso point the nodes at your own sources:\n- ATS stages and panels\n- Panel calendars (Google, Outlook)\n- Candidate contact details\n- Interview kits and scorecards\n- Video-conferencing links"
+    },
+    {
+      "parameters": {
+        "resource": "event",
+        "operation": "create",
+        "calendar": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Config (edit me)').item.json.config.your_email }}"
+        },
+        "start": "={{ $json.start || $now }}",
+        "end": "={{ $json.end || $now.plus(1, 'hour') }}",
+        "additionalFields": {}
+      },
+      "id": "interview-scheduling-automation-02",
+      "name": "Google Calendar: Find common slots",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        640,
+        300
+      ],
+      "notes": "Find common slots\n\nFree/busy across every panel member for the next ten working days, inside their working hours, avoiding lunch and back-to-back blocks; three options, spread across days."
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $json.email || $json.output?.email || '' }}",
+        "subject": "={{ $json.output?.subject || $json.subject || 'Re: your enquiry' }}",
+        "emailType": "text",
+        "message": "={{ $json.output?.draft || $json.draft || $json.summary || '' }}",
+        "options": {}
+      },
+      "id": "interview-scheduling-automation-03",
+      "name": "Gmail: Offer the slots",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        960,
+        300
+      ],
+      "notes": "Offer the slots\n\nOne email from the recruiter with three buttons or links, the format, who they will meet, and what to prepare — written for the stage, not a template dump."
+    },
+    {
+      "parameters": {
+        "resource": "event",
+        "operation": "create",
+        "calendar": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Config (edit me)').item.json.config.your_email }}"
+        },
+        "start": "={{ $json.start || $now }}",
+        "end": "={{ $json.end || $now.plus(1, 'hour') }}",
+        "additionalFields": {}
+      },
+      "id": "interview-scheduling-automation-04",
+      "name": "Google Calendar: Book",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        1280,
+        300
+      ],
+      "notes": "Book\n\nThe chosen slot becomes an event on every calendar with the video link or room, the candidate's CV attached for the panel, and the interview kit."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": []
+        },
+        "options": {}
+      },
+      "id": "interview-scheduling-automation-05",
+      "name": "Set: Remind",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1600,
+        300
+      ],
+      "notes": "Remind\n\nCandidate: 24 hours and 2 hours before, by email and SMS if they gave a number. Panel: 30 minutes before, with the CV and the scorecard link."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the \"Handle changes\" step of the Interview Scheduling Automation Workflow workflow run by Agentmelt.\nTask: A reply asking to move, cancel or ask a question is understood and acted on in the same thread; new slots are offered without the recruiter.\n\nRules:\n- Panel working hours and blocked times are respected; the workflow never books over a 'focus' block or outside hours.\n- Candidates are never offered a slot less than 24 hours away unless the recruiter allows it for the stage.\n- Every change is written to the same email thread, so the candidate has one conversation, not five.\n- SMS only with a number the candidate gave; opt-out honoured.\n- The recruiter is copied on every candidate-facing message and can take over any thread by replying.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON."
+        }
+      },
+      "id": "interview-scheduling-automation-06",
+      "name": "AI Agent: Handle changes",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        1920,
+        300
+      ],
+      "notes": "Handle changes\n\nA reply asking to move, cancel or ask a question is understood and acted on in the same thread; new slots are offered without the recruiter."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "interview-scheduling-automation-06-llm",
+      "name": "Claude (Anthropic Chat Model)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        2240,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"summary\": { \"type\": \"string\" },\n    \"draft\": { \"type\": \"string\", \"description\": \"The message or document text this step produced, ready to send or review\" },\n    \"subject\": { \"type\": \"string\" },\n    \"confidence\": { \"type\": \"number\" },\n    \"needs_human\": { \"type\": \"boolean\" },\n    \"reasons\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } }\n  },\n  \"required\": [\"summary\", \"confidence\", \"needs_human\"]\n}"
+      },
+      "id": "interview-scheduling-automation-06-parser",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        2440,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "interview-scheduling-automation-06-gate",
+      "name": "Needs a person?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2240,
+        300
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "interview-scheduling-automation-needs-a-person-handle-changes",
+      "name": "Needs a person: Handle changes",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2240,
+        80
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/replace-me",
+        "method": "GET",
+        "options": {},
+        "notes": "Interview scheduled, rescheduled, completed or no-show is written back to the candidate's record; the scorecard is opened for the panel."
+      },
+      "id": "interview-scheduling-automation-07",
+      "name": "HTTP Request: Sync the ATS",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2560,
+        300
+      ],
+      "notes": "Sync the ATS\n\nInterview scheduled, rescheduled, completed or no-show is written back to the candidate's record; the scorecard is opened for the panel."
+    },
+    {
+      "parameters": {
+        "resource": "sheet",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ 'replace-with-your-spreadsheet-id' }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "interview-scheduling-automation-08",
+      "name": "Google Sheets: Report",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2880,
+        300
+      ],
+      "notes": "Report\n\nTime from stage change to booked, reschedule rate, no-show rate by role and stage, so the recruiter sees where the process drags."
+    }
+  ],
+  "connections": {
+    "Webhook: Read the stage": {
+      "main": [
+        [
+          {
+            "node": "Config (edit me)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config (edit me)": {
+      "main": [
+        [
+          {
+            "node": "Google Calendar: Find common slots",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar: Find common slots": {
+      "main": [
+        [
+          {
+            "node": "Gmail: Offer the slots",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail: Offer the slots": {
+      "main": [
+        [
+          {
+            "node": "Google Calendar: Book",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar: Book": {
+      "main": [
+        [
+          {
+            "node": "Set: Remind",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set: Remind": {
+      "main": [
+        [
+          {
+            "node": "AI Agent: Handle changes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent: Handle changes",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent: Handle changes",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent: Handle changes": {
+      "main": [
+        [
+          {
+            "node": "Needs a person?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person?": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Handle changes",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request: Sync the ATS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Sync the ATS": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets: Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "source": "https://agentmelt.com/workflows/interview-scheduling-automation/"
+  }
+}

@@ -1,0 +1,615 @@
+{
+  "name": "Agentmelt — IT Helpdesk Automation Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## IT Helpdesk Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Messages to the IT bot or #it-help channel, and new tickets in Jira Service Management, Freshservice or ServiceNow.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Identity is taken from the chat platform's SSO, never from the message; sensitive actions require a fresh MFA step.\n   - Access grants always require manager (or app owner) approval recorded in the ticket; privileged groups are excluded from self-service.\n   - Every automated action is logged with requester, approver and timestamp for audit.\n   - Outage reports and security concerns bypass the bot and go straight to the on-call engineer.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/it-helpdesk-automation/\nWant it built and run for you? $297/month · custom $5,000–9,000 one-time",
+        "height": 520,
+        "width": 460,
+        "color": 4
+      },
+      "id": "it-helpdesk-automation-note",
+      "name": "Read me first",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "it-helpdesk-automation",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "it-helpdesk-automation-01",
+      "name": "Webhook: Receive the request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        300
+      ],
+      "notes": "Receive the request\n\nMessage text, requester identity (verified through the chat platform's SSO), device and location from the MDM where available.",
+      "webhookId": "it-helpdesk-automation-webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-1",
+              "name": "config.your_name",
+              "value": "Your name — signs every outgoing message",
+              "type": "string"
+            },
+            {
+              "id": "cfg-2",
+              "name": "config.your_email",
+              "value": "you@example.com",
+              "type": "string"
+            },
+            {
+              "id": "cfg-3",
+              "name": "config.your_company",
+              "value": "Your company or brokerage",
+              "type": "string"
+            },
+            {
+              "id": "cfg-4",
+              "name": "config.timezone",
+              "value": "Europe/London",
+              "type": "string"
+            },
+            {
+              "id": "cfg-5",
+              "name": "config.quiet_hours_start",
+              "value": 21,
+              "type": "number"
+            },
+            {
+              "id": "cfg-6",
+              "name": "config.quiet_hours_end",
+              "value": 8,
+              "type": "number"
+            },
+            {
+              "id": "cfg-7",
+              "name": "config.approval_mode",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "cfg-8",
+              "name": "config.approver",
+              "value": "#approvals — a Slack channel, or an email address",
+              "type": "string"
+            },
+            {
+              "id": "cfg-9",
+              "name": "config.test_mode",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "it-helpdesk-automation-config",
+      "name": "Config (edit me)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        300
+      ],
+      "notes": "Fill these in once; every later node reads them as $('Config (edit me)').item.json.config.*\n\ntest_mode = true: log what the workflow would write, without writing it, for the first week.\napproval_mode = true: the approval node waits for a person; switch off per message type once it has earned it.\n\nAlso point the nodes at your own sources:\n- Slack / Teams (identity-verified requests)\n- IT knowledge base (Confluence, Notion, help centre)\n- Identity provider (Okta, Entra ID, Google Workspace)\n- MDM and licence platforms (Jamf, Intune, licence manager)\n- Help desk (Jira SM, Freshservice, ServiceNow)"
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.text }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "category-a",
+              "description": "Replace with your first category"
+            },
+            {
+              "category": "category-b",
+              "description": "Replace with your second category"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "it-helpdesk-automation-02",
+      "name": "Text Classifier: Classify the request",
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1,
+      "position": [
+        640,
+        300
+      ],
+      "notes": "Classify the request\n\nPassword/MFA, access request, software/licence, hardware, how-to, outage report, other — with urgency. Outage reports skip to incident handling."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "it-helpdesk-automation-02-llm",
+      "name": "Claude (Anthropic Chat Model)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        960,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "it-helpdesk-automation-02-gate",
+      "name": "Needs a person?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        300
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "it-helpdesk-automation-needs-a-person-classify-the-request",
+      "name": "Needs a person: Classify the request",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        960,
+        80
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the \"Answer from the knowledge base\" step of the IT Helpdesk Automation Workflow workflow run by Agentmelt.\nTask: How-to questions are answered from the IT knowledge base with the steps and a link; the agent asks a clarifying question when the request is ambiguous.\n\nRules:\n- Identity is taken from the chat platform's SSO, never from the message; sensitive actions require a fresh MFA step.\n- Access grants always require manager (or app owner) approval recorded in the ticket; privileged groups are excluded from self-service.\n- Every automated action is logged with requester, approver and timestamp for audit.\n- Outage reports and security concerns bypass the bot and go straight to the on-call engineer.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON."
+        }
+      },
+      "id": "it-helpdesk-automation-03",
+      "name": "AI Agent: Answer from the knowledge base",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        1280,
+        300
+      ],
+      "notes": "Answer from the knowledge base\n\nHow-to questions are answered from the IT knowledge base with the steps and a link; the agent asks a clarifying question when the request is ambiguous."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "it-helpdesk-automation-03-llm",
+      "name": "Claude (Anthropic Chat Model) 2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1600,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"summary\": { \"type\": \"string\" },\n    \"draft\": { \"type\": \"string\", \"description\": \"The message or document text this step produced, ready to send or review\" },\n    \"subject\": { \"type\": \"string\" },\n    \"confidence\": { \"type\": \"number\" },\n    \"needs_human\": { \"type\": \"boolean\" },\n    \"reasons\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } }\n  },\n  \"required\": [\"summary\", \"confidence\", \"needs_human\"]\n}"
+      },
+      "id": "it-helpdesk-automation-03-parser",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        1800,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "it-helpdesk-automation-03-gate",
+      "name": "Needs a person? 2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1600,
+        300
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "it-helpdesk-automation-needs-a-person-answer-from-the-knowledge-base",
+      "name": "Needs a person: Answer from the knowledge base",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        80
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "route-a",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "route-a"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "it-helpdesk-automation-04",
+      "name": "Switch: Self-service actions with approval",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1920,
+        300
+      ],
+      "notes": "Self-service actions with approval\n\nPassword reset → identity-provider API after MFA verification. Access to a group or app → manager approval request in Slack, then the identity-provider call. Software → licence check, then MDM deployment or a purchase request. Hardware → ticket with the asset details."
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/replace-me",
+        "method": "GET",
+        "options": {},
+        "notes": "Okta/Entra ID/Google Workspace for identity actions, Jamf/Intune for software deployment, the licence platform for seat assignment — each call logged with requester, approver and timestamp."
+      },
+      "id": "it-helpdesk-automation-05",
+      "name": "HTTP Request: Execute through the systems",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2240,
+        300
+      ],
+      "notes": "Execute through the systems\n\nOkta/Entra ID/Google Workspace for identity actions, Jamf/Intune for software deployment, the licence platform for seat assignment — each call logged with requester, approver and timestamp."
+    },
+    {
+      "parameters": {
+        "resource": "issue",
+        "operation": "create",
+        "project": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ 'replace-with-your-jira-project-id' }}"
+        },
+        "issueType": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ 'replace-with-your-issue-type-id' }}"
+        },
+        "summary": "={{ $json.output?.subject || $json.summary || 'Automated item' }}",
+        "additionalFields": {}
+      },
+      "id": "it-helpdesk-automation-06",
+      "name": "Jira: Create or update the ticket",
+      "type": "n8n-nodes-base.jira",
+      "typeVersion": 1,
+      "position": [
+        2560,
+        300
+      ],
+      "notes": "Create or update the ticket\n\nEvery request, resolved or not, becomes a ticket with the classification, the actions taken and the conversation, so metrics and audits are complete."
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "post",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Config (edit me)').item.json.config.approver }}"
+        },
+        "text": "={{ $json.output?.summary || $json.summary || JSON.stringify($json) }}",
+        "otherOptions": {}
+      },
+      "id": "it-helpdesk-automation-07",
+      "name": "Slack: Route unresolved requests",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        2880,
+        300
+      ],
+      "notes": "Route unresolved requests\n\nAnything the bot cannot resolve is assigned to the right IT queue with the context and a summary; the requester is told who has it and the expected time."
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "it-helpdesk-automation-08",
+      "name": "Schedule Trigger: Improve the knowledge base",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        860
+      ],
+      "notes": "Improve the knowledge base\n\nWeekly: questions the agent could not answer, grouped by topic, become draft KB articles for IT to approve; resolved-by-bot rate and time-to-resolve reported per category."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Improve the knowledge base\n// Weekly: questions the agent could not answer, grouped by topic, become draft KB articles for IT to approve; resolved-by-bot rate and time-to-resolve reported per category.\n// Build this branch here: read what the main chain wrote, then report or act.\nreturn $input.all();"
+      },
+      "id": "it-helpdesk-automation-08-branch",
+      "name": "Code: Improve the knowledge base",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        860
+      ],
+      "notes": "Weekly: questions the agent could not answer, grouped by topic, become draft KB articles for IT to approve; resolved-by-bot rate and time-to-resolve reported per category."
+    }
+  ],
+  "connections": {
+    "Webhook: Receive the request": {
+      "main": [
+        [
+          {
+            "node": "Config (edit me)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config (edit me)": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier: Classify the request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier: Classify the request",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier: Classify the request": {
+      "main": [
+        [
+          {
+            "node": "Needs a person?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person?": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Classify the request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent: Answer from the knowledge base",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model) 2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent: Answer from the knowledge base",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent: Answer from the knowledge base",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent: Answer from the knowledge base": {
+      "main": [
+        [
+          {
+            "node": "Needs a person? 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person? 2": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Answer from the knowledge base",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch: Self-service actions with approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch: Self-service actions with approval": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Execute through the systems",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Execute through the systems": {
+      "main": [
+        [
+          {
+            "node": "Jira: Create or update the ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Jira: Create or update the ticket": {
+      "main": [
+        [
+          {
+            "node": "Slack: Route unresolved requests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger: Improve the knowledge base": {
+      "main": [
+        [
+          {
+            "node": "Code: Improve the knowledge base",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "source": "https://agentmelt.com/workflows/it-helpdesk-automation/"
+  }
+}

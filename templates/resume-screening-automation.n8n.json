@@ -1,0 +1,577 @@
+{
+  "name": "Agentmelt — Resume Screening Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Resume Screening Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Greenhouse, Lever, Ashby, Workable or Teamtailor post each new application; a daily run catches any missed.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - No candidate is rejected automatically; the workflow ranks and explains, recruiters decide.\n   - Protected characteristics are excluded from scoring by instruction and by stripping fields before the model sees them.\n   - Every score carries an evidence quote; unexplained scores are not shown.\n   - Pass-through rates by group are monitored where lawful, and criteria that skew are reviewed.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/resume-screening-automation/\nWant it built and run for you? $247/month · custom $3,500–6,000 one-time",
+        "height": 520,
+        "width": 460,
+        "color": 4
+      },
+      "id": "resume-screening-automation-note",
+      "name": "Read me first",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "resume-screening-automation",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "resume-screening-automation-01",
+      "name": "Webhook: Receive the application",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        300
+      ],
+      "notes": "Receive the application\n\nResume, cover letter, application answers and the job requisition id from the ATS.",
+      "webhookId": "resume-screening-automation-webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-1",
+              "name": "config.your_name",
+              "value": "Your name — signs every outgoing message",
+              "type": "string"
+            },
+            {
+              "id": "cfg-2",
+              "name": "config.your_email",
+              "value": "you@example.com",
+              "type": "string"
+            },
+            {
+              "id": "cfg-3",
+              "name": "config.your_company",
+              "value": "Your company or brokerage",
+              "type": "string"
+            },
+            {
+              "id": "cfg-4",
+              "name": "config.timezone",
+              "value": "Europe/London",
+              "type": "string"
+            },
+            {
+              "id": "cfg-5",
+              "name": "config.quiet_hours_start",
+              "value": 21,
+              "type": "number"
+            },
+            {
+              "id": "cfg-6",
+              "name": "config.quiet_hours_end",
+              "value": 8,
+              "type": "number"
+            },
+            {
+              "id": "cfg-7",
+              "name": "config.approval_mode",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "cfg-8",
+              "name": "config.approver",
+              "value": "#approvals — a Slack channel, or an email address",
+              "type": "string"
+            },
+            {
+              "id": "cfg-9",
+              "name": "config.test_mode",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "resume-screening-automation-config",
+      "name": "Config (edit me)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        300
+      ],
+      "notes": "Fill these in once; every later node reads them as $('Config (edit me)').item.json.config.*\n\ntest_mode = true: log what the workflow would write, without writing it, for the first week.\napproval_mode = true: the approval node waits for a person; switch off per message type once it has earned it.\n\nAlso point the nodes at your own sources:\n- ATS applications (Greenhouse, Lever, Ashby, Workable, Teamtailor)\n- Role criteria sheet (hiring manager + HR)\n- Company screening policy and legal constraints"
+    },
+    {
+      "parameters": {
+        "resource": "sheet",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ 'replace-with-your-spreadsheet-id' }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "resume-screening-automation-02",
+      "name": "Google Sheets: Load the role criteria",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        640,
+        300
+      ],
+      "notes": "Load the role criteria\n\nMust-haves, nice-to-haves and disqualifiers for the role, written by the hiring manager in plain language and approved by HR; weights per criterion."
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.text }}",
+        "schemaType": "fromJson",
+        "jsonSchemaExample": "{\"field\": \"value\"}",
+        "options": {
+          "systemPromptTemplate": "Roles, dates, employers, skills, education, certifications and locations into structured fields, with the source text kept for quoting."
+        }
+      },
+      "id": "resume-screening-automation-03",
+      "name": "Information Extractor: Parse the resume",
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1,
+      "position": [
+        960,
+        300
+      ],
+      "notes": "Parse the resume\n\nRoles, dates, employers, skills, education, certifications and locations into structured fields, with the source text kept for quoting."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "resume-screening-automation-03-llm",
+      "name": "Claude (Anthropic Chat Model)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1280,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "resume-screening-automation-03-gate",
+      "name": "Needs a person?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1280,
+        300
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "resume-screening-automation-needs-a-person-parse-the-resume",
+      "name": "Needs a person: Parse the resume",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        80
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the \"Score against criteria with evidence\" step of the Resume Screening Workflow workflow run by Agentmelt.\nTask: Each criterion scored met / partially / not met with a quote from the application as evidence; the agent is instructed to ignore name, photo, age, gender, nationality and school prestige unless a certification is a legal requirement.\n\nRules:\n- No candidate is rejected automatically; the workflow ranks and explains, recruiters decide.\n- Protected characteristics are excluded from scoring by instruction and by stripping fields before the model sees them.\n- Every score carries an evidence quote; unexplained scores are not shown.\n- Pass-through rates by group are monitored where lawful, and criteria that skew are reviewed.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON."
+        }
+      },
+      "id": "resume-screening-automation-04",
+      "name": "AI Agent: Score against criteria with evidence",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        1600,
+        300
+      ],
+      "notes": "Score against criteria with evidence\n\nEach criterion scored met / partially / not met with a quote from the application as evidence; the agent is instructed to ignore name, photo, age, gender, nationality and school prestige unless a certification is a legal requirement."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "resume-screening-automation-04-llm",
+      "name": "Claude (Anthropic Chat Model) 2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1920,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"summary\": { \"type\": \"string\" },\n    \"draft\": { \"type\": \"string\", \"description\": \"The message or document text this step produced, ready to send or review\" },\n    \"subject\": { \"type\": \"string\" },\n    \"confidence\": { \"type\": \"number\" },\n    \"needs_human\": { \"type\": \"boolean\" },\n    \"reasons\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } }\n  },\n  \"required\": [\"summary\", \"confidence\", \"needs_human\"]\n}"
+      },
+      "id": "resume-screening-automation-04-parser",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        2120,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "resume-screening-automation-04-gate",
+      "name": "Needs a person? 2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1920,
+        300
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "resume-screening-automation-needs-a-person-score-against-criteria-with-evidence",
+      "name": "Needs a person: Score against criteria with evidence",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        80
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Flag verification items\n// Gaps, overlapping dates, claims that need checking (certifications, seniority) listed for the interview.\nreturn $input.all();"
+      },
+      "id": "resume-screening-automation-05",
+      "name": "Code: Flag verification items",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2240,
+        300
+      ],
+      "notes": "Flag verification items\n\nGaps, overlapping dates, claims that need checking (certifications, seniority) listed for the interview."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build the ranked shortlist\n// Weighted score and band (strong / possible / unlikely); disqualifier matches are listed separately with the rule, never silently dropped.\nreturn $input.all();"
+      },
+      "id": "resume-screening-automation-06",
+      "name": "Code: Build the ranked shortlist",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2560,
+        300
+      ],
+      "notes": "Build the ranked shortlist\n\nWeighted score and band (strong / possible / unlikely); disqualifier matches are listed separately with the rule, never silently dropped."
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/replace-me",
+        "method": "GET",
+        "options": {},
+        "notes": "Scores, bands and explanations written back to the ATS as a scorecard; the recruiter reviews the strong band plus a random sample from the others and moves candidates forward."
+      },
+      "id": "resume-screening-automation-07",
+      "name": "HTTP Request: Present to the recruiter",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2880,
+        300
+      ],
+      "notes": "Present to the recruiter\n\nScores, bands and explanations written back to the ATS as a scorecard; the recruiter reviews the strong band plus a random sample from the others and moves candidates forward."
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "resume-screening-automation-08",
+      "name": "Schedule Trigger: Audit and bias monitoring",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        860
+      ],
+      "notes": "Audit and bias monitoring\n\nWeekly: score distributions and pass-through rates by self-reported demographic group where legally collected; anomalies flagged to HR."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Audit and bias monitoring\n// Weekly: score distributions and pass-through rates by self-reported demographic group where legally collected; anomalies flagged to HR.\n// Build this branch here: read what the main chain wrote, then report or act.\nreturn $input.all();"
+      },
+      "id": "resume-screening-automation-08-branch",
+      "name": "Code: Audit and bias monitoring",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        860
+      ],
+      "notes": "Weekly: score distributions and pass-through rates by self-reported demographic group where legally collected; anomalies flagged to HR."
+    }
+  ],
+  "connections": {
+    "Webhook: Receive the application": {
+      "main": [
+        [
+          {
+            "node": "Config (edit me)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config (edit me)": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets: Load the role criteria",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets: Load the role criteria": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor: Parse the resume",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor: Parse the resume",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor: Parse the resume": {
+      "main": [
+        [
+          {
+            "node": "Needs a person?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person?": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Parse the resume",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent: Score against criteria with evidence",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model) 2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent: Score against criteria with evidence",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent: Score against criteria with evidence",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent: Score against criteria with evidence": {
+      "main": [
+        [
+          {
+            "node": "Needs a person? 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person? 2": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Score against criteria with evidence",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code: Flag verification items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Flag verification items": {
+      "main": [
+        [
+          {
+            "node": "Code: Build the ranked shortlist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Build the ranked shortlist": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Present to the recruiter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger: Audit and bias monitoring": {
+      "main": [
+        [
+          {
+            "node": "Code: Audit and bias monitoring",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "source": "https://agentmelt.com/workflows/resume-screening-automation/"
+  }
+}

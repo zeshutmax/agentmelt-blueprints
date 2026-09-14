@@ -1,0 +1,484 @@
+{
+  "name": "Agentmelt — AI Demand Forecasting Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## AI Demand Forecasting Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Runs Sunday night after the ERP's weekly close. A second, lighter run on Wednesday refreshes the short-term horizon with the latest POS data for the top movers.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - The model forecasts; the agent explains. No language model touches a number that goes into replenishment.\n   - Every run scores the previous run's accuracy so drift is visible within a week.\n   - Planner overrides are captured and evaluated against the model, not silently overwritten.\n   - Forecasts carry quantiles, and safety stock uses them — a point forecast alone hides the uncertainty that drives stockouts.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/demand-forecasting/\nWant it built and run for you? $297/month · custom $5,000–9,000 one-time",
+        "height": 520,
+        "width": 460,
+        "color": 4
+      },
+      "id": "demand-forecasting-note",
+      "name": "Read me first",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "weeksInterval": 1,
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "demand-forecasting-00",
+      "name": "Schedule Trigger (weekly)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ],
+      "notes": "Schedule Trigger (weekly, after the sales data closes)\n\nRuns Sunday night after the ERP's weekly close. A second, lighter run on Wednesday refreshes the short-term horizon with the latest POS data for the top movers."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-1",
+              "name": "config.your_name",
+              "value": "Your name — signs every outgoing message",
+              "type": "string"
+            },
+            {
+              "id": "cfg-2",
+              "name": "config.your_email",
+              "value": "you@example.com",
+              "type": "string"
+            },
+            {
+              "id": "cfg-3",
+              "name": "config.your_company",
+              "value": "Your company or brokerage",
+              "type": "string"
+            },
+            {
+              "id": "cfg-4",
+              "name": "config.timezone",
+              "value": "Europe/London",
+              "type": "string"
+            },
+            {
+              "id": "cfg-5",
+              "name": "config.quiet_hours_start",
+              "value": 21,
+              "type": "number"
+            },
+            {
+              "id": "cfg-6",
+              "name": "config.quiet_hours_end",
+              "value": 8,
+              "type": "number"
+            },
+            {
+              "id": "cfg-7",
+              "name": "config.approval_mode",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "cfg-8",
+              "name": "config.approver",
+              "value": "#approvals — a Slack channel, or an email address",
+              "type": "string"
+            },
+            {
+              "id": "cfg-9",
+              "name": "config.test_mode",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "demand-forecasting-config",
+      "name": "Config (edit me)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        300
+      ],
+      "notes": "Fill these in once; every later node reads them as $('Config (edit me)').item.json.config.*\n\ntest_mode = true: log what the workflow would write, without writing it, for the first week.\napproval_mode = true: the approval node waits for a person; switch off per message type once it has earned it.\n\nAlso point the nodes at your own sources:\n- Sales history by SKU-location-week (ERP / data warehouse)\n- Promotion and price calendars\n- Marketing spend and web analytics\n- Weather (Open-Meteo, Visual Crossing) and public holidays\n- Stockout / inventory position (to correct censored demand)"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT 1; -- replace with your query",
+        "options": {}
+      },
+      "id": "demand-forecasting-01",
+      "name": "Postgres: Pull sales history",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        640,
+        300
+      ],
+      "notes": "Pull sales history\n\nUnits sold per SKU per location per week from the ERP or data warehouse (NetSuite, SAP, Dynamics, BigQuery, Snowflake), including returns and stockout flags so lost sales are not read as low demand."
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/replace-me",
+        "method": "GET",
+        "options": {},
+        "notes": "Promotion calendar, price history, marketing spend, web sessions per product, weather for store regions, public holidays, and competitor price feeds where you have them. Each becomes a feature aligned to the same SKU-location-week grid."
+      },
+      "id": "demand-forecasting-02",
+      "name": "HTTP Request: Pull the signals",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        300
+      ],
+      "notes": "Pull the signals\n\nPromotion calendar, price history, marketing spend, web sessions per product, weather for store regions, public holidays, and competitor price feeds where you have them. Each becomes a feature aligned to the same SKU-location-week grid."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Clean and align\n// Fills gaps, corrects stockout weeks (censored demand), maps promotions to weeks, and produces one wide table per SKU-location. Bad rows are logged, not silently dropped.\nreturn $input.all();"
+      },
+      "id": "demand-forecasting-03",
+      "name": "Code: Clean and align",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1280,
+        300
+      ],
+      "notes": "Clean and align\n\nFills gaps, corrects stockout weeks (censored demand), maps promotions to weeks, and produces one wide table per SKU-location. Bad rows are logged, not silently dropped."
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/replace-me",
+        "method": "GET",
+        "options": {},
+        "notes": "Calls the forecasting service — a gradient-boosted model (LightGBM) or a foundation time-series model (Chronos, TimesFM) hosted as an endpoint, or Nixtla's TimeGPT API for teams that do not want to host. Returns point forecasts and quantiles (p10/p50/p90) for the next 13 weeks."
+      },
+      "id": "demand-forecasting-04",
+      "name": "HTTP Request: Run the forecasting model",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1600,
+        300
+      ],
+      "notes": "Run the forecasting model\n\nCalls the forecasting service — a gradient-boosted model (LightGBM) or a foundation time-series model (Chronos, TimesFM) hosted as an endpoint, or Nixtla's TimeGPT API for teams that do not want to host. Returns point forecasts and quantiles (p10/p50/p90) for the next 13 weeks."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Score last week's forecast\n// Compares the forecast made a week ago to the actuals that just arrived and computes WAPE, bias and forecast-value-added by segment, so the workflow reports its own accuracy every run.\nreturn $input.all();"
+      },
+      "id": "demand-forecasting-05",
+      "name": "Code: Score last week's forecast",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1920,
+        300
+      ],
+      "notes": "Score last week's forecast\n\nCompares the forecast made a week ago to the actuals that just arrived and computes WAPE, bias and forecast-value-added by segment, so the workflow reports its own accuracy every run."
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT 1; -- replace with your query",
+        "options": {}
+      },
+      "id": "demand-forecasting-06",
+      "name": "Postgres: Write forecasts to the planning system",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2240,
+        300
+      ],
+      "notes": "Write forecasts to the planning system\n\nStores forecasts and quantiles by SKU-location-week, with a run id, in the table the planning tool or replenishment sheet reads."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the \"Explain the exceptions\" step of the AI Demand Forecasting Workflow workflow run by Agentmelt.\nTask: For SKUs where the forecast moved by more than a threshold or error was worst, the agent reads the feature changes (a new promotion, a price drop, a stockout) and writes a one-line explanation with the numbers. It never changes a forecast.\n\nRules:\n- The model forecasts; the agent explains. No language model touches a number that goes into replenishment.\n- Every run scores the previous run's accuracy so drift is visible within a week.\n- Planner overrides are captured and evaluated against the model, not silently overwritten.\n- Forecasts carry quantiles, and safety stock uses them — a point forecast alone hides the uncertainty that drives stockouts.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON."
+        }
+      },
+      "id": "demand-forecasting-07",
+      "name": "AI Agent: Explain the exceptions",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        2560,
+        300
+      ],
+      "notes": "Explain the exceptions\n\nFor SKUs where the forecast moved by more than a threshold or error was worst, the agent reads the feature changes (a new promotion, a price drop, a stockout) and writes a one-line explanation with the numbers. It never changes a forecast."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "demand-forecasting-07-llm",
+      "name": "Claude (Anthropic Chat Model)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        2880,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"summary\": { \"type\": \"string\" },\n    \"draft\": { \"type\": \"string\", \"description\": \"The message or document text this step produced, ready to send or review\" },\n    \"subject\": { \"type\": \"string\" },\n    \"confidence\": { \"type\": \"number\" },\n    \"needs_human\": { \"type\": \"boolean\" },\n    \"reasons\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } }\n  },\n  \"required\": [\"summary\", \"confidence\", \"needs_human\"]\n}"
+      },
+      "id": "demand-forecasting-07-parser",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        3080,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "demand-forecasting-07-gate",
+      "name": "Needs a person?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2880,
+        300
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "demand-forecasting-needs-a-person-explain-the-exceptions",
+      "name": "Needs a person: Explain the exceptions",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2880,
+        80
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "post",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Config (edit me)').item.json.config.approver }}"
+        },
+        "text": "={{ $json.output?.summary || $json.summary || JSON.stringify($json) }}",
+        "otherOptions": {}
+      },
+      "id": "demand-forecasting-08",
+      "name": "Slack: Publish the weekly review",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        3200,
+        300
+      ],
+      "notes": "Publish the weekly review\n\nPosts the accuracy scorecard, the top exceptions with explanations, and a link to the planning sheet. Planners override in the sheet; overrides are stored and scored separately so you learn whether they help."
+    }
+  ],
+  "connections": {
+    "Schedule Trigger (weekly)": {
+      "main": [
+        [
+          {
+            "node": "Config (edit me)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config (edit me)": {
+      "main": [
+        [
+          {
+            "node": "Postgres: Pull sales history",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres: Pull sales history": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Pull the signals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Pull the signals": {
+      "main": [
+        [
+          {
+            "node": "Code: Clean and align",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Clean and align": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Run the forecasting model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Run the forecasting model": {
+      "main": [
+        [
+          {
+            "node": "Code: Score last week's forecast",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Score last week's forecast": {
+      "main": [
+        [
+          {
+            "node": "Postgres: Write forecasts to the planning system",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres: Write forecasts to the planning system": {
+      "main": [
+        [
+          {
+            "node": "AI Agent: Explain the exceptions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent: Explain the exceptions",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent: Explain the exceptions",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent: Explain the exceptions": {
+      "main": [
+        [
+          {
+            "node": "Needs a person?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person?": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Explain the exceptions",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Slack: Publish the weekly review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "source": "https://agentmelt.com/workflows/demand-forecasting/"
+  }
+}

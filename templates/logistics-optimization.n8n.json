@@ -1,0 +1,450 @@
+{
+  "name": "Agentmelt — Logistics Optimization Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Logistics Optimization Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: The WMS or e-commerce platform (Shopify, NetSuite, ShipStation) posts when a shipment is packed. A Schedule Trigger polls tracking every 30 minutes for in-flight shipments.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Customer messages for orders above a value threshold are approved by a person before sending.\n   - Carrier selection rules (customer or product overrides) always win over cost.\n   - Claims are drafted, not filed, until the logistics lead confirms.\n   - Every selection is logged with the alternatives and prices for later audit.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/logistics-optimization/\nWant it built and run for you? $247/month · custom $4,000–7,000 one-time",
+        "height": 520,
+        "width": 460,
+        "color": 4
+      },
+      "id": "logistics-optimization-note",
+      "name": "Read me first",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "logistics-optimization",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "logistics-optimization-01",
+      "name": "Webhook: Receive the shipment",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        300
+      ],
+      "notes": "Receive the shipment\n\nDestination, weight, dimensions, service promise (delivery date), declared value and any constraints (residential, hazmat, signature).",
+      "webhookId": "logistics-optimization-webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-1",
+              "name": "config.your_name",
+              "value": "Your name — signs every outgoing message",
+              "type": "string"
+            },
+            {
+              "id": "cfg-2",
+              "name": "config.your_email",
+              "value": "you@example.com",
+              "type": "string"
+            },
+            {
+              "id": "cfg-3",
+              "name": "config.your_company",
+              "value": "Your company or brokerage",
+              "type": "string"
+            },
+            {
+              "id": "cfg-4",
+              "name": "config.timezone",
+              "value": "Europe/London",
+              "type": "string"
+            },
+            {
+              "id": "cfg-5",
+              "name": "config.quiet_hours_start",
+              "value": 21,
+              "type": "number"
+            },
+            {
+              "id": "cfg-6",
+              "name": "config.quiet_hours_end",
+              "value": 8,
+              "type": "number"
+            },
+            {
+              "id": "cfg-7",
+              "name": "config.approval_mode",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "cfg-8",
+              "name": "config.approver",
+              "value": "#approvals — a Slack channel, or an email address",
+              "type": "string"
+            },
+            {
+              "id": "cfg-9",
+              "name": "config.test_mode",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "logistics-optimization-config",
+      "name": "Config (edit me)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        300
+      ],
+      "notes": "Fill these in once; every later node reads them as $('Config (edit me)').item.json.config.*\n\ntest_mode = true: log what the workflow would write, without writing it, for the first week.\napproval_mode = true: the approval node waits for a person; switch off per message type once it has earned it.\n\nAlso point the nodes at your own sources:\n- Orders and shipments (WMS / Shopify / NetSuite / ShipStation)\n- Carrier rate APIs and contract discounts\n- Tracking events per carrier\n- Measured on-time performance by carrier, service and lane\n- Carrier invoices (EDI, CSV or portal export)"
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/replace-me",
+        "method": "GET",
+        "options": {},
+        "notes": "Requests rates from each contracted carrier (UPS, FedEx, DHL, USPS, regional) directly or via EasyPost/Shippo, applying your negotiated discounts and accessorials."
+      },
+      "id": "logistics-optimization-02",
+      "name": "HTTP Request: Rate across carriers",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        640,
+        300
+      ],
+      "notes": "Rate across carriers\n\nRequests rates from each contracted carrier (UPS, FedEx, DHL, USPS, regional) directly or via EasyPost/Shippo, applying your negotiated discounts and accessorials."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Select the service\n// Filters to services meeting the promise date with a buffer from measured on-time performance per lane, then picks the cheapest. Rules can force a carrier for certain customers or products.\nreturn $input.all();"
+      },
+      "id": "logistics-optimization-03",
+      "name": "Code: Select the service",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        300
+      ],
+      "notes": "Select the service\n\nFilters to services meeting the promise date with a buffer from measured on-time performance per lane, then picks the cheapest. Rules can force a carrier for certain customers or products."
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/replace-me",
+        "method": "GET",
+        "options": {},
+        "notes": "Purchases the label, writes the tracking number and chosen service back to the order, and prints to the pack station."
+      },
+      "id": "logistics-optimization-04",
+      "name": "HTTP Request: Book and label",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1280,
+        300
+      ],
+      "notes": "Book and label\n\nPurchases the label, writes the tracking number and chosen service back to the order, and prints to the pack station."
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "logistics-optimization-05",
+      "name": "Schedule Trigger: Track in flight",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        860
+      ],
+      "notes": "Track in flight\n\nPolls tracking for open shipments; each event is compared to the expected milestone times for that service and lane."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the \"Detect and explain delays\" step of the Logistics Optimization Workflow workflow run by Agentmelt.\nTask: When a milestone is late or an exception code appears, the agent reads the tracking history and drafts a plain-language customer update and, if the carrier's SLA was missed, a claim request with the evidence.\n\nRules:\n- Customer messages for orders above a value threshold are approved by a person before sending.\n- Carrier selection rules (customer or product overrides) always win over cost.\n- Claims are drafted, not filed, until the logistics lead confirms.\n- Every selection is logged with the alternatives and prices for later audit.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON."
+        }
+      },
+      "id": "logistics-optimization-06",
+      "name": "AI Agent: Detect and explain delays",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        320,
+        860
+      ],
+      "notes": "Detect and explain delays\n\nWhen a milestone is late or an exception code appears, the agent reads the tracking history and drafts a plain-language customer update and, if the carrier's SLA was missed, a claim request with the evidence."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "logistics-optimization-06-llm",
+      "name": "Claude (Anthropic Chat Model)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        640,
+        1080
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"summary\": { \"type\": \"string\" },\n    \"draft\": { \"type\": \"string\", \"description\": \"The message or document text this step produced, ready to send or review\" },\n    \"subject\": { \"type\": \"string\" },\n    \"confidence\": { \"type\": \"number\" },\n    \"needs_human\": { \"type\": \"boolean\" },\n    \"reasons\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } }\n  },\n  \"required\": [\"summary\", \"confidence\", \"needs_human\"]\n}"
+      },
+      "id": "logistics-optimization-06-parser",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        840,
+        1080
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "logistics-optimization-06-gate",
+      "name": "Needs a person?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        640,
+        860
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "logistics-optimization-needs-a-person-detect-and-explain-delays",
+      "name": "Needs a person: Detect and explain delays",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        640,
+        640
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $json.email || $json.output?.email || '' }}",
+        "subject": "={{ $json.output?.subject || $json.subject || 'Re: your enquiry' }}",
+        "emailType": "text",
+        "message": "={{ $json.output?.draft || $json.draft || $json.summary || '' }}",
+        "options": {}
+      },
+      "id": "logistics-optimization-07",
+      "name": "Gmail: Notify and escalate",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        960,
+        860
+      ],
+      "notes": "Notify and escalate\n\nCustomer update sent from the support inbox (after a human click for high-value orders); internal alert to the logistics lead for exceptions."
+    },
+    {
+      "parameters": {
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "id",
+              "field2": "id"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "logistics-optimization-08",
+      "name": "Compare Datasets: Audit carrier invoices",
+      "type": "n8n-nodes-base.compareDatasets",
+      "typeVersion": 2.3,
+      "position": [
+        1280,
+        860
+      ],
+      "notes": "Audit carrier invoices\n\nWeekly: carrier invoice lines matched to booked shipments; differences above tolerance become dispute items with the quote attached."
+    }
+  ],
+  "connections": {
+    "Webhook: Receive the shipment": {
+      "main": [
+        [
+          {
+            "node": "Config (edit me)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config (edit me)": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Rate across carriers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Rate across carriers": {
+      "main": [
+        [
+          {
+            "node": "Code: Select the service",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Select the service": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Book and label",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger: Track in flight": {
+      "main": [
+        [
+          {
+            "node": "AI Agent: Detect and explain delays",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent: Detect and explain delays",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent: Detect and explain delays",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent: Detect and explain delays": {
+      "main": [
+        [
+          {
+            "node": "Needs a person?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person?": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Detect and explain delays",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Gmail: Notify and escalate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail: Notify and escalate": {
+      "main": [
+        [
+          {
+            "node": "Compare Datasets: Audit carrier invoices",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "source": "https://agentmelt.com/workflows/logistics-optimization/"
+  }
+}

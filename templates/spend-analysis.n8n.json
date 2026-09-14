@@ -1,0 +1,595 @@
+{
+  "name": "Agentmelt — AI Spend Analysis Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## AI Spend Analysis Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Runs after accounts payable closes the month. A weekly incremental run classifies new invoices so the cube is never more than a week behind.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Classification below the confidence threshold is reviewed by a person before it enters the cube.\n   - Supplier merges are logged and reversible; tax-ID matches are the only automatic merges.\n   - The AI agent drafts briefs; savings are only reported as realised when finance confirms them.\n   - Source lines are never altered — the cube is a derived table with a run id.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/spend-analysis/\nWant it built and run for you? $297/month · custom $6,000–12,000 one-time",
+        "height": 520,
+        "width": 460,
+        "color": 4
+      },
+      "id": "spend-analysis-note",
+      "name": "Read me first",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "months",
+              "monthsInterval": 1,
+              "triggerAtDayOfMonth": 1,
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "spend-analysis-00",
+      "name": "Schedule Trigger (monthly)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ],
+      "notes": "Schedule Trigger (monthly, after AP close)\n\nRuns after accounts payable closes the month. A weekly incremental run classifies new invoices so the cube is never more than a week behind."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-1",
+              "name": "config.your_name",
+              "value": "Your name — signs every outgoing message",
+              "type": "string"
+            },
+            {
+              "id": "cfg-2",
+              "name": "config.your_email",
+              "value": "you@example.com",
+              "type": "string"
+            },
+            {
+              "id": "cfg-3",
+              "name": "config.your_company",
+              "value": "Your company or brokerage",
+              "type": "string"
+            },
+            {
+              "id": "cfg-4",
+              "name": "config.timezone",
+              "value": "Europe/London",
+              "type": "string"
+            },
+            {
+              "id": "cfg-5",
+              "name": "config.quiet_hours_start",
+              "value": 21,
+              "type": "number"
+            },
+            {
+              "id": "cfg-6",
+              "name": "config.quiet_hours_end",
+              "value": 8,
+              "type": "number"
+            },
+            {
+              "id": "cfg-7",
+              "name": "config.approval_mode",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "cfg-8",
+              "name": "config.approver",
+              "value": "#approvals — a Slack channel, or an email address",
+              "type": "string"
+            },
+            {
+              "id": "cfg-9",
+              "name": "config.test_mode",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "spend-analysis-config",
+      "name": "Config (edit me)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        300
+      ],
+      "notes": "Fill these in once; every later node reads them as $('Config (edit me)').item.json.config.*\n\ntest_mode = true: log what the workflow would write, without writing it, for the first week.\napproval_mode = true: the approval node waits for a person; switch off per message type once it has earned it.\n\nAlso point the nodes at your own sources:\n- AP invoice lines and PO lines (ERP)\n- Corporate card and expense platform transactions\n- Supplier master (with tax IDs where available)\n- Category taxonomy (UNSPSC or custom)\n- Contract register (suppliers, terms, expiry dates)"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT 1; -- replace with your query",
+        "options": {}
+      },
+      "id": "spend-analysis-01",
+      "name": "Postgres: Extract AP and PO lines",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        640,
+        300
+      ],
+      "notes": "Extract AP and PO lines\n\nInvoice lines and PO lines from the ERP (SAP, Oracle, NetSuite, Dynamics) and the card or expense platform: supplier, description, GL account, cost centre, amount, currency, date. Line level, not header level — headers hide the categories."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normalise suppliers\n// Cleans legal suffixes and punctuation, then matches to a master supplier list using fuzzy matching plus tax IDs where available. Unmatched names go to a review queue; matches above the threshold are applied automatically.\nreturn $input.all();"
+      },
+      "id": "spend-analysis-02",
+      "name": "Code: Normalise suppliers",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        300
+      ],
+      "notes": "Normalise suppliers\n\nCleans legal suffixes and punctuation, then matches to a master supplier list using fuzzy matching plus tax IDs where available. Unmatched names go to a review queue; matches above the threshold are applied automatically."
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.text }}",
+        "schemaType": "fromJson",
+        "jsonSchemaExample": "{\"field\": \"value\"}",
+        "options": {
+          "systemPromptTemplate": "An LLM classification step assigns each line a level-1/2/3 category from your taxonomy (UNSPSC or a custom tree) using the description, supplier, GL account and cost centre, and returns a confidence score. High-confidence lines are accepted; the rest go to review."
+        }
+      },
+      "id": "spend-analysis-03",
+      "name": "Information Extractor: Classify each line",
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        300
+      ],
+      "notes": "Classify each line\n\nAn LLM classification step assigns each line a level-1/2/3 category from your taxonomy (UNSPSC or a custom tree) using the description, supplier, GL account and cost centre, and returns a confidence score. High-confidence lines are accepted; the rest go to review."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "spend-analysis-03-llm",
+      "name": "Claude (Anthropic Chat Model)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1600,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "spend-analysis-03-gate",
+      "name": "Needs a person?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1600,
+        300
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "spend-analysis-needs-a-person-classify-each-line",
+      "name": "Needs a person: Classify each line",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        80
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "resource": "sheet",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ 'replace-with-your-spreadsheet-id' }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "spend-analysis-04",
+      "name": "Google Sheets: Learn from corrections",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1920,
+        300
+      ],
+      "notes": "Learn from corrections\n\nReviewers correct low-confidence lines in a sheet. Corrections become few-shot examples and supplier → category rules for the next run, so accuracy climbs month over month."
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT 1; -- replace with your query",
+        "options": {}
+      },
+      "id": "spend-analysis-05",
+      "name": "Postgres: Build the spend cube",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2240,
+        300
+      ],
+      "notes": "Build the spend cube\n\nAggregates classified lines by supplier, category, business unit, cost centre and month into the table your BI tool reads (Looker, Power BI, Metabase)."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Detect opportunities\n// Deterministic checks: same item bought from several suppliers at different prices, categories with many small suppliers, spend outside contracted suppliers (maverick spend), spend without a PO, contract expiries in the next 90 days.\nreturn $input.all();"
+      },
+      "id": "spend-analysis-06",
+      "name": "Code: Detect opportunities",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2560,
+        300
+      ],
+      "notes": "Detect opportunities\n\nDeterministic checks: same item bought from several suppliers at different prices, categories with many small suppliers, spend outside contracted suppliers (maverick spend), spend without a PO, contract expiries in the next 90 days."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the \"Write the opportunity briefs\" step of the AI Spend Analysis Workflow workflow run by Agentmelt.\nTask: For each flagged opportunity the agent drafts a half-page brief with the numbers, the suppliers involved and a suggested action (consolidate, renegotiate, enforce PO policy). Category managers edit and own the brief.\n\nRules:\n- Classification below the confidence threshold is reviewed by a person before it enters the cube.\n- Supplier merges are logged and reversible; tax-ID matches are the only automatic merges.\n- The AI agent drafts briefs; savings are only reported as realised when finance confirms them.\n- Source lines are never altered — the cube is a derived table with a run id.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON."
+        }
+      },
+      "id": "spend-analysis-07",
+      "name": "AI Agent: Write the opportunity briefs",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        2880,
+        300
+      ],
+      "notes": "Write the opportunity briefs\n\nFor each flagged opportunity the agent drafts a half-page brief with the numbers, the suppliers involved and a suggested action (consolidate, renegotiate, enforce PO policy). Category managers edit and own the brief."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "spend-analysis-07-llm",
+      "name": "Claude (Anthropic Chat Model) 2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        3200,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"summary\": { \"type\": \"string\" },\n    \"draft\": { \"type\": \"string\", \"description\": \"The message or document text this step produced, ready to send or review\" },\n    \"subject\": { \"type\": \"string\" },\n    \"confidence\": { \"type\": \"number\" },\n    \"needs_human\": { \"type\": \"boolean\" },\n    \"reasons\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } }\n  },\n  \"required\": [\"summary\", \"confidence\", \"needs_human\"]\n}"
+      },
+      "id": "spend-analysis-07-parser",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        3400,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "spend-analysis-07-gate",
+      "name": "Needs a person? 2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3200,
+        300
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "spend-analysis-needs-a-person-write-the-opportunity-briefs",
+      "name": "Needs a person: Write the opportunity briefs",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        3200,
+        80
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "post",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Config (edit me)').item.json.config.approver }}"
+        },
+        "text": "={{ $json.output?.summary || $json.summary || JSON.stringify($json) }}",
+        "otherOptions": {}
+      },
+      "id": "spend-analysis-08",
+      "name": "Slack: Publish and track",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        3520,
+        300
+      ],
+      "notes": "Publish and track\n\nPosts the monthly summary and briefs. Each opportunity gets an owner and a status in the sheet so realised savings can be reported against the estimate."
+    }
+  ],
+  "connections": {
+    "Schedule Trigger (monthly)": {
+      "main": [
+        [
+          {
+            "node": "Config (edit me)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config (edit me)": {
+      "main": [
+        [
+          {
+            "node": "Postgres: Extract AP and PO lines",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres: Extract AP and PO lines": {
+      "main": [
+        [
+          {
+            "node": "Code: Normalise suppliers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Normalise suppliers": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor: Classify each line",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor: Classify each line",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor: Classify each line": {
+      "main": [
+        [
+          {
+            "node": "Needs a person?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person?": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Classify each line",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Sheets: Learn from corrections",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets: Learn from corrections": {
+      "main": [
+        [
+          {
+            "node": "Postgres: Build the spend cube",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres: Build the spend cube": {
+      "main": [
+        [
+          {
+            "node": "Code: Detect opportunities",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Detect opportunities": {
+      "main": [
+        [
+          {
+            "node": "AI Agent: Write the opportunity briefs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model) 2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent: Write the opportunity briefs",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent: Write the opportunity briefs",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent: Write the opportunity briefs": {
+      "main": [
+        [
+          {
+            "node": "Needs a person? 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person? 2": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Write the opportunity briefs",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Slack: Publish and track",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "source": "https://agentmelt.com/workflows/spend-analysis/"
+  }
+}

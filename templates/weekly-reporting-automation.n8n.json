@@ -1,0 +1,499 @@
+{
+  "name": "Agentmelt — Weekly Reporting Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Weekly Reporting Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Weekly run after data sources have closed the week; on-demand run for ad-hoc periods.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Every number in the narrative must appear in the metrics table; the agent cannot introduce figures.\n   - Causal claims are phrased as likely and tied to a context event; where no event exists the narrative says the cause is unknown.\n   - The report is approved by its owner before distribution.\n   - Broken or missing metrics are flagged in the report, never silently omitted.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/weekly-reporting-automation/\nWant it built and run for you? $197/month · custom $2,000–4,000 one-time",
+        "height": 520,
+        "width": 460,
+        "color": 4
+      },
+      "id": "weekly-reporting-automation-note",
+      "name": "Read me first",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "weekly-reporting-automation-00",
+      "name": "Schedule Trigger (daily)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ],
+      "notes": "Schedule Trigger (Monday 6am)\n\nWeekly run after data sources have closed the week; on-demand run for ad-hoc periods."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-1",
+              "name": "config.your_name",
+              "value": "Your name — signs every outgoing message",
+              "type": "string"
+            },
+            {
+              "id": "cfg-2",
+              "name": "config.your_email",
+              "value": "you@example.com",
+              "type": "string"
+            },
+            {
+              "id": "cfg-3",
+              "name": "config.your_company",
+              "value": "Your company or brokerage",
+              "type": "string"
+            },
+            {
+              "id": "cfg-4",
+              "name": "config.timezone",
+              "value": "Europe/London",
+              "type": "string"
+            },
+            {
+              "id": "cfg-5",
+              "name": "config.quiet_hours_start",
+              "value": 21,
+              "type": "number"
+            },
+            {
+              "id": "cfg-6",
+              "name": "config.quiet_hours_end",
+              "value": 8,
+              "type": "number"
+            },
+            {
+              "id": "cfg-7",
+              "name": "config.approval_mode",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "cfg-8",
+              "name": "config.approver",
+              "value": "#approvals — a Slack channel, or an email address",
+              "type": "string"
+            },
+            {
+              "id": "cfg-9",
+              "name": "config.test_mode",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "weekly-reporting-automation-config",
+      "name": "Config (edit me)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        300
+      ],
+      "notes": "Fill these in once; every later node reads them as $('Config (edit me)').item.json.config.*\n\ntest_mode = true: log what the workflow would write, without writing it, for the first week.\napproval_mode = true: the approval node waits for a person; switch off per message type once it has earned it.\n\nAlso point the nodes at your own sources:\n- Data warehouse / databases (BigQuery, Snowflake, Postgres)\n- SaaS APIs (HubSpot, Stripe, GA4, Zendesk, Jira)\n- Metric catalogue with targets (sheet)\n- Calendar, changelog, incident tracker (context)"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT 1; -- replace with your query",
+        "options": {}
+      },
+      "id": "weekly-reporting-automation-01",
+      "name": "Postgres: Run the metric queries",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        640,
+        300
+      ],
+      "notes": "Run the metric queries\n\nEach metric defined once in a query catalogue (SQL, API call or sheet range) with owner and target; the run executes all of them for the period and the comparison periods."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Assemble the metrics table\n// Current, previous week, same week last year and target per metric; deltas and flags for metrics outside their tolerance band.\nreturn $input.all();"
+      },
+      "id": "weekly-reporting-automation-02",
+      "name": "Code: Assemble the metrics table",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        300
+      ],
+      "notes": "Assemble the metrics table\n\nCurrent, previous week, same week last year and target per metric; deltas and flags for metrics outside their tolerance band."
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/replace-me",
+        "method": "GET",
+        "options": {},
+        "notes": "Notable events from the week — releases, campaigns, incidents, holidays — from the calendar, changelog and incident tracker, so the narrative can explain moves."
+      },
+      "id": "weekly-reporting-automation-03",
+      "name": "HTTP Request: Pull context",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1280,
+        300
+      ],
+      "notes": "Pull context\n\nNotable events from the week — releases, campaigns, incidents, holidays — from the calendar, changelog and incident tracker, so the narrative can explain moves."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the \"Draft the narrative\" step of the Weekly Reporting Workflow workflow run by Agentmelt.\nTask: From the table, the context and last week's approved report, the agent writes the summary: the three biggest moves with likely causes from the context, metrics off target, and what to watch. Every claim references a number in the table.\n\nRules:\n- Every number in the narrative must appear in the metrics table; the agent cannot introduce figures.\n- Causal claims are phrased as likely and tied to a context event; where no event exists the narrative says the cause is unknown.\n- The report is approved by its owner before distribution.\n- Broken or missing metrics are flagged in the report, never silently omitted.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON."
+        }
+      },
+      "id": "weekly-reporting-automation-04",
+      "name": "AI Agent: Draft the narrative",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        1600,
+        300
+      ],
+      "notes": "Draft the narrative\n\nFrom the table, the context and last week's approved report, the agent writes the summary: the three biggest moves with likely causes from the context, metrics off target, and what to watch. Every claim references a number in the table."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "weekly-reporting-automation-04-llm",
+      "name": "Claude (Anthropic Chat Model)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1920,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"summary\": { \"type\": \"string\" },\n    \"draft\": { \"type\": \"string\", \"description\": \"The message or document text this step produced, ready to send or review\" },\n    \"subject\": { \"type\": \"string\" },\n    \"confidence\": { \"type\": \"number\" },\n    \"needs_human\": { \"type\": \"boolean\" },\n    \"reasons\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } }\n  },\n  \"required\": [\"summary\", \"confidence\", \"needs_human\"]\n}"
+      },
+      "id": "weekly-reporting-automation-04-parser",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        2120,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "weekly-reporting-automation-04-gate",
+      "name": "Needs a person?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1920,
+        300
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "weekly-reporting-automation-needs-a-person-draft-the-narrative",
+      "name": "Needs a person: Draft the narrative",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        80
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "resource": "document",
+        "operation": "create",
+        "driveId": "myDrive",
+        "folderId": "={{ 'replace-with-your-folder-id' }}",
+        "title": "={{ $json.output?.subject || $json.title || $json.summary || 'Untitled' }}"
+      },
+      "id": "weekly-reporting-automation-05",
+      "name": "Google Docs: Render the report",
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        2240,
+        300
+      ],
+      "notes": "Render the report\n\nTemplate filled with the table, charts generated from the numbers, and the narrative; also a Slack-ready short version."
+    },
+    {
+      "parameters": {
+        "resume": "webhook",
+        "options": {}
+      },
+      "id": "weekly-reporting-automation-06",
+      "name": "Wait: Approve",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2560,
+        300
+      ],
+      "notes": "Approve\n\nOwner reviews in Slack — approve, or edit the doc and approve; edits are kept for next week's prompt context."
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "post",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Config (edit me)').item.json.config.approver }}"
+        },
+        "text": "={{ $json.output?.summary || $json.summary || JSON.stringify($json) }}",
+        "otherOptions": {}
+      },
+      "id": "weekly-reporting-automation-07",
+      "name": "Slack: Distribute",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        2880,
+        300
+      ],
+      "notes": "Distribute\n\nPosted to the leadership channel and emailed to the list; the doc archived by week."
+    },
+    {
+      "parameters": {
+        "resource": "sheet",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ 'replace-with-your-spreadsheet-id' }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "weekly-reporting-automation-08",
+      "name": "Google Sheets: Maintain the catalogue",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        3200,
+        300
+      ],
+      "notes": "Maintain the catalogue\n\nMetric definitions, owners and targets live in a sheet; adding a metric is a row, and broken queries alert their owner rather than silently dropping out."
+    }
+  ],
+  "connections": {
+    "Schedule Trigger (daily)": {
+      "main": [
+        [
+          {
+            "node": "Config (edit me)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config (edit me)": {
+      "main": [
+        [
+          {
+            "node": "Postgres: Run the metric queries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres: Run the metric queries": {
+      "main": [
+        [
+          {
+            "node": "Code: Assemble the metrics table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Assemble the metrics table": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Pull context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Pull context": {
+      "main": [
+        [
+          {
+            "node": "AI Agent: Draft the narrative",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent: Draft the narrative",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent: Draft the narrative",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent: Draft the narrative": {
+      "main": [
+        [
+          {
+            "node": "Needs a person?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person?": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Draft the narrative",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Docs: Render the report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Docs: Render the report": {
+      "main": [
+        [
+          {
+            "node": "Wait: Approve",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait: Approve": {
+      "main": [
+        [
+          {
+            "node": "Slack: Distribute",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack: Distribute": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets: Maintain the catalogue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "source": "https://agentmelt.com/workflows/weekly-reporting-automation/"
+  }
+}

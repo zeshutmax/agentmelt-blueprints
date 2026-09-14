@@ -1,0 +1,507 @@
+{
+  "name": "Agentmelt — Inventory Optimization Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Inventory Optimization Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Runs after the demand-forecasting workflow writes new forecasts; a daily run checks stock positions against reorder points.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Draft POs only — a buyer approves before anything is sent to a supplier.\n   - Parameter changes above a threshold are explained and can be frozen per SKU.\n   - Service-level targets are set by finance and operations together, and the achieved level is reported weekly.\n   - Supplier lead times come from receipts, not from the master data, so the numbers reflect reality.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/inventory-optimization/\nWant it built and run for you? $297/month · custom $5,000–8,000 one-time",
+        "height": 520,
+        "width": 460,
+        "color": 4
+      },
+      "id": "inventory-optimization-note",
+      "name": "Read me first",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "weeksInterval": 1,
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "inventory-optimization-00",
+      "name": "Schedule Trigger (weekly)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ],
+      "notes": "Schedule Trigger (weekly, after the forecast run)\n\nRuns after the demand-forecasting workflow writes new forecasts; a daily run checks stock positions against reorder points."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-1",
+              "name": "config.your_name",
+              "value": "Your name — signs every outgoing message",
+              "type": "string"
+            },
+            {
+              "id": "cfg-2",
+              "name": "config.your_email",
+              "value": "you@example.com",
+              "type": "string"
+            },
+            {
+              "id": "cfg-3",
+              "name": "config.your_company",
+              "value": "Your company or brokerage",
+              "type": "string"
+            },
+            {
+              "id": "cfg-4",
+              "name": "config.timezone",
+              "value": "Europe/London",
+              "type": "string"
+            },
+            {
+              "id": "cfg-5",
+              "name": "config.quiet_hours_start",
+              "value": 21,
+              "type": "number"
+            },
+            {
+              "id": "cfg-6",
+              "name": "config.quiet_hours_end",
+              "value": 8,
+              "type": "number"
+            },
+            {
+              "id": "cfg-7",
+              "name": "config.approval_mode",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "cfg-8",
+              "name": "config.approver",
+              "value": "#approvals — a Slack channel, or an email address",
+              "type": "string"
+            },
+            {
+              "id": "cfg-9",
+              "name": "config.test_mode",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "inventory-optimization-config",
+      "name": "Config (edit me)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        300
+      ],
+      "notes": "Fill these in once; every later node reads them as $('Config (edit me)').item.json.config.*\n\ntest_mode = true: log what the workflow would write, without writing it, for the first week.\napproval_mode = true: the approval node waits for a person; switch off per message type once it has earned it.\n\nAlso point the nodes at your own sources:\n- Forecast table with quantiles (from the demand-forecasting workflow)\n- ERP/WMS stock positions and open orders\n- PO and receipt history (lead times)\n- Supplier minimums, pack sizes and price breaks\n- Service-level targets by ABC/XYZ class"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT 1; -- replace with your query",
+        "options": {}
+      },
+      "id": "inventory-optimization-01",
+      "name": "Postgres: Read forecasts and error",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        640,
+        300
+      ],
+      "notes": "Read forecasts and error\n\np50 forecast and p90–p50 spread per SKU-location-week from the forecast table, plus measured forecast error by SKU segment."
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/replace-me",
+        "method": "GET",
+        "options": {},
+        "notes": "On-hand, allocated, in-transit and open PO quantities from the ERP or WMS, and receipt history for lead-time measurement."
+      },
+      "id": "inventory-optimization-02",
+      "name": "HTTP Request: Read inventory and open orders",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        300
+      ],
+      "notes": "Read inventory and open orders\n\nOn-hand, allocated, in-transit and open PO quantities from the ERP or WMS, and receipt history for lead-time measurement."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Measure supplier lead times\n// Mean and variance of actual lead time per supplier-SKU from PO created → received, replacing the ERP's static lead-time field.\nreturn $input.all();"
+      },
+      "id": "inventory-optimization-03",
+      "name": "Code: Measure supplier lead times",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1280,
+        300
+      ],
+      "notes": "Measure supplier lead times\n\nMean and variance of actual lead time per supplier-SKU from PO created → received, replacing the ERP's static lead-time field."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Compute safety stock and reorder points\n// Safety stock from the service-level target, forecast error and lead-time variability; reorder point = lead-time demand + safety stock; order quantity from EOQ or supplier minimums and pack sizes.\nreturn $input.all();"
+      },
+      "id": "inventory-optimization-04",
+      "name": "Code: Compute safety stock and reorder points",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        300
+      ],
+      "notes": "Compute safety stock and reorder points\n\nSafety stock from the service-level target, forecast error and lead-time variability; reorder point = lead-time demand + safety stock; order quantity from EOQ or supplier minimums and pack sizes."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Classify SKUs\n// ABC by revenue and XYZ by demand variability, so service-level targets differ by class (e.g. 98% for AX, 90% for CZ) instead of one number for everything.\nreturn $input.all();"
+      },
+      "id": "inventory-optimization-05",
+      "name": "Code: Classify SKUs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1920,
+        300
+      ],
+      "notes": "Classify SKUs\n\nABC by revenue and XYZ by demand variability, so service-level targets differ by class (e.g. 98% for AX, 90% for CZ) instead of one number for everything."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.confidence }}",
+              "rightValue": 0.8,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "inventory-optimization-06",
+      "name": "IF: Generate purchase suggestions",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2240,
+        300
+      ],
+      "notes": "Generate purchase suggestions\n\nEvery SKU-location whose projected position (on-hand + in-transit − forecast over lead time) falls below the reorder point becomes a suggestion, grouped by supplier into a draft PO."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the \"Explain parameter changes\" step of the Inventory Optimization Workflow workflow run by Agentmelt.\nTask: Where a reorder point moved more than 20%, the agent states why in one line: forecast up, lead time slipped, error widened. Buyers see the reasoning before they approve.\n\nRules:\n- Draft POs only — a buyer approves before anything is sent to a supplier.\n- Parameter changes above a threshold are explained and can be frozen per SKU.\n- Service-level targets are set by finance and operations together, and the achieved level is reported weekly.\n- Supplier lead times come from receipts, not from the master data, so the numbers reflect reality.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON."
+        }
+      },
+      "id": "inventory-optimization-07",
+      "name": "AI Agent: Explain parameter changes",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        2560,
+        300
+      ],
+      "notes": "Explain parameter changes\n\nWhere a reorder point moved more than 20%, the agent states why in one line: forecast up, lead time slipped, error widened. Buyers see the reasoning before they approve."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "inventory-optimization-07-llm",
+      "name": "Claude (Anthropic Chat Model)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        2880,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"summary\": { \"type\": \"string\" },\n    \"draft\": { \"type\": \"string\", \"description\": \"The message or document text this step produced, ready to send or review\" },\n    \"subject\": { \"type\": \"string\" },\n    \"confidence\": { \"type\": \"number\" },\n    \"needs_human\": { \"type\": \"boolean\" },\n    \"reasons\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } }\n  },\n  \"required\": [\"summary\", \"confidence\", \"needs_human\"]\n}"
+      },
+      "id": "inventory-optimization-07-parser",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        3080,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "inventory-optimization-07-gate",
+      "name": "Needs a person?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2880,
+        300
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "inventory-optimization-needs-a-person-explain-parameter-changes",
+      "name": "Needs a person: Explain parameter changes",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2880,
+        80
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "resource": "sheet",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ 'replace-with-your-spreadsheet-id' }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "inventory-optimization-08",
+      "name": "Google Sheets: Publish to buyers and the ERP",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        3200,
+        300
+      ],
+      "notes": "Publish to buyers and the ERP\n\nSuggestions go to the buyer sheet with approve/adjust; approved lines are pushed to the ERP as draft POs via API."
+    }
+  ],
+  "connections": {
+    "Schedule Trigger (weekly)": {
+      "main": [
+        [
+          {
+            "node": "Config (edit me)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config (edit me)": {
+      "main": [
+        [
+          {
+            "node": "Postgres: Read forecasts and error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres: Read forecasts and error": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Read inventory and open orders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Read inventory and open orders": {
+      "main": [
+        [
+          {
+            "node": "Code: Measure supplier lead times",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Measure supplier lead times": {
+      "main": [
+        [
+          {
+            "node": "Code: Compute safety stock and reorder points",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Compute safety stock and reorder points": {
+      "main": [
+        [
+          {
+            "node": "Code: Classify SKUs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Classify SKUs": {
+      "main": [
+        [
+          {
+            "node": "IF: Generate purchase suggestions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Generate purchase suggestions": {
+      "main": [
+        [
+          {
+            "node": "AI Agent: Explain parameter changes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent: Explain parameter changes",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent: Explain parameter changes",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent: Explain parameter changes": {
+      "main": [
+        [
+          {
+            "node": "Needs a person?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person?": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Explain parameter changes",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Sheets: Publish to buyers and the ERP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "source": "https://agentmelt.com/workflows/inventory-optimization/"
+  }
+}

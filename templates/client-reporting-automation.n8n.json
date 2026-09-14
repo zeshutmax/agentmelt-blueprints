@@ -1,0 +1,684 @@
+{
+  "name": "Agentmelt — Client Reporting Automation Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Client Reporting Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: On the day you set after month-end close — or when an accountant asks for a client by name — the pack for that client is built.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - No pack is drafted on an unclean close; the workflow reports what is open instead.\n   - The narrative can only cite movements present in the numbers; causes are stated as 'appears to be' unless the ledger shows them.\n   - Every pack is approved by the accountant before it reaches a client.\n   - Numbers in the narrative are checked against the tables before the draft is shown.\n   - Client data stays in the ledger and the client folder; model calls use an API with no data retention.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/client-reporting-automation/\nWant it built and run for you? $247/month · custom $3,500–6,000 one-time",
+        "height": 520,
+        "width": 460,
+        "color": 4
+      },
+      "id": "client-reporting-automation-note",
+      "name": "Read me first",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "months",
+              "monthsInterval": 1,
+              "triggerAtDayOfMonth": 1,
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "client-reporting-automation-00",
+      "name": "Schedule Trigger (monthly)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ],
+      "notes": "Schedule (monthly, after the ledger closes) or on demand\n\nOn the day you set after month-end close — or when an accountant asks for a client by name — the pack for that client is built."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-1",
+              "name": "config.your_name",
+              "value": "Your name — signs every outgoing message",
+              "type": "string"
+            },
+            {
+              "id": "cfg-2",
+              "name": "config.your_email",
+              "value": "you@example.com",
+              "type": "string"
+            },
+            {
+              "id": "cfg-3",
+              "name": "config.your_company",
+              "value": "Your company or brokerage",
+              "type": "string"
+            },
+            {
+              "id": "cfg-4",
+              "name": "config.timezone",
+              "value": "Europe/London",
+              "type": "string"
+            },
+            {
+              "id": "cfg-5",
+              "name": "config.quiet_hours_start",
+              "value": 21,
+              "type": "number"
+            },
+            {
+              "id": "cfg-6",
+              "name": "config.quiet_hours_end",
+              "value": 8,
+              "type": "number"
+            },
+            {
+              "id": "cfg-7",
+              "name": "config.approval_mode",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "cfg-8",
+              "name": "config.approver",
+              "value": "#approvals — a Slack channel, or an email address",
+              "type": "string"
+            },
+            {
+              "id": "cfg-9",
+              "name": "config.test_mode",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "client-reporting-automation-config",
+      "name": "Config (edit me)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        300
+      ],
+      "notes": "Fill these in once; every later node reads them as $('Config (edit me)').item.json.config.*\n\ntest_mode = true: log what the workflow would write, without writing it, for the first week.\napproval_mode = true: the approval node waits for a person; switch off per message type once it has earned it.\n\nAlso point the nodes at your own sources:\n- Ledger (Xero, QuickBooks Online, Sage, NetSuite)\n- Budgets and client KPI settings\n- Prior packs (style and structure)\n- Client folder (Drive, SharePoint)\n- Practice pack template"
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/replace-me",
+        "method": "GET",
+        "options": {},
+        "notes": "Trial balance, P&L, balance sheet, cash and aged receivables from Xero, QuickBooks or Sage for the period, prior period and prior year."
+      },
+      "id": "client-reporting-automation-01",
+      "name": "HTTP Request: Pull the numbers",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        640,
+        300
+      ],
+      "notes": "Pull the numbers\n\nTrial balance, P&L, balance sheet, cash and aged receivables from Xero, QuickBooks or Sage for the period, prior period and prior year."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check the close\n// Unreconciled bank lines, unposted drafts, suspense balances: if the close is not clean, the pack waits and the accountant is told what is open.\nreturn $input.all();"
+      },
+      "id": "client-reporting-automation-02",
+      "name": "Code: Check the close",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        300
+      ],
+      "notes": "Check the close\n\nUnreconciled bank lines, unposted drafts, suspense balances: if the close is not clean, the pack waits and the accountant is told what is open."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Compute the comparisons\n// Against budget, prior month and prior year; margins, cash runway, debtor days; the client's own KPIs from their settings.\nreturn $input.all();"
+      },
+      "id": "client-reporting-automation-03",
+      "name": "Code: Compute the comparisons",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1280,
+        300
+      ],
+      "notes": "Compute the comparisons\n\nAgainst budget, prior month and prior year; margins, cash runway, debtor days; the client's own KPIs from their settings."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the \"Find the variances that matter\" step of the Client Reporting Automation Workflow workflow run by Agentmelt.\nTask: Ranks movements by size and by whether they are one-off, timing or trend, and names the three a client should hear about — with the evidence lines.\n\nRules:\n- No pack is drafted on an unclean close; the workflow reports what is open instead.\n- The narrative can only cite movements present in the numbers; causes are stated as 'appears to be' unless the ledger shows them.\n- Every pack is approved by the accountant before it reaches a client.\n- Numbers in the narrative are checked against the tables before the draft is shown.\n- Client data stays in the ledger and the client folder; model calls use an API with no data retention.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON."
+        }
+      },
+      "id": "client-reporting-automation-04",
+      "name": "AI Agent: Find the variances that matter",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        1600,
+        300
+      ],
+      "notes": "Find the variances that matter\n\nRanks movements by size and by whether they are one-off, timing or trend, and names the three a client should hear about — with the evidence lines."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "client-reporting-automation-04-llm",
+      "name": "Claude (Anthropic Chat Model)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1920,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"summary\": { \"type\": \"string\" },\n    \"draft\": { \"type\": \"string\", \"description\": \"The message or document text this step produced, ready to send or review\" },\n    \"subject\": { \"type\": \"string\" },\n    \"confidence\": { \"type\": \"number\" },\n    \"needs_human\": { \"type\": \"boolean\" },\n    \"reasons\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } }\n  },\n  \"required\": [\"summary\", \"confidence\", \"needs_human\"]\n}"
+      },
+      "id": "client-reporting-automation-04-parser",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        2120,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "client-reporting-automation-04-gate",
+      "name": "Needs a person?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1920,
+        300
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "client-reporting-automation-needs-a-person-find-the-variances-that-matter",
+      "name": "Needs a person: Find the variances that matter",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        80
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the \"Draft the narrative\" step of the Client Reporting Automation Workflow workflow run by Agentmelt.\nTask: In the practice's style from past packs: what happened, why, what to watch — two to four paragraphs and the partner's questions, never invented causes.\n\nRules:\n- No pack is drafted on an unclean close; the workflow reports what is open instead.\n- The narrative can only cite movements present in the numbers; causes are stated as 'appears to be' unless the ledger shows them.\n- Every pack is approved by the accountant before it reaches a client.\n- Numbers in the narrative are checked against the tables before the draft is shown.\n- Client data stays in the ledger and the client folder; model calls use an API with no data retention.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON."
+        }
+      },
+      "id": "client-reporting-automation-05",
+      "name": "AI Agent: Draft the narrative",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        2240,
+        300
+      ],
+      "notes": "Draft the narrative\n\nIn the practice's style from past packs: what happened, why, what to watch — two to four paragraphs and the partner's questions, never invented causes."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "client-reporting-automation-05-llm",
+      "name": "Claude (Anthropic Chat Model) 2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        2560,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"summary\": { \"type\": \"string\" },\n    \"draft\": { \"type\": \"string\", \"description\": \"The message or document text this step produced, ready to send or review\" },\n    \"subject\": { \"type\": \"string\" },\n    \"confidence\": { \"type\": \"number\" },\n    \"needs_human\": { \"type\": \"boolean\" },\n    \"reasons\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } }\n  },\n  \"required\": [\"summary\", \"confidence\", \"needs_human\"]\n}"
+      },
+      "id": "client-reporting-automation-05-parser",
+      "name": "Structured Output Parser 2",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        2760,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "client-reporting-automation-05-gate",
+      "name": "Needs a person? 2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2560,
+        300
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "client-reporting-automation-needs-a-person-draft-the-narrative",
+      "name": "Needs a person: Draft the narrative",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2560,
+        80
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "resource": "document",
+        "operation": "create",
+        "driveId": "myDrive",
+        "folderId": "={{ 'replace-with-your-folder-id' }}",
+        "title": "={{ $json.output?.subject || $json.title || $json.summary || 'Untitled' }}"
+      },
+      "id": "client-reporting-automation-06",
+      "name": "Google Docs: Assemble the pack",
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        2880,
+        300
+      ],
+      "notes": "Assemble the pack\n\nThe practice's template filled: tables, charts, narrative, KPIs, with the client's branding where used; PDF and editable versions."
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendAndWait",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Config (edit me)').item.json.config.approver }}"
+        },
+        "message": "={{ $json.output ? $json.output.summary : $json.summary }}",
+        "responseType": "approval",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "approveLabel": "Approve",
+            "disapproveLabel": "Reject"
+          }
+        },
+        "options": {}
+      },
+      "id": "client-reporting-automation-07",
+      "name": "Slack approval: Review and sign off",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        3200,
+        300
+      ],
+      "notes": "Review and sign off\n\nThe accountant gets the draft with the flagged variances and the open questions; edit, approve or send back with a note.\n\nSend-and-wait: the run pauses here until someone presses Approve or Reject. Set config.approver in \"Config (edit me)\"."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "ap",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "client-reporting-automation-07-approved",
+      "name": "Approved?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3520,
+        300
+      ],
+      "notes": "True = approved → continue to the write-back. False = rejected → stop here; the item stays where it was."
+    },
+    {
+      "parameters": {},
+      "id": "client-reporting-automation-rejected-review-and-sign-off",
+      "name": "Rejected: Review and sign off",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        3520,
+        80
+      ],
+      "notes": "Rejected by the approver. Nothing is written. Optionally log the rejection to your sheet so the weekly count of corrections is visible."
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $json.email || $json.output?.email || '' }}",
+        "subject": "={{ $json.output?.subject || $json.subject || 'Re: your enquiry' }}",
+        "emailType": "text",
+        "message": "={{ $json.output?.draft || $json.draft || $json.summary || '' }}",
+        "options": {}
+      },
+      "id": "client-reporting-automation-08",
+      "name": "Gmail: Deliver and log",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        3840,
+        300
+      ],
+      "notes": "Deliver and log\n\nSent to the client from the accountant's address on approval, with a short cover note; the pack is filed in the client's folder and logged."
+    }
+  ],
+  "connections": {
+    "Schedule Trigger (monthly)": {
+      "main": [
+        [
+          {
+            "node": "Config (edit me)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config (edit me)": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Pull the numbers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Pull the numbers": {
+      "main": [
+        [
+          {
+            "node": "Code: Check the close",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Check the close": {
+      "main": [
+        [
+          {
+            "node": "Code: Compute the comparisons",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Compute the comparisons": {
+      "main": [
+        [
+          {
+            "node": "AI Agent: Find the variances that matter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent: Find the variances that matter",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent: Find the variances that matter",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent: Find the variances that matter": {
+      "main": [
+        [
+          {
+            "node": "Needs a person?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person?": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Find the variances that matter",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent: Draft the narrative",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model) 2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent: Draft the narrative",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser 2": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent: Draft the narrative",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent: Draft the narrative": {
+      "main": [
+        [
+          {
+            "node": "Needs a person? 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person? 2": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Draft the narrative",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Docs: Assemble the pack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Docs: Assemble the pack": {
+      "main": [
+        [
+          {
+            "node": "Slack approval: Review and sign off",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack approval: Review and sign off": {
+      "main": [
+        [
+          {
+            "node": "Approved?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approved?": {
+      "main": [
+        [
+          {
+            "node": "Gmail: Deliver and log",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Rejected: Review and sign off",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "source": "https://agentmelt.com/workflows/client-reporting-automation/"
+  }
+}

@@ -1,0 +1,510 @@
+{
+  "name": "Agentmelt — Appointment Reminder Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Appointment Reminder Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Hourly scan of upcoming appointments in the scheduling system; webhooks for new bookings, cancellations and inbound SMS replies.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Only patients with recorded consent for SMS or automated calls are messaged; opt-out words stop the sequence immediately.\n   - Messages contain no clinical detail — appointment type, time and location only — to stay within HIPAA-safe messaging practice.\n   - Reschedules are booked only into real availability; the agent never promises a slot it cannot see.\n   - Ambiguous or emotional replies route to a person, with the thread.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/appointment-reminders-automation/\nWant it built and run for you? $197/month · custom $2,000–4,000 one-time",
+        "height": 520,
+        "width": 460,
+        "color": 4
+      },
+      "id": "appointment-reminders-automation-note",
+      "name": "Read me first",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "appointment-reminders-automation-00",
+      "name": "Schedule Trigger (hourly)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ],
+      "notes": "Schedule Trigger (hourly) + booking-system webhooks\n\nHourly scan of upcoming appointments in the scheduling system; webhooks for new bookings, cancellations and inbound SMS replies."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-1",
+              "name": "config.your_name",
+              "value": "Your name — signs every outgoing message",
+              "type": "string"
+            },
+            {
+              "id": "cfg-2",
+              "name": "config.your_email",
+              "value": "you@example.com",
+              "type": "string"
+            },
+            {
+              "id": "cfg-3",
+              "name": "config.your_company",
+              "value": "Your company or brokerage",
+              "type": "string"
+            },
+            {
+              "id": "cfg-4",
+              "name": "config.timezone",
+              "value": "Europe/London",
+              "type": "string"
+            },
+            {
+              "id": "cfg-5",
+              "name": "config.quiet_hours_start",
+              "value": 21,
+              "type": "number"
+            },
+            {
+              "id": "cfg-6",
+              "name": "config.quiet_hours_end",
+              "value": 8,
+              "type": "number"
+            },
+            {
+              "id": "cfg-7",
+              "name": "config.approval_mode",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "cfg-8",
+              "name": "config.approver",
+              "value": "#approvals — a Slack channel, or an email address",
+              "type": "string"
+            },
+            {
+              "id": "cfg-9",
+              "name": "config.test_mode",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "appointment-reminders-automation-config",
+      "name": "Config (edit me)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        300
+      ],
+      "notes": "Fill these in once; every later node reads them as $('Config (edit me)').item.json.config.*\n\ntest_mode = true: log what the workflow would write, without writing it, for the first week.\napproval_mode = true: the approval node waits for a person; switch off per message type once it has earned it.\n\nAlso point the nodes at your own sources:\n- Practice management / scheduling system\n- Patient contact preferences and consent\n- SMS/voice provider (Twilio) and email\n- Waitlist (system or sheet)"
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/replace-me",
+        "method": "GET",
+        "options": {},
+        "notes": "Appointments in the next 7 days with patient contact preferences, provider, location and appointment type from the practice management or booking system (Dentrix, athenahealth, Cliniko, Acuity, Calendly)."
+      },
+      "id": "appointment-reminders-automation-01",
+      "name": "HTTP Request: Pull upcoming appointments",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        640,
+        300
+      ],
+      "notes": "Pull upcoming appointments\n\nAppointments in the next 7 days with patient contact preferences, provider, location and appointment type from the practice management or booking system (Dentrix, athenahealth, Cliniko, Acuity, Calendly)."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Decide the cadence and channel\n// Reminder schedule per appointment type (a 2-hour procedure gets more notice than a 15-minute check) and per patient preference; quiet hours and time zones respected.\nreturn $input.all();"
+      },
+      "id": "appointment-reminders-automation-02",
+      "name": "Code: Decide the cadence and channel",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        300
+      ],
+      "notes": "Decide the cadence and channel\n\nReminder schedule per appointment type (a 2-hour procedure gets more notice than a 15-minute check) and per patient preference; quiet hours and time zones respected."
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/replace-me",
+        "method": "GET",
+        "options": {},
+        "notes": "SMS via Twilio, email via the practice's sender, or a voice call for patients who prefer it, with a one-tap confirm and a reply-to-reschedule option."
+      },
+      "id": "appointment-reminders-automation-03",
+      "name": "HTTP Request: Send the reminder",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1280,
+        300
+      ],
+      "notes": "Send the reminder\n\nSMS via Twilio, email via the practice's sender, or a voice call for patients who prefer it, with a one-tap confirm and a reply-to-reschedule option."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the \"Understand replies\" step of the Appointment Reminder Workflow workflow run by Agentmelt.\nTask: Free-text replies are classified — confirm, cancel, reschedule (with the proposed time extracted), question — and the agent drafts a short reply; ambiguous messages go to the front desk.\n\nRules:\n- Only patients with recorded consent for SMS or automated calls are messaged; opt-out words stop the sequence immediately.\n- Messages contain no clinical detail — appointment type, time and location only — to stay within HIPAA-safe messaging practice.\n- Reschedules are booked only into real availability; the agent never promises a slot it cannot see.\n- Ambiguous or emotional replies route to a person, with the thread.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON."
+        }
+      },
+      "id": "appointment-reminders-automation-04",
+      "name": "AI Agent: Understand replies",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        1600,
+        300
+      ],
+      "notes": "Understand replies\n\nFree-text replies are classified — confirm, cancel, reschedule (with the proposed time extracted), question — and the agent drafts a short reply; ambiguous messages go to the front desk."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "appointment-reminders-automation-04-llm",
+      "name": "Claude (Anthropic Chat Model)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1920,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"summary\": { \"type\": \"string\" },\n    \"draft\": { \"type\": \"string\", \"description\": \"The message or document text this step produced, ready to send or review\" },\n    \"subject\": { \"type\": \"string\" },\n    \"confidence\": { \"type\": \"number\" },\n    \"needs_human\": { \"type\": \"boolean\" },\n    \"reasons\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } }\n  },\n  \"required\": [\"summary\", \"confidence\", \"needs_human\"]\n}"
+      },
+      "id": "appointment-reminders-automation-04-parser",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        2120,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "appointment-reminders-automation-04-gate",
+      "name": "Needs a person?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1920,
+        300
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "appointment-reminders-automation-needs-a-person-understand-replies",
+      "name": "Needs a person: Understand replies",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        80
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/replace-me",
+        "method": "GET",
+        "options": {},
+        "notes": "For reschedule requests, the workflow reads open slots for the same provider and type, offers the nearest three, and books the one the patient picks."
+      },
+      "id": "appointment-reminders-automation-05",
+      "name": "HTTP Request: Book reschedules from real availability",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2240,
+        300
+      ],
+      "notes": "Book reschedules from real availability\n\nFor reschedule requests, the workflow reads open slots for the same provider and type, offers the nearest three, and books the one the patient picks."
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "appointment-reminders-automation-06",
+      "name": "Loop Over Items: Fill cancellations from the waitlist",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2560,
+        300
+      ],
+      "notes": "Fill cancellations from the waitlist\n\nA cancelled slot triggers offers to waitlisted patients in priority order, first to accept gets it; the rest are told the slot is gone."
+    },
+    {
+      "parameters": {
+        "resource": "sheet",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ 'replace-with-your-spreadsheet-id' }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "appointment-reminders-automation-07",
+      "name": "Google Sheets: Update the record and the desk",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2880,
+        300
+      ],
+      "notes": "Update the record and the desk\n\nConfirmation status written back to the scheduling system; the day sheet in Slack or email shows confirmed, unconfirmed and rescheduled, so the desk calls only the unconfirmed."
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "appointment-reminders-automation-08",
+      "name": "Schedule Trigger: Report weekly",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        860
+      ],
+      "notes": "Report weekly\n\nNo-show rate by provider and appointment type, confirmation rate by channel, slots recovered from the waitlist, and reply-handling accuracy."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Report weekly\n// No-show rate by provider and appointment type, confirmation rate by channel, slots recovered from the waitlist, and reply-handling accuracy.\n// Build this branch here: read what the main chain wrote, then report or act.\nreturn $input.all();"
+      },
+      "id": "appointment-reminders-automation-08-branch",
+      "name": "Code: Report weekly",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        860
+      ],
+      "notes": "No-show rate by provider and appointment type, confirmation rate by channel, slots recovered from the waitlist, and reply-handling accuracy."
+    }
+  ],
+  "connections": {
+    "Schedule Trigger (hourly)": {
+      "main": [
+        [
+          {
+            "node": "Config (edit me)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config (edit me)": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Pull upcoming appointments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Pull upcoming appointments": {
+      "main": [
+        [
+          {
+            "node": "Code: Decide the cadence and channel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Decide the cadence and channel": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Send the reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Send the reminder": {
+      "main": [
+        [
+          {
+            "node": "AI Agent: Understand replies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent: Understand replies",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent: Understand replies",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent: Understand replies": {
+      "main": [
+        [
+          {
+            "node": "Needs a person?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person?": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Understand replies",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request: Book reschedules from real availability",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Book reschedules from real availability": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items: Fill cancellations from the waitlist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items: Fill cancellations from the waitlist": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets: Update the record and the desk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger: Report weekly": {
+      "main": [
+        [
+          {
+            "node": "Code: Report weekly",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "source": "https://agentmelt.com/workflows/appointment-reminders-automation/"
+  }
+}

@@ -1,0 +1,725 @@
+{
+  "name": "Agentmelt — Content Repurposing Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Content Repurposing Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: A recording dropped in the 'episodes' folder, a new item in the podcast RSS feed, or a Riverside/Zoom recording webhook starts the run.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Nothing publishes without approval on the review board.\n   - Quotes are verbatim from the transcript with timestamps; the agent cannot invent a quote.\n   - Claims extracted from the episode are attributed to the speaker, not stated as fact by the brand.\n   - Style rules (no emojis, no hashtags, sentence length) are enforced by structured output and checked before the board.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/content-repurposing-automation/\nWant it built and run for you? $297/month · custom $3,000–5,000 one-time",
+        "height": 520,
+        "width": 460,
+        "color": 4
+      },
+      "id": "content-repurposing-automation-note",
+      "name": "Read me first",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "content-repurposing-automation-00",
+      "name": "Schedule Trigger (daily)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ],
+      "notes": "New file in a folder (Google Drive / Dropbox) or RSS\n\nA recording dropped in the 'episodes' folder, a new item in the podcast RSS feed, or a Riverside/Zoom recording webhook starts the run."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-1",
+              "name": "config.your_name",
+              "value": "Your name — signs every outgoing message",
+              "type": "string"
+            },
+            {
+              "id": "cfg-2",
+              "name": "config.your_email",
+              "value": "you@example.com",
+              "type": "string"
+            },
+            {
+              "id": "cfg-3",
+              "name": "config.your_company",
+              "value": "Your company or brokerage",
+              "type": "string"
+            },
+            {
+              "id": "cfg-4",
+              "name": "config.timezone",
+              "value": "Europe/London",
+              "type": "string"
+            },
+            {
+              "id": "cfg-5",
+              "name": "config.quiet_hours_start",
+              "value": 21,
+              "type": "number"
+            },
+            {
+              "id": "cfg-6",
+              "name": "config.quiet_hours_end",
+              "value": 8,
+              "type": "number"
+            },
+            {
+              "id": "cfg-7",
+              "name": "config.approval_mode",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "cfg-8",
+              "name": "config.approver",
+              "value": "#approvals — a Slack channel, or an email address",
+              "type": "string"
+            },
+            {
+              "id": "cfg-9",
+              "name": "config.test_mode",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "content-repurposing-automation-config",
+      "name": "Config (edit me)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        300
+      ],
+      "notes": "Fill these in once; every later node reads them as $('Config (edit me)').item.json.config.*\n\ntest_mode = true: log what the workflow would write, without writing it, for the first week.\napproval_mode = true: the approval node waits for a person; switch off per message type once it has earned it.\n\nAlso point the nodes at your own sources:\n- Recording source (Drive, Dropbox, RSS, Riverside, Zoom)\n- Transcription API (Deepgram, AssemblyAI, Whisper)\n- Voice and format guide, past top-performing posts\n- Scheduler (Buffer, Hootsuite) and CMS\n- Platform analytics for the feedback loop"
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/replace-me",
+        "method": "GET",
+        "options": {},
+        "notes": "Audio to a speaker-labelled transcript with timestamps via Deepgram, AssemblyAI or Whisper; the transcript is stored next to the recording."
+      },
+      "id": "content-repurposing-automation-01",
+      "name": "HTTP Request: Transcribe",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        640,
+        300
+      ],
+      "notes": "Transcribe\n\nAudio to a speaker-labelled transcript with timestamps via Deepgram, AssemblyAI or Whisper; the transcript is stored next to the recording."
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.text }}",
+        "schemaType": "fromJson",
+        "jsonSchemaExample": "{\"field\": \"value\"}",
+        "options": {
+          "systemPromptTemplate": "Segments with titles and timestamps, key claims, the three most quotable lines, named people and resources mentioned, and the episode's single main idea."
+        }
+      },
+      "id": "content-repurposing-automation-02",
+      "name": "Information Extractor: Extract structure",
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1,
+      "position": [
+        960,
+        300
+      ],
+      "notes": "Extract structure\n\nSegments with titles and timestamps, key claims, the three most quotable lines, named people and resources mentioned, and the episode's single main idea."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "content-repurposing-automation-02-llm",
+      "name": "Claude (Anthropic Chat Model)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1280,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "content-repurposing-automation-02-gate",
+      "name": "Needs a person?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1280,
+        300
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "content-repurposing-automation-needs-a-person-extract-structure",
+      "name": "Needs a person: Extract structure",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        80
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the \"Draft the long-form\" step of the Content Repurposing Workflow workflow run by Agentmelt.\nTask: Show notes with timestamps and a blog post that restructures the conversation into an article — not a transcript summary — in your voice guide, with the resources linked.\n\nRules:\n- Nothing publishes without approval on the review board.\n- Quotes are verbatim from the transcript with timestamps; the agent cannot invent a quote.\n- Claims extracted from the episode are attributed to the speaker, not stated as fact by the brand.\n- Style rules (no emojis, no hashtags, sentence length) are enforced by structured output and checked before the board.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON."
+        }
+      },
+      "id": "content-repurposing-automation-03",
+      "name": "AI Agent: Draft the long-form",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        1600,
+        300
+      ],
+      "notes": "Draft the long-form\n\nShow notes with timestamps and a blog post that restructures the conversation into an article — not a transcript summary — in your voice guide, with the resources linked."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "content-repurposing-automation-03-llm",
+      "name": "Claude (Anthropic Chat Model) 2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1920,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"summary\": { \"type\": \"string\" },\n    \"draft\": { \"type\": \"string\", \"description\": \"The message or document text this step produced, ready to send or review\" },\n    \"subject\": { \"type\": \"string\" },\n    \"confidence\": { \"type\": \"number\" },\n    \"needs_human\": { \"type\": \"boolean\" },\n    \"reasons\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } }\n  },\n  \"required\": [\"summary\", \"confidence\", \"needs_human\"]\n}"
+      },
+      "id": "content-repurposing-automation-03-parser",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        2120,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "content-repurposing-automation-03-gate",
+      "name": "Needs a person? 2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1920,
+        300
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "content-repurposing-automation-needs-a-person-draft-the-long-form",
+      "name": "Needs a person: Draft the long-form",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        80
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the \"Draft the short-form\" step of the Content Repurposing Workflow workflow run by Agentmelt.\nTask: Five LinkedIn posts (one per key idea, different hooks), an X thread, a newsletter section, and a pull-quote graphic brief; each within platform limits and your style rules.\n\nRules:\n- Nothing publishes without approval on the review board.\n- Quotes are verbatim from the transcript with timestamps; the agent cannot invent a quote.\n- Claims extracted from the episode are attributed to the speaker, not stated as fact by the brand.\n- Style rules (no emojis, no hashtags, sentence length) are enforced by structured output and checked before the board.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON."
+        }
+      },
+      "id": "content-repurposing-automation-04",
+      "name": "AI Agent: Draft the short-form",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        2240,
+        300
+      ],
+      "notes": "Draft the short-form\n\nFive LinkedIn posts (one per key idea, different hooks), an X thread, a newsletter section, and a pull-quote graphic brief; each within platform limits and your style rules."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "content-repurposing-automation-04-llm",
+      "name": "Claude (Anthropic Chat Model) 3",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        2560,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"summary\": { \"type\": \"string\" },\n    \"draft\": { \"type\": \"string\", \"description\": \"The message or document text this step produced, ready to send or review\" },\n    \"subject\": { \"type\": \"string\" },\n    \"confidence\": { \"type\": \"number\" },\n    \"needs_human\": { \"type\": \"boolean\" },\n    \"reasons\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } }\n  },\n  \"required\": [\"summary\", \"confidence\", \"needs_human\"]\n}"
+      },
+      "id": "content-repurposing-automation-04-parser",
+      "name": "Structured Output Parser 2",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        2760,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "content-repurposing-automation-04-gate",
+      "name": "Needs a person? 3",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2560,
+        300
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "content-repurposing-automation-needs-a-person-draft-the-short-form",
+      "name": "Needs a person: Draft the short-form",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2560,
+        80
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Clip list for the editor\n// Timestamps for the six strongest 30–90-second segments with a suggested caption and hook, exported to the editor's tool or a sheet.\nreturn $input.all();"
+      },
+      "id": "content-repurposing-automation-05",
+      "name": "Code: Clip list for the editor",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2880,
+        300
+      ],
+      "notes": "Clip list for the editor\n\nTimestamps for the six strongest 30–90-second segments with a suggested caption and hook, exported to the editor's tool or a sheet."
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ 'replace-with-your-notion-database-id' }}"
+        },
+        "title": "={{ $json.output?.subject || $json.title || $json.summary || 'Untitled' }}",
+        "options": {}
+      },
+      "id": "content-repurposing-automation-06",
+      "name": "Notion: Review board",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        3200,
+        300
+      ],
+      "notes": "Review board\n\nOne page per episode with every asset, the transcript and the clip list; the owner edits and marks each asset approved."
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/replace-me",
+        "method": "GET",
+        "options": {},
+        "notes": "Approved posts go to Buffer, Hootsuite or the platform APIs on the cadence in the calendar rules; the blog post to the CMS as a draft; the newsletter section to the ESP draft."
+      },
+      "id": "content-repurposing-automation-07",
+      "name": "HTTP Request: Schedule approved assets",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3520,
+        300
+      ],
+      "notes": "Schedule approved assets\n\nApproved posts go to Buffer, Hootsuite or the platform APIs on the cadence in the calendar rules; the blog post to the CMS as a draft; the newsletter section to the ESP draft."
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "content-repurposing-automation-08",
+      "name": "Schedule Trigger: Report performance back",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        860
+      ],
+      "notes": "Report performance back\n\nWeekly: engagement per asset and per hook style, so the prompts learn which hooks work for your audience."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Report performance back\n// Weekly: engagement per asset and per hook style, so the prompts learn which hooks work for your audience.\n// Build this branch here: read what the main chain wrote, then report or act.\nreturn $input.all();"
+      },
+      "id": "content-repurposing-automation-08-branch",
+      "name": "Code: Report performance back",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        860
+      ],
+      "notes": "Weekly: engagement per asset and per hook style, so the prompts learn which hooks work for your audience."
+    }
+  ],
+  "connections": {
+    "Schedule Trigger (daily)": {
+      "main": [
+        [
+          {
+            "node": "Config (edit me)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config (edit me)": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Transcribe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Transcribe": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor: Extract structure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor: Extract structure",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor: Extract structure": {
+      "main": [
+        [
+          {
+            "node": "Needs a person?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person?": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Extract structure",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent: Draft the long-form",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model) 2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent: Draft the long-form",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent: Draft the long-form",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent: Draft the long-form": {
+      "main": [
+        [
+          {
+            "node": "Needs a person? 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person? 2": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Draft the long-form",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent: Draft the short-form",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model) 3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent: Draft the short-form",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser 2": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent: Draft the short-form",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent: Draft the short-form": {
+      "main": [
+        [
+          {
+            "node": "Needs a person? 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person? 3": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Draft the short-form",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code: Clip list for the editor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Clip list for the editor": {
+      "main": [
+        [
+          {
+            "node": "Notion: Review board",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion: Review board": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Schedule approved assets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger: Report performance back": {
+      "main": [
+        [
+          {
+            "node": "Code: Report performance back",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "source": "https://agentmelt.com/workflows/content-repurposing-automation/"
+  }
+}

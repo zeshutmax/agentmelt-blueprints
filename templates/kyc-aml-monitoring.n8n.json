@@ -1,0 +1,553 @@
+{
+  "name": "Agentmelt — KYC/AML Monitoring Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## KYC/AML Monitoring Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: New customers screened at onboarding; the full book re-screened daily against list updates; transaction events evaluated in near real time.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - No case is closed without an analyst's recorded decision; the agent drafts, never decides.\n   - Sanctions matches always reach a senior analyst regardless of the draft assessment.\n   - Every decision is logged in a tamper-evident store with actor, rationale and timestamp.\n   - Rules and thresholds are versioned; changes require compliance-officer approval and are logged.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/kyc-aml-monitoring/\nWant it built and run for you? $297/month · custom $8,000–15,000 one-time",
+        "height": 520,
+        "width": 460,
+        "color": 4
+      },
+      "id": "kyc-aml-monitoring-note",
+      "name": "Read me first",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "kyc-aml-monitoring-00",
+      "name": "Schedule Trigger (daily)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ],
+      "notes": "Onboarding webhook + daily screening + transaction webhooks\n\nNew customers screened at onboarding; the full book re-screened daily against list updates; transaction events evaluated in near real time."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-1",
+              "name": "config.your_name",
+              "value": "Your name — signs every outgoing message",
+              "type": "string"
+            },
+            {
+              "id": "cfg-2",
+              "name": "config.your_email",
+              "value": "you@example.com",
+              "type": "string"
+            },
+            {
+              "id": "cfg-3",
+              "name": "config.your_company",
+              "value": "Your company or brokerage",
+              "type": "string"
+            },
+            {
+              "id": "cfg-4",
+              "name": "config.timezone",
+              "value": "Europe/London",
+              "type": "string"
+            },
+            {
+              "id": "cfg-5",
+              "name": "config.quiet_hours_start",
+              "value": 21,
+              "type": "number"
+            },
+            {
+              "id": "cfg-6",
+              "name": "config.quiet_hours_end",
+              "value": 8,
+              "type": "number"
+            },
+            {
+              "id": "cfg-7",
+              "name": "config.approval_mode",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "cfg-8",
+              "name": "config.approver",
+              "value": "#approvals — a Slack channel, or an email address",
+              "type": "string"
+            },
+            {
+              "id": "cfg-9",
+              "name": "config.test_mode",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "kyc-aml-monitoring-config",
+      "name": "Config (edit me)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        300
+      ],
+      "notes": "Fill these in once; every later node reads them as $('Config (edit me)').item.json.config.*\n\ntest_mode = true: log what the workflow would write, without writing it, for the first week.\napproval_mode = true: the approval node waits for a person; switch off per message type once it has earned it.\n\nAlso point the nodes at your own sources:\n- Onboarding system / CRM (customer profiles)\n- Screening providers (ComplyAdvantage, Dow Jones, Refinitiv, OpenSanctions)\n- Core banking / payments (transactions)\n- Compliance rule set and risk policy"
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/replace-me",
+        "method": "GET",
+        "options": {},
+        "notes": "Name, DOB, nationality, addresses and beneficial owners screened against sanctions (OFAC, EU, UN, UK), PEP and adverse-media providers (ComplyAdvantage, Dow Jones, Refinitiv); results with match scores."
+      },
+      "id": "kyc-aml-monitoring-01",
+      "name": "HTTP Request: Screen the customer",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        640,
+        300
+      ],
+      "notes": "Screen the customer\n\nName, DOB, nationality, addresses and beneficial owners screened against sanctions (OFAC, EU, UN, UK), PEP and adverse-media providers (ComplyAdvantage, Dow Jones, Refinitiv); results with match scores."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the \"Pre-assess matches\" step of the KYC/AML Monitoring Workflow workflow run by Agentmelt.\nTask: For each hit the agent compares the customer profile to the list entry — dates, locations, identifiers, context — and drafts an assessment: likely true match, likely false positive, or needs more information, with the reasoning.\n\nRules:\n- No case is closed without an analyst's recorded decision; the agent drafts, never decides.\n- Sanctions matches always reach a senior analyst regardless of the draft assessment.\n- Every decision is logged in a tamper-evident store with actor, rationale and timestamp.\n- Rules and thresholds are versioned; changes require compliance-officer approval and are logged.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON."
+        }
+      },
+      "id": "kyc-aml-monitoring-02",
+      "name": "AI Agent: Pre-assess matches",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        960,
+        300
+      ],
+      "notes": "Pre-assess matches\n\nFor each hit the agent compares the customer profile to the list entry — dates, locations, identifiers, context — and drafts an assessment: likely true match, likely false positive, or needs more information, with the reasoning."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "kyc-aml-monitoring-02-llm",
+      "name": "Claude (Anthropic Chat Model)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1280,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"summary\": { \"type\": \"string\" },\n    \"draft\": { \"type\": \"string\", \"description\": \"The message or document text this step produced, ready to send or review\" },\n    \"subject\": { \"type\": \"string\" },\n    \"confidence\": { \"type\": \"number\" },\n    \"needs_human\": { \"type\": \"boolean\" },\n    \"reasons\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } }\n  },\n  \"required\": [\"summary\", \"confidence\", \"needs_human\"]\n}"
+      },
+      "id": "kyc-aml-monitoring-02-parser",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        1480,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "kyc-aml-monitoring-02-gate",
+      "name": "Needs a person?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1280,
+        300
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "kyc-aml-monitoring-needs-a-person-pre-assess-matches",
+      "name": "Needs a person: Pre-assess matches",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        80
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Evaluate transactions\n// Rule set (structuring patterns, velocity, high-risk corridors, unusual counterparties) applied to transaction events; rules versioned and owned by compliance.\nreturn $input.all();"
+      },
+      "id": "kyc-aml-monitoring-03",
+      "name": "Code: Evaluate transactions",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        300
+      ],
+      "notes": "Evaluate transactions\n\nRule set (structuring patterns, velocity, high-risk corridors, unusual counterparties) applied to transaction events; rules versioned and owned by compliance."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": []
+        },
+        "options": {}
+      },
+      "id": "kyc-aml-monitoring-04",
+      "name": "Set: Build the case",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1920,
+        300
+      ],
+      "notes": "Build the case\n\nAlert, customer profile, screening evidence, transaction history and the agent's draft assembled into a case record."
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendAndWait",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Config (edit me)').item.json.config.approver }}"
+        },
+        "message": "={{ $json.output ? $json.output.summary : $json.summary }}",
+        "responseType": "approval",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "approveLabel": "Approve",
+            "disapproveLabel": "Reject"
+          }
+        },
+        "options": {}
+      },
+      "id": "kyc-aml-monitoring-05",
+      "name": "Slack approval: Route to the analyst",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        2240,
+        300
+      ],
+      "notes": "Route to the analyst\n\nCases queued by risk score; low-risk likely-false-positives can be batch-cleared with a review sample; anything involving sanctions goes to a senior analyst.\n\nSend-and-wait: the run pauses here until someone presses Approve or Reject. Set config.approver in \"Config (edit me)\"."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "ap",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "kyc-aml-monitoring-05-approved",
+      "name": "Approved?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2560,
+        300
+      ],
+      "notes": "True = approved → continue to the write-back. False = rejected → stop here; the item stays where it was."
+    },
+    {
+      "parameters": {},
+      "id": "kyc-aml-monitoring-rejected-route-to-the-analyst",
+      "name": "Rejected: Route to the analyst",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2560,
+        80
+      ],
+      "notes": "Rejected by the approver. Nothing is written. Optionally log the rejection to your sheet so the weekly count of corrections is visible."
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT 1; -- replace with your query",
+        "options": {}
+      },
+      "id": "kyc-aml-monitoring-06",
+      "name": "Postgres: Record the decision",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2880,
+        300
+      ],
+      "notes": "Record the decision\n\nAnalyst decision, rationale, reviewer and timestamp recorded on the case in a tamper-evident log; SAR/STR drafts generated for confirmed suspicious cases."
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "kyc-aml-monitoring-07",
+      "name": "Schedule Trigger: Continuous re-screening",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        860
+      ],
+      "notes": "Continuous re-screening\n\nDaily re-screen against list updates; changes in a customer's risk (new PEP status, adverse media) reopen a case automatically."
+    },
+    {
+      "parameters": {
+        "resource": "document",
+        "operation": "create",
+        "driveId": "myDrive",
+        "folderId": "={{ 'replace-with-your-folder-id' }}",
+        "title": "={{ $json.output?.subject || $json.title || $json.summary || 'Untitled' }}"
+      },
+      "id": "kyc-aml-monitoring-08",
+      "name": "Google Docs: Regulatory reporting",
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        320,
+        860
+      ],
+      "notes": "Regulatory reporting\n\nMonthly MI: alerts by type, false-positive rate, clearance times, open cases by age, and the rule-tuning log."
+    }
+  ],
+  "connections": {
+    "Schedule Trigger (daily)": {
+      "main": [
+        [
+          {
+            "node": "Config (edit me)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config (edit me)": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Screen the customer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Screen the customer": {
+      "main": [
+        [
+          {
+            "node": "AI Agent: Pre-assess matches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent: Pre-assess matches",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent: Pre-assess matches",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent: Pre-assess matches": {
+      "main": [
+        [
+          {
+            "node": "Needs a person?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person?": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Pre-assess matches",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code: Evaluate transactions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Evaluate transactions": {
+      "main": [
+        [
+          {
+            "node": "Set: Build the case",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set: Build the case": {
+      "main": [
+        [
+          {
+            "node": "Slack approval: Route to the analyst",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack approval: Route to the analyst": {
+      "main": [
+        [
+          {
+            "node": "Approved?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approved?": {
+      "main": [
+        [
+          {
+            "node": "Postgres: Record the decision",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Rejected: Route to the analyst",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger: Continuous re-screening": {
+      "main": [
+        [
+          {
+            "node": "Google Docs: Regulatory reporting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "source": "https://agentmelt.com/workflows/kyc-aml-monitoring/"
+  }
+}

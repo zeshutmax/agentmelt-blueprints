@@ -1,0 +1,609 @@
+{
+  "name": "Agentmelt — Supplier Risk Monitoring Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Supplier Risk Monitoring Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: News and delivery data refresh daily; financial and ESG data refresh weekly; the composite score is recomputed weekly and on any high-severity signal.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Scores are explainable: every alert lists the signals and weights that produced it.\n   - News is classified for relevance and severity before it affects a score; a single article never triggers an alert on its own.\n   - The agent recommends; procurement decides and records the action.\n   - Tier-3 suppliers are scored on delivery data only, so monitoring cost stays proportional.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/supplier-risk-monitoring/\nWant it built and run for you? $297/month · custom $5,000–9,000 one-time",
+        "height": 520,
+        "width": 460,
+        "color": 4
+      },
+      "id": "supplier-risk-monitoring-note",
+      "name": "Read me first",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "weeksInterval": 1,
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "supplier-risk-monitoring-00",
+      "name": "Schedule Trigger (weekly)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ],
+      "notes": "Schedule Trigger (daily signals, weekly scoring)\n\nNews and delivery data refresh daily; financial and ESG data refresh weekly; the composite score is recomputed weekly and on any high-severity signal."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-1",
+              "name": "config.your_name",
+              "value": "Your name — signs every outgoing message",
+              "type": "string"
+            },
+            {
+              "id": "cfg-2",
+              "name": "config.your_email",
+              "value": "you@example.com",
+              "type": "string"
+            },
+            {
+              "id": "cfg-3",
+              "name": "config.your_company",
+              "value": "Your company or brokerage",
+              "type": "string"
+            },
+            {
+              "id": "cfg-4",
+              "name": "config.timezone",
+              "value": "Europe/London",
+              "type": "string"
+            },
+            {
+              "id": "cfg-5",
+              "name": "config.quiet_hours_start",
+              "value": 21,
+              "type": "number"
+            },
+            {
+              "id": "cfg-6",
+              "name": "config.quiet_hours_end",
+              "value": 8,
+              "type": "number"
+            },
+            {
+              "id": "cfg-7",
+              "name": "config.approval_mode",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "cfg-8",
+              "name": "config.approver",
+              "value": "#approvals — a Slack channel, or an email address",
+              "type": "string"
+            },
+            {
+              "id": "cfg-9",
+              "name": "config.test_mode",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "supplier-risk-monitoring-config",
+      "name": "Config (edit me)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        300
+      ],
+      "notes": "Fill these in once; every later node reads them as $('Config (edit me)').item.json.config.*\n\ntest_mode = true: log what the workflow would write, without writing it, for the first week.\napproval_mode = true: the approval node waits for a person; switch off per message type once it has earned it.\n\nAlso point the nodes at your own sources:\n- Supplier master with spend, tier, geography (ERP or sheet)\n- Credit and financial data (D&B, Creditsafe, Coface)\n- News API and sanctions / regulatory lists\n- Receipt, OTIF and quality records (ERP/QMS)\n- Weather, port and logistics status feeds"
+    },
+    {
+      "parameters": {
+        "resource": "sheet",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ 'replace-with-your-spreadsheet-id' }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "supplier-risk-monitoring-01",
+      "name": "Google Sheets: Load the supplier portfolio",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        640,
+        300
+      ],
+      "notes": "Load the supplier portfolio\n\nSuppliers with spend, criticality tier, category, country of manufacture, single-source flag and contract terms. Tier drives how much monitoring each gets."
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/replace-me",
+        "method": "GET",
+        "options": {},
+        "notes": "Credit scores and payment behaviour from D&B, Creditsafe or Coface; public filings for listed suppliers."
+      },
+      "id": "supplier-risk-monitoring-02",
+      "name": "HTTP Request: Pull financial signals",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        300
+      ],
+      "notes": "Pull financial signals\n\nCredit scores and payment behaviour from D&B, Creditsafe or Coface; public filings for listed suppliers."
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/replace-me",
+        "method": "GET",
+        "options": {},
+        "notes": "News API queries per supplier and per manufacturing region; regulatory and sanctions list checks; weather and port-status feeds for logistics-critical regions."
+      },
+      "id": "supplier-risk-monitoring-03",
+      "name": "HTTP Request: Pull news and events",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1280,
+        300
+      ],
+      "notes": "Pull news and events\n\nNews API queries per supplier and per manufacturing region; regulatory and sanctions list checks; weather and port-status feeds for logistics-critical regions."
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT 1; -- replace with your query",
+        "options": {}
+      },
+      "id": "supplier-risk-monitoring-04",
+      "name": "Postgres: Measure delivery performance",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1600,
+        300
+      ],
+      "notes": "Measure delivery performance\n\nOn-time-in-full rate, lead-time drift and quality rejections per supplier from your own receipts and QC records — the most predictive signal you already own."
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.text }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "category-a",
+              "description": "Replace with your first category"
+            },
+            {
+              "category": "category-b",
+              "description": "Replace with your second category"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "supplier-risk-monitoring-05",
+      "name": "Text Classifier: Classify and weight signals",
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        300
+      ],
+      "notes": "Classify and weight signals\n\nNews items are classified (financial distress, labour action, quality recall, natural disaster, ownership change, irrelevant) with severity; irrelevant mentions are dropped."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "supplier-risk-monitoring-05-llm",
+      "name": "Claude (Anthropic Chat Model)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        2240,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "supplier-risk-monitoring-05-gate",
+      "name": "Needs a person?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2240,
+        300
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "supplier-risk-monitoring-needs-a-person-classify-and-weight-signals",
+      "name": "Needs a person: Classify and weight signals",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2240,
+        80
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Compute the composite score\n// Weighted score per supplier from financial, operational, geographic and news components, with the weights per tier kept in the sheet so procurement can tune them.\nreturn $input.all();"
+      },
+      "id": "supplier-risk-monitoring-06",
+      "name": "Code: Compute the composite score",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2560,
+        300
+      ],
+      "notes": "Compute the composite score\n\nWeighted score per supplier from financial, operational, geographic and news components, with the weights per tier kept in the sheet so procurement can tune them."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the \"Draft the risk brief\" step of the Supplier Risk Monitoring Workflow workflow run by Agentmelt.\nTask: When a score crosses its threshold, the agent assembles the evidence, states the exposure (parts, spend, lead time to switch) and recommends actions: increase safety stock, qualify the backup, renegotiate terms, visit the site.\n\nRules:\n- Scores are explainable: every alert lists the signals and weights that produced it.\n- News is classified for relevance and severity before it affects a score; a single article never triggers an alert on its own.\n- The agent recommends; procurement decides and records the action.\n- Tier-3 suppliers are scored on delivery data only, so monitoring cost stays proportional.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON."
+        }
+      },
+      "id": "supplier-risk-monitoring-07",
+      "name": "AI Agent: Draft the risk brief",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        2880,
+        300
+      ],
+      "notes": "Draft the risk brief\n\nWhen a score crosses its threshold, the agent assembles the evidence, states the exposure (parts, spend, lead time to switch) and recommends actions: increase safety stock, qualify the backup, renegotiate terms, visit the site."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "supplier-risk-monitoring-07-llm",
+      "name": "Claude (Anthropic Chat Model) 2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        3200,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"summary\": { \"type\": \"string\" },\n    \"draft\": { \"type\": \"string\", \"description\": \"The message or document text this step produced, ready to send or review\" },\n    \"subject\": { \"type\": \"string\" },\n    \"confidence\": { \"type\": \"number\" },\n    \"needs_human\": { \"type\": \"boolean\" },\n    \"reasons\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } }\n  },\n  \"required\": [\"summary\", \"confidence\", \"needs_human\"]\n}"
+      },
+      "id": "supplier-risk-monitoring-07-parser",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        3400,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "supplier-risk-monitoring-07-gate",
+      "name": "Needs a person? 2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3200,
+        300
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "supplier-risk-monitoring-needs-a-person-draft-the-risk-brief",
+      "name": "Needs a person: Draft the risk brief",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        3200,
+        80
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "post",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Config (edit me)').item.json.config.approver }}"
+        },
+        "text": "={{ $json.output?.summary || $json.summary || JSON.stringify($json) }}",
+        "otherOptions": {}
+      },
+      "id": "supplier-risk-monitoring-08",
+      "name": "Slack: Alert and track",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        3520,
+        300
+      ],
+      "notes": "Alert and track\n\nBrief posted to the procurement channel and logged on the supplier record; actions get owners and due dates; scores and briefs feed the quarterly review."
+    }
+  ],
+  "connections": {
+    "Schedule Trigger (weekly)": {
+      "main": [
+        [
+          {
+            "node": "Config (edit me)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config (edit me)": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets: Load the supplier portfolio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets: Load the supplier portfolio": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Pull financial signals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Pull financial signals": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Pull news and events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Pull news and events": {
+      "main": [
+        [
+          {
+            "node": "Postgres: Measure delivery performance",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres: Measure delivery performance": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier: Classify and weight signals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier: Classify and weight signals",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier: Classify and weight signals": {
+      "main": [
+        [
+          {
+            "node": "Needs a person?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person?": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Classify and weight signals",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code: Compute the composite score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Compute the composite score": {
+      "main": [
+        [
+          {
+            "node": "AI Agent: Draft the risk brief",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model) 2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent: Draft the risk brief",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent: Draft the risk brief",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent: Draft the risk brief": {
+      "main": [
+        [
+          {
+            "node": "Needs a person? 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person? 2": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Draft the risk brief",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Slack: Alert and track",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "source": "https://agentmelt.com/workflows/supplier-risk-monitoring/"
+  }
+}

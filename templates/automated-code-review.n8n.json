@@ -1,0 +1,483 @@
+{
+  "name": "Agentmelt — Automated Code Review Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Automated Code Review Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: pull_request opened, synchronize and ready_for_review events; draft PRs are skipped unless labelled.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - The workflow never approves or merges; it reviews and labels. A human approval remains required.\n   - Comments are posted only for concrete findings with reasoning; style nits go to the summary or nowhere.\n   - Code is sent to the model provider under your data-processing terms; repositories can be excluded, and self-hosted models are an option for sensitive code.\n   - High-risk areas require a named human reviewer regardless of the automated verdict.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/automated-code-review/\nWant it built and run for you? $247/month · custom $3,500–6,000 one-time",
+        "height": 520,
+        "width": 460,
+        "color": 4
+      },
+      "id": "automated-code-review-note",
+      "name": "Read me first",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "automated-code-review",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "automated-code-review-01",
+      "name": "Webhook: Receive the PR event",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        300
+      ],
+      "notes": "Receive the PR event\n\nRepository, PR number, author, base and head, changed files, linked issue. PRs from bots or with a skip label are ignored.",
+      "webhookId": "automated-code-review-webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-1",
+              "name": "config.your_name",
+              "value": "Your name — signs every outgoing message",
+              "type": "string"
+            },
+            {
+              "id": "cfg-2",
+              "name": "config.your_email",
+              "value": "you@example.com",
+              "type": "string"
+            },
+            {
+              "id": "cfg-3",
+              "name": "config.your_company",
+              "value": "Your company or brokerage",
+              "type": "string"
+            },
+            {
+              "id": "cfg-4",
+              "name": "config.timezone",
+              "value": "Europe/London",
+              "type": "string"
+            },
+            {
+              "id": "cfg-5",
+              "name": "config.quiet_hours_start",
+              "value": 21,
+              "type": "number"
+            },
+            {
+              "id": "cfg-6",
+              "name": "config.quiet_hours_end",
+              "value": 8,
+              "type": "number"
+            },
+            {
+              "id": "cfg-7",
+              "name": "config.approval_mode",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "cfg-8",
+              "name": "config.approver",
+              "value": "#approvals — a Slack channel, or an email address",
+              "type": "string"
+            },
+            {
+              "id": "cfg-9",
+              "name": "config.test_mode",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "automated-code-review-config",
+      "name": "Config (edit me)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        300
+      ],
+      "notes": "Fill these in once; every later node reads them as $('Config (edit me)').item.json.config.*\n\ntest_mode = true: log what the workflow would write, without writing it, for the first week.\napproval_mode = true: the approval node waits for a person; switch off per message type once it has earned it.\n\nAlso point the nodes at your own sources:\n- Git host (GitHub, GitLab, Bitbucket) PR events and API\n- Repository standards docs and CODEOWNERS\n- Issue tracker (linked ticket text)\n- CI results (lint, types, tests, secret scanning)"
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/replace-me",
+        "method": "GET",
+        "options": {},
+        "notes": "The unified diff plus the full content of changed files and the definitions they reference, the linked issue or ticket text, and the repo's CONTRIBUTING and standards docs."
+      },
+      "id": "automated-code-review-02",
+      "name": "HTTP Request: Fetch the diff and context",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        640,
+        300
+      ],
+      "notes": "Fetch the diff and context\n\nThe unified diff plus the full content of changed files and the definitions they reference, the linked issue or ticket text, and the repo's CONTRIBUTING and standards docs."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Run static checks\n// Linters, type checks and secret scanning results from CI are collected so the model does not repeat what tooling already reported.\nreturn $input.all();"
+      },
+      "id": "automated-code-review-03",
+      "name": "Code: Run static checks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        300
+      ],
+      "notes": "Run static checks\n\nLinters, type checks and secret scanning results from CI are collected so the model does not repeat what tooling already reported."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the \"Analyse the change\" step of the Automated Code Review Workflow workflow run by Agentmelt.\nTask: With the diff, context, standards and issue: does the change do what the issue asks; concrete bugs or edge cases; security issues (injection, auth, secrets, unsafe deserialisation); breaking API or schema changes; missing or weak tests; deviations from the written standards. Output is structured: findings with file, line, severity, explanation and a suggested fix.\n\nRules:\n- The workflow never approves or merges; it reviews and labels. A human approval remains required.\n- Comments are posted only for concrete findings with reasoning; style nits go to the summary or nowhere.\n- Code is sent to the model provider under your data-processing terms; repositories can be excluded, and self-hosted models are an option for sensitive code.\n- High-risk areas require a named human reviewer regardless of the automated verdict.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON."
+        }
+      },
+      "id": "automated-code-review-04",
+      "name": "AI Agent: Analyse the change",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        1280,
+        300
+      ],
+      "notes": "Analyse the change\n\nWith the diff, context, standards and issue: does the change do what the issue asks; concrete bugs or edge cases; security issues (injection, auth, secrets, unsafe deserialisation); breaking API or schema changes; missing or weak tests; deviations from the written standards. Output is structured: findings with file, line, severity, explanation and a suggested fix."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "automated-code-review-04-llm",
+      "name": "Claude (Anthropic Chat Model)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1600,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"summary\": { \"type\": \"string\" },\n    \"draft\": { \"type\": \"string\", \"description\": \"The message or document text this step produced, ready to send or review\" },\n    \"subject\": { \"type\": \"string\" },\n    \"confidence\": { \"type\": \"number\" },\n    \"needs_human\": { \"type\": \"boolean\" },\n    \"reasons\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } }\n  },\n  \"required\": [\"summary\", \"confidence\", \"needs_human\"]\n}"
+      },
+      "id": "automated-code-review-04-parser",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        1800,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "automated-code-review-04-gate",
+      "name": "Needs a person?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1600,
+        300
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "automated-code-review-needs-a-person-analyse-the-change",
+      "name": "Needs a person: Analyse the change",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        80
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.confidence }}",
+              "rightValue": 0.8,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "automated-code-review-05",
+      "name": "IF: Filter to what matters",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1920,
+        300
+      ],
+      "notes": "Filter to what matters\n\nFindings below a confidence threshold or classed as style-only are dropped or folded into the summary; only concrete, explained issues become inline comments. Comment volume per PR is capped."
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/replace-me",
+        "method": "GET",
+        "options": {},
+        "notes": "Review comments on the exact lines via the GitHub/GitLab API, plus a summary comment: what the PR does, risk level, test coverage of the change, and the two or three things a human should look at."
+      },
+      "id": "automated-code-review-06",
+      "name": "HTTP Request: Post inline comments and summary",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2240,
+        300
+      ],
+      "notes": "Post inline comments and summary\n\nReview comments on the exact lines via the GitHub/GitLab API, plus a summary comment: what the PR does, risk level, test coverage of the change, and the two or three things a human should look at."
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/replace-me",
+        "method": "GET",
+        "options": {},
+        "notes": "Risk label (low/medium/high), area labels, and — for high-risk changes touching auth, payments or data — a required reviewer from the CODEOWNERS group."
+      },
+      "id": "automated-code-review-07",
+      "name": "HTTP Request: Label and route",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2560,
+        300
+      ],
+      "notes": "Label and route\n\nRisk label (low/medium/high), area labels, and — for high-risk changes touching auth, payments or data — a required reviewer from the CODEOWNERS group."
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "automated-code-review-08",
+      "name": "Schedule Trigger: Learn from resolutions",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        860
+      ],
+      "notes": "Learn from resolutions\n\nWeekly: which comments were resolved, dismissed or replied 'not an issue'; precision per finding type is reported and thresholds adjusted; recurring findings become proposals for a lint rule."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Learn from resolutions\n// Weekly: which comments were resolved, dismissed or replied 'not an issue'; precision per finding type is reported and thresholds adjusted; recurring findings become proposals for a lint rule.\n// Build this branch here: read what the main chain wrote, then report or act.\nreturn $input.all();"
+      },
+      "id": "automated-code-review-08-branch",
+      "name": "Code: Learn from resolutions",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        860
+      ],
+      "notes": "Weekly: which comments were resolved, dismissed or replied 'not an issue'; precision per finding type is reported and thresholds adjusted; recurring findings become proposals for a lint rule."
+    }
+  ],
+  "connections": {
+    "Webhook: Receive the PR event": {
+      "main": [
+        [
+          {
+            "node": "Config (edit me)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config (edit me)": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Fetch the diff and context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Fetch the diff and context": {
+      "main": [
+        [
+          {
+            "node": "Code: Run static checks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Run static checks": {
+      "main": [
+        [
+          {
+            "node": "AI Agent: Analyse the change",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent: Analyse the change",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent: Analyse the change",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent: Analyse the change": {
+      "main": [
+        [
+          {
+            "node": "Needs a person?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person?": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Analyse the change",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IF: Filter to what matters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Filter to what matters": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Post inline comments and summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Post inline comments and summary": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Label and route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger: Learn from resolutions": {
+      "main": [
+        [
+          {
+            "node": "Code: Learn from resolutions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "source": "https://agentmelt.com/workflows/automated-code-review/"
+  }
+}

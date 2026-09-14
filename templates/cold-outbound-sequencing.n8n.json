@@ -1,0 +1,637 @@
+{
+  "name": "Agentmelt — Cold Outbound Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Cold Outbound Automation\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: A daily run selects the next batch from the list; the sending tool's webhooks report replies, bounces and unsubscribes in real time.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Daily volume per mailbox is capped and warm-up is respected; the workflow never sends outside the sequencer's limits.\n   - Emails that fail the specificity check are not sent; generic filler is worse than silence.\n   - Any human reply stops the sequence immediately; unsubscribes are honoured across all lists.\n   - Suppression lists (customers, open deals, competitors, opt-outs) are applied before research spends any credits.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/cold-outbound-sequencing/\nWant it built and run for you? $297/month · custom $4,000–7,000 one-time",
+        "height": 520,
+        "width": 460,
+        "color": 4
+      },
+      "id": "cold-outbound-sequencing-note",
+      "name": "Read me first",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "cold-outbound-sequencing-00",
+      "name": "Schedule Trigger (daily)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ],
+      "notes": "Schedule Trigger (daily batch) + reply webhooks\n\nA daily run selects the next batch from the list; the sending tool's webhooks report replies, bounces and unsubscribes in real time."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-1",
+              "name": "config.your_name",
+              "value": "Your name — signs every outgoing message",
+              "type": "string"
+            },
+            {
+              "id": "cfg-2",
+              "name": "config.your_email",
+              "value": "you@example.com",
+              "type": "string"
+            },
+            {
+              "id": "cfg-3",
+              "name": "config.your_company",
+              "value": "Your company or brokerage",
+              "type": "string"
+            },
+            {
+              "id": "cfg-4",
+              "name": "config.timezone",
+              "value": "Europe/London",
+              "type": "string"
+            },
+            {
+              "id": "cfg-5",
+              "name": "config.quiet_hours_start",
+              "value": 21,
+              "type": "number"
+            },
+            {
+              "id": "cfg-6",
+              "name": "config.quiet_hours_end",
+              "value": 8,
+              "type": "number"
+            },
+            {
+              "id": "cfg-7",
+              "name": "config.approval_mode",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "cfg-8",
+              "name": "config.approver",
+              "value": "#approvals — a Slack channel, or an email address",
+              "type": "string"
+            },
+            {
+              "id": "cfg-9",
+              "name": "config.test_mode",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "cold-outbound-sequencing-config",
+      "name": "Config (edit me)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        300
+      ],
+      "notes": "Fill these in once; every later node reads them as $('Config (edit me)').item.json.config.*\n\ntest_mode = true: log what the workflow would write, without writing it, for the first week.\napproval_mode = true: the approval node waits for a person; switch off per message type once it has earned it.\n\nAlso point the nodes at your own sources:\n- Prospect data (Apollo, Clay, LinkedIn Sales Navigator exports)\n- Company sites, news, job posts (web fetch)\n- CRM for suppression and logging\n- Sequencer (Instantly, Smartlead, Lemlist, Outreach)\n- Messaging playbook and angles"
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/replace-me",
+        "method": "GET",
+        "options": {},
+        "notes": "Pulls prospects matching the ICP from Apollo or Clay that are not in the CRM, not suppressed, and not contacted in 90 days. Daily batch size is capped per sending mailbox."
+      },
+      "id": "cold-outbound-sequencing-01",
+      "name": "HTTP Request: Build the batch",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        640,
+        300
+      ],
+      "notes": "Build the batch\n\nPulls prospects matching the ICP from Apollo or Clay that are not in the CRM, not suppressed, and not contacted in 90 days. Daily batch size is capped per sending mailbox."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the \"Research each account\" step of the Cold Outbound Automation workflow run by Agentmelt.\nTask: Reads the company site, recent news, job postings and tech stack (via enrichment and a web-fetch tool) and writes a five-line research note: what they do, what changed recently, a plausible trigger for your offer.\n\nRules:\n- Daily volume per mailbox is capped and warm-up is respected; the workflow never sends outside the sequencer's limits.\n- Emails that fail the specificity check are not sent; generic filler is worse than silence.\n- Any human reply stops the sequence immediately; unsubscribes are honoured across all lists.\n- Suppression lists (customers, open deals, competitors, opt-outs) are applied before research spends any credits.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON."
+        }
+      },
+      "id": "cold-outbound-sequencing-02",
+      "name": "AI Agent: Research each account",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        960,
+        300
+      ],
+      "notes": "Research each account\n\nReads the company site, recent news, job postings and tech stack (via enrichment and a web-fetch tool) and writes a five-line research note: what they do, what changed recently, a plausible trigger for your offer."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "cold-outbound-sequencing-02-llm",
+      "name": "Claude (Anthropic Chat Model)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1280,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"summary\": { \"type\": \"string\" },\n    \"draft\": { \"type\": \"string\", \"description\": \"The message or document text this step produced, ready to send or review\" },\n    \"subject\": { \"type\": \"string\" },\n    \"confidence\": { \"type\": \"number\" },\n    \"needs_human\": { \"type\": \"boolean\" },\n    \"reasons\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } }\n  },\n  \"required\": [\"summary\", \"confidence\", \"needs_human\"]\n}"
+      },
+      "id": "cold-outbound-sequencing-02-parser",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        1480,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "cold-outbound-sequencing-02-gate",
+      "name": "Needs a person?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1280,
+        300
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "cold-outbound-sequencing-needs-a-person-research-each-account",
+      "name": "Needs a person: Research each account",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        80
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the \"Write the first line and email\" step of the Cold Outbound Automation workflow run by Agentmelt.\nTask: From the research note and your messaging playbook, writes the opening line and a sub-80-word email for the chosen angle. Structured output enforces length, no adjectives about your product, and one clear ask.\n\nRules:\n- Daily volume per mailbox is capped and warm-up is respected; the workflow never sends outside the sequencer's limits.\n- Emails that fail the specificity check are not sent; generic filler is worse than silence.\n- Any human reply stops the sequence immediately; unsubscribes are honoured across all lists.\n- Suppression lists (customers, open deals, competitors, opt-outs) are applied before research spends any credits.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON."
+        }
+      },
+      "id": "cold-outbound-sequencing-03",
+      "name": "AI Agent: Write the first line and email",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        1600,
+        300
+      ],
+      "notes": "Write the first line and email\n\nFrom the research note and your messaging playbook, writes the opening line and a sub-80-word email for the chosen angle. Structured output enforces length, no adjectives about your product, and one clear ask."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "cold-outbound-sequencing-03-llm",
+      "name": "Claude (Anthropic Chat Model) 2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1920,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"summary\": { \"type\": \"string\" },\n    \"draft\": { \"type\": \"string\", \"description\": \"The message or document text this step produced, ready to send or review\" },\n    \"subject\": { \"type\": \"string\" },\n    \"confidence\": { \"type\": \"number\" },\n    \"needs_human\": { \"type\": \"boolean\" },\n    \"reasons\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } }\n  },\n  \"required\": [\"summary\", \"confidence\", \"needs_human\"]\n}"
+      },
+      "id": "cold-outbound-sequencing-03-parser",
+      "name": "Structured Output Parser 2",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        2120,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "nh",
+              "leftValue": "={{ $json.output ? $json.output.needs_human : $json.needs_human }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "cold-outbound-sequencing-03-gate",
+      "name": "Needs a person? 2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1920,
+        300
+      ],
+      "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
+    },
+    {
+      "parameters": {},
+      "id": "cold-outbound-sequencing-needs-a-person-write-the-first-line-and-email",
+      "name": "Needs a person: Write the first line and email",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        80
+      ],
+      "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.confidence }}",
+              "rightValue": 0.8,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "cold-outbound-sequencing-04",
+      "name": "IF: Quality gate",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2240,
+        300
+      ],
+      "notes": "Quality gate\n\nEmails are checked for specificity (must reference the research note), banned phrases, and length. Failures are rewritten once, then dropped from the batch rather than sent generic."
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/replace-me",
+        "method": "GET",
+        "options": {},
+        "notes": "Pushes the prospect and the personalised steps into Instantly, Smartlead, Lemlist or Outreach, which handle sending, warm-up and inbox rotation."
+      },
+      "id": "cold-outbound-sequencing-05",
+      "name": "HTTP Request: Load into the sequencer",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2560,
+        300
+      ],
+      "notes": "Load into the sequencer\n\nPushes the prospect and the personalised steps into Instantly, Smartlead, Lemlist or Outreach, which handle sending, warm-up and inbox rotation."
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cold-outbound-sequencing",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "cold-outbound-sequencing-06",
+      "name": "Webhook: Detect replies and classify",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        860
+      ],
+      "notes": "Detect replies and classify\n\nEvery reply is classified: interested, question, not now, wrong person (with a referral), unsubscribe, out of office. Sequences are stopped on any human reply.",
+      "webhookId": "cold-outbound-sequencing-webhook"
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "post",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Config (edit me)').item.json.config.approver }}"
+        },
+        "text": "={{ $json.output?.summary || $json.summary || JSON.stringify($json) }}",
+        "otherOptions": {}
+      },
+      "id": "cold-outbound-sequencing-07",
+      "name": "Slack: Hand to a rep",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        320,
+        860
+      ],
+      "notes": "Hand to a rep\n\nInterested and question replies go to the rep with the thread, the research note and a suggested response; 'not now' is scheduled for a follow-up; referrals create a new prospect."
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "cold-outbound-sequencing-08",
+      "name": "Schedule Trigger: Report by angle and segment",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        1420
+      ],
+      "notes": "Report by angle and segment\n\nWeekly: sent, replies, positive replies, meetings by segment, angle and mailbox; deliverability metrics from the sequencer; the losing angle is retired."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Report by angle and segment\n// Weekly: sent, replies, positive replies, meetings by segment, angle and mailbox; deliverability metrics from the sequencer; the losing angle is retired.\n// Build this branch here: read what the main chain wrote, then report or act.\nreturn $input.all();"
+      },
+      "id": "cold-outbound-sequencing-08-branch",
+      "name": "Code: Report by angle and segment",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        1420
+      ],
+      "notes": "Weekly: sent, replies, positive replies, meetings by segment, angle and mailbox; deliverability metrics from the sequencer; the losing angle is retired."
+    }
+  ],
+  "connections": {
+    "Schedule Trigger (daily)": {
+      "main": [
+        [
+          {
+            "node": "Config (edit me)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config (edit me)": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Build the batch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Build the batch": {
+      "main": [
+        [
+          {
+            "node": "AI Agent: Research each account",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent: Research each account",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent: Research each account",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent: Research each account": {
+      "main": [
+        [
+          {
+            "node": "Needs a person?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person?": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Research each account",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent: Write the first line and email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (Anthropic Chat Model) 2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent: Write the first line and email",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser 2": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent: Write the first line and email",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent: Write the first line and email": {
+      "main": [
+        [
+          {
+            "node": "Needs a person? 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs a person? 2": {
+      "main": [
+        [
+          {
+            "node": "Needs a person: Write the first line and email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IF: Quality gate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Quality gate": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Load into the sequencer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook: Detect replies and classify": {
+      "main": [
+        [
+          {
+            "node": "Slack: Hand to a rep",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger: Report by angle and segment": {
+      "main": [
+        [
+          {
+            "node": "Code: Report by angle and segment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "source": "https://agentmelt.com/workflows/cold-outbound-sequencing/"
+  }
+}
