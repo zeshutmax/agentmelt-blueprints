@@ -1,0 +1,611 @@
+{
+  "name": "Intake new client enquiries from Gmail with Claude into Clio and DocuSign",
+  "flow": [
+    {
+      "id": 1,
+      "module": "google-email:TriggerNewEmail",
+      "version": 2,
+      "parameters": {
+        "searchType": "simple",
+        "criteria": "UNSEEN",
+        "markSeen": false,
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Gmail: Receive the enquiry"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "config_your_name",
+            "value": "Your name — signs every outgoing message"
+          },
+          {
+            "name": "config_your_email",
+            "value": "you@example.com"
+          },
+          {
+            "name": "config_your_company",
+            "value": "Your company or brokerage"
+          },
+          {
+            "name": "config_timezone",
+            "value": "Europe/London"
+          },
+          {
+            "name": "config_quiet_hours_start",
+            "value": "21"
+          },
+          {
+            "name": "config_quiet_hours_end",
+            "value": "8"
+          },
+          {
+            "name": "config_approval_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_approver",
+            "value": "#approvals — a Slack channel, or an email address"
+          },
+          {
+            "name": "config_test_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_schedule",
+            "value": "poll the inbox every 15 minutes"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "model": "claude-sonnet-5",
+        "system": "You are the \"Classify the matter\" step of the Client Intake Automation Workflow workflow run by Agentmelt.\nTask: Matter type from the firm's own taxonomy (employment, commercial, family, conveyancing…), urgency, and whether it is within the firm's practice at all.\n\nRules:\n- Nothing is sent to an enquirer except the acknowledgement until a person approves; no advice or fee is ever quoted automatically.\n- Conflict results are shown with their evidence; a hit blocks the engagement letter until a person clears it.\n- Enquiry content is processed through an API with no data retention and stored only in the firm's own systems.\n- Out-of-scope or conflicted matters get a courteous decline drafted for approval, never an automatic one.\n- Every intake keeps an audit line: received, classified, checked, approved by whom, when.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Classify the matter.\n\nItem (map the fields your source provides here):\n{{1.text}}{{1.body}}{{1.message}}{{1.subject}}{{1.email}}{{1.name}}{{1.data}}"
+              }
+            ]
+          }
+        ],
+        "max_tokens": "2000",
+        "temperature": "0.2",
+        "metadata": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "Claude: Classify the matter"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{3.textResponse}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Parse Claude's JSON: Classify the matter"
+        }
+      }
+    },
+    {
+      "id": 20,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": null,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "Gate: Classify the matter"
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 19,
+              "module": "builtin:ThrowWarning",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "message": "Parked for a person — Classify the matter: {{4.summary}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 0,
+                  "name": "Needs a person: Classify the matter"
+                }
+              },
+              "filter": {
+                "name": "Needs a person?",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{4.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:equal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 5,
+              "module": "anthropic-claude:createAMessage",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "model": "claude-sonnet-5",
+                "system": "You are the \"Extract the conflict-check facts\" step of the Client Intake Automation Workflow workflow run by Agentmelt.\nTask: Names of parties and related entities, addresses, dates, the other side's counsel if named — structured, with the source sentence for each.\n\nRules:\n- Nothing is sent to an enquirer except the acknowledgement until a person approves; no advice or fee is ever quoted automatically.\n- Conflict results are shown with their evidence; a hit blocks the engagement letter until a person clears it.\n- Enquiry content is processed through an API with no data retention and stored only in the firm's own systems.\n- Out-of-scope or conflicted matters get a courteous decline drafted for approval, never an automatic one.\n- Every intake keeps an audit line: received, classified, checked, approved by whom, when.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+                "messages": [
+                  {
+                    "role": "user",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Extract the conflict-check facts.\n\nItem (map the fields your source provides here):\n{{4.summary}}\n\n{{4.text}}{{4.body}}{{4.message}}{{4.subject}}{{4.email}}{{4.name}}{{4.data}}"
+                      }
+                    ]
+                  }
+                ],
+                "max_tokens": "2000",
+                "temperature": "0.2",
+                "metadata": {}
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 150,
+                  "name": "Claude: Extract the conflict-check facts"
+                }
+              },
+              "filter": {
+                "name": "Continue",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{4.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:notequal"
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "id": 6,
+              "module": "json:ParseJSON",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "json": "{{5.textResponse}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 150,
+                  "name": "Parse Claude's JSON: Extract the conflict-check facts"
+                }
+              }
+            },
+            {
+              "id": 18,
+              "module": "builtin:BasicRouter",
+              "version": 1,
+              "parameters": null,
+              "mapper": null,
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 150,
+                  "name": "Gate: Extract the conflict-check facts"
+                }
+              },
+              "routes": [
+                {
+                  "flow": [
+                    {
+                      "id": 17,
+                      "module": "builtin:ThrowWarning",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "message": "Parked for a person — Extract the conflict-check facts: {{6.summary}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2400,
+                          "y": 150,
+                          "name": "Needs a person: Extract the conflict-check facts"
+                        }
+                      },
+                      "filter": {
+                        "name": "Needs a person?",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{6.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:equal"
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "flow": [
+                    {
+                      "id": 7,
+                      "module": "util:SetVariables",
+                      "version": 1,
+                      "parameters": null,
+                      "mapper": {
+                        "scope": "roundtrip",
+                        "variables": [
+                          {
+                            "name": "result",
+                            "value": ""
+                          }
+                        ]
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2400,
+                          "y": 300,
+                          "name": "Run the conflict check (port the rule here)"
+                        }
+                      },
+                      "filter": {
+                        "name": "Continue",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{6.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:notequal"
+                            }
+                          ]
+                        ]
+                      }
+                    },
+                    {
+                      "id": 8,
+                      "module": "google-email:ActionSendEmail",
+                      "version": 2,
+                      "parameters": {},
+                      "mapper": {
+                        "to": [
+                          "{{6.email}}"
+                        ],
+                        "subject": "{{6.subject}}",
+                        "html": "{{6.draft}}",
+                        "attachments": []
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2700,
+                          "y": 300,
+                          "name": "Gmail: Acknowledge"
+                        }
+                      }
+                    },
+                    {
+                      "id": 9,
+                      "module": "anthropic-claude:createAMessage",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "model": "claude-sonnet-5",
+                        "system": "You are the \"Draft the next document\" step of the Client Intake Automation Workflow workflow run by Agentmelt.\nTask: Engagement letter from the firm's template for that matter type with fees from the schedule, or a decline where the matter is out of scope or conflicted — variables highlighted.\n\nRules:\n- Nothing is sent to an enquirer except the acknowledgement until a person approves; no advice or fee is ever quoted automatically.\n- Conflict results are shown with their evidence; a hit blocks the engagement letter until a person clears it.\n- Enquiry content is processed through an API with no data retention and stored only in the firm's own systems.\n- Out-of-scope or conflicted matters get a courteous decline drafted for approval, never an automatic one.\n- Every intake keeps an audit line: received, classified, checked, approved by whom, when.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+                        "messages": [
+                          {
+                            "role": "user",
+                            "content": [
+                              {
+                                "type": "text",
+                                "text": "Draft the next document.\n\nItem (map the fields your source provides here):\n{{6.summary}}\n\n{{8.text}}{{8.body}}{{8.message}}{{8.subject}}{{8.email}}{{8.name}}{{8.data}}"
+                              }
+                            ]
+                          }
+                        ],
+                        "max_tokens": "2000",
+                        "temperature": "0.2",
+                        "metadata": {}
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3000,
+                          "y": 300,
+                          "name": "Claude: Draft the next document"
+                        }
+                      }
+                    },
+                    {
+                      "id": 10,
+                      "module": "json:ParseJSON",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "json": "{{9.textResponse}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3300,
+                          "y": 300,
+                          "name": "Parse Claude's JSON: Draft the next document"
+                        }
+                      }
+                    },
+                    {
+                      "id": 16,
+                      "module": "builtin:BasicRouter",
+                      "version": 1,
+                      "parameters": null,
+                      "mapper": null,
+                      "metadata": {
+                        "designer": {
+                          "x": 3600,
+                          "y": 300,
+                          "name": "Gate: Draft the next document"
+                        }
+                      },
+                      "routes": [
+                        {
+                          "flow": [
+                            {
+                              "id": 15,
+                              "module": "builtin:ThrowWarning",
+                              "version": 1,
+                              "parameters": {},
+                              "mapper": {
+                                "message": "Parked for a person — Draft the next document: {{10.summary}}"
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 3900,
+                                  "y": 300,
+                                  "name": "Needs a person: Draft the next document"
+                                }
+                              },
+                              "filter": {
+                                "name": "Needs a person?",
+                                "conditions": [
+                                  [
+                                    {
+                                      "a": "{{10.needs_human}}",
+                                      "b": "true",
+                                      "o": "boolean:equal"
+                                    }
+                                  ]
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "flow": [
+                            {
+                              "id": 11,
+                              "module": "slack:CreateMessage",
+                              "version": 4,
+                              "parameters": {},
+                              "mapper": {
+                                "channelType": "public",
+                                "channel": "{{2.config_approver}}",
+                                "text": "Approve? {{10.summary}}\n\nReply in the thread with APPROVE or REJECT. With config_approval_mode = true nothing is written until the item is re-run with approved = true.",
+                                "parseText": false,
+                                "mrkdwn": true
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 3900,
+                                  "y": 450,
+                                  "name": "Slack approval: Approve"
+                                }
+                              },
+                              "filter": {
+                                "name": "Continue",
+                                "conditions": [
+                                  [
+                                    {
+                                      "a": "{{10.needs_human}}",
+                                      "b": "true",
+                                      "o": "boolean:notequal"
+                                    }
+                                  ]
+                                ]
+                              }
+                            },
+                            {
+                              "id": 14,
+                              "module": "builtin:BasicRouter",
+                              "version": 1,
+                              "parameters": null,
+                              "mapper": null,
+                              "metadata": {
+                                "designer": {
+                                  "x": 4200,
+                                  "y": 450,
+                                  "name": "Approval gate: Approve"
+                                }
+                              },
+                              "routes": [
+                                {
+                                  "flow": [
+                                    {
+                                      "id": 13,
+                                      "module": "builtin:ThrowWarning",
+                                      "version": 1,
+                                      "parameters": {},
+                                      "mapper": {
+                                        "message": "Approval requested. Re-run the item with approved = true (or set config_approval_mode = false) to write it back."
+                                      },
+                                      "metadata": {
+                                        "designer": {
+                                          "x": 4500,
+                                          "y": 450,
+                                          "name": "Waiting for approval: Approve"
+                                        }
+                                      },
+                                      "filter": {
+                                        "name": "Approval mode on",
+                                        "conditions": [
+                                          [
+                                            {
+                                              "a": "{{2.config_approval_mode}}",
+                                              "b": "true",
+                                              "o": "text:equal"
+                                            }
+                                          ]
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                },
+                                {
+                                  "flow": [
+                                    {
+                                      "id": 12,
+                                      "module": "http:MakeRequest",
+                                      "version": 4,
+                                      "parameters": {
+                                        "authenticationType": "apiKey"
+                                      },
+                                      "mapper": {
+                                        "url": "https://app.clio.com/api/v4/matters.json",
+                                        "method": "post",
+                                        "headers": [],
+                                        "queryParameters": [],
+                                        "parseResponse": true,
+                                        "stopOnHttpError": true,
+                                        "timeout": "",
+                                        "allowRedirects": true,
+                                        "shareCookies": false,
+                                        "requestCompressedContent": true,
+                                        "contentType": "json",
+                                        "inputMethod": "jsonString",
+                                        "jsonStringBodyContent": "{\n  \"data\": {\n    \"description\": \"{{ $json.output?.matter_description }}\",\n    \"client\": {\n      \"id\": \"{{ $json.client_id }}\"\n    },\n    \"practice_area\": {\n      \"id\": \"{{ $json.practice_area_id }}\"\n    }\n  }\n}"
+                                      },
+                                      "metadata": {
+                                        "designer": {
+                                          "x": 4500,
+                                          "y": 600,
+                                          "name": "Clio API: Open the matter"
+                                        }
+                                      },
+                                      "filter": {
+                                        "name": "Approved or approval mode off",
+                                        "conditions": [
+                                          [
+                                            {
+                                              "a": "{{2.config_approval_mode}}",
+                                              "b": "false",
+                                              "o": "text:equal"
+                                            }
+                                          ],
+                                          [
+                                            {
+                                              "a": "{{1.approved}}",
+                                              "b": "true",
+                                              "o": "boolean:equal"
+                                            }
+                                          ]
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "notes": [
+      {
+        "moduleIds": [
+          2
+        ],
+        "content": "## Intake new client enquiries from Gmail with Claude into Clio and DocuSign\n\nLaw firms and professional practices that reply to enquiries a day late and re-key them into the practice system.\n\n### How it works\nTrigger: An email to the intake address, a website form submission, or a phone note typed into the shared inbox starts intake for that enquiry.\n1. Receive the enquiry\n2. Classify the matter\n3. Extract the conflict-check facts\n4. Run the conflict check\n5. Acknowledge\n6. Draft the next document\n7. Approve\n8. Open the matter\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Clio / PracticePanther, Gmail / Outlook, DocuSign / PandaDoc.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nDefine the practice areas and the conflict-check questions in the Config node; swap Clio for PracticePanther.\nGuardrail to keep: Nothing is sent to an enquirer except the acknowledgement until a person approves; no advice or fee is ever quoted automatically.\n\nFull blueprint: https://agentmelt.com/workflows/client-intake-automation/",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#F5D451"
+        }
+      }
+    ],
+    "zone": "eu1.make.com"
+  }
+}

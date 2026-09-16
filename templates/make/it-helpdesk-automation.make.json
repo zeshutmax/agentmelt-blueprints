@@ -1,0 +1,432 @@
+{
+  "name": "Resolve IT requests from Slack with Claude, Okta and Jira Service Management",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Webhook: Receive the request"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "config_your_name",
+            "value": "Your name — signs every outgoing message"
+          },
+          {
+            "name": "config_your_email",
+            "value": "you@example.com"
+          },
+          {
+            "name": "config_your_company",
+            "value": "Your company or brokerage"
+          },
+          {
+            "name": "config_timezone",
+            "value": "Europe/London"
+          },
+          {
+            "name": "config_quiet_hours_start",
+            "value": "21"
+          },
+          {
+            "name": "config_quiet_hours_end",
+            "value": "8"
+          },
+          {
+            "name": "config_approval_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_approver",
+            "value": "#approvals — a Slack channel, or an email address"
+          },
+          {
+            "name": "config_test_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_schedule",
+            "value": "instant (webhook)"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "model": "claude-sonnet-5",
+        "system": "You are the \"Classify the request\" step of the IT Helpdesk Automation Workflow workflow run by Agentmelt.\nTask: Password/MFA, access request, software/licence, hardware, how-to, outage report, other — with urgency. Outage reports skip to incident handling.\n\nRules:\n- Identity is taken from the chat platform's SSO, never from the message; sensitive actions require a fresh MFA step.\n- Access grants always require manager (or app owner) approval recorded in the ticket; privileged groups are excluded from self-service.\n- Every automated action is logged with requester, approver and timestamp for audit.\n- Outage reports and security concerns bypass the bot and go straight to the on-call engineer.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Classify the request.\n\nItem (map the fields your source provides here):\n{{1.text}}{{1.body}}{{1.message}}{{1.subject}}{{1.email}}{{1.name}}{{1.data}}"
+              }
+            ]
+          }
+        ],
+        "max_tokens": "2000",
+        "temperature": "0.2",
+        "metadata": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "Claude: Classify the request"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{3.textResponse}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Parse Claude's JSON: Classify the request"
+        }
+      }
+    },
+    {
+      "id": 15,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": null,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "Gate: Classify the request"
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 14,
+              "module": "builtin:ThrowWarning",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "message": "Parked for a person — Classify the request: {{4.summary}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 0,
+                  "name": "Needs a person: Classify the request"
+                }
+              },
+              "filter": {
+                "name": "Needs a person?",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{4.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:equal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 5,
+              "module": "anthropic-claude:createAMessage",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "model": "claude-sonnet-5",
+                "system": "You are the \"Answer from the knowledge base\" step of the IT Helpdesk Automation Workflow workflow run by Agentmelt.\nTask: How-to questions are answered from the IT knowledge base with the steps and a link; the agent asks a clarifying question when the request is ambiguous.\n\nRules:\n- Identity is taken from the chat platform's SSO, never from the message; sensitive actions require a fresh MFA step.\n- Access grants always require manager (or app owner) approval recorded in the ticket; privileged groups are excluded from self-service.\n- Every automated action is logged with requester, approver and timestamp for audit.\n- Outage reports and security concerns bypass the bot and go straight to the on-call engineer.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+                "messages": [
+                  {
+                    "role": "user",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Answer from the knowledge base.\n\nItem (map the fields your source provides here):\n{{4.summary}}\n\n{{4.text}}{{4.body}}{{4.message}}{{4.subject}}{{4.email}}{{4.name}}{{4.data}}"
+                      }
+                    ]
+                  }
+                ],
+                "max_tokens": "2000",
+                "temperature": "0.2",
+                "metadata": {}
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 150,
+                  "name": "Claude: Answer from the knowledge base"
+                }
+              },
+              "filter": {
+                "name": "Continue",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{4.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:notequal"
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "id": 6,
+              "module": "json:ParseJSON",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "json": "{{5.textResponse}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 150,
+                  "name": "Parse Claude's JSON: Answer from the knowledge base"
+                }
+              }
+            },
+            {
+              "id": 13,
+              "module": "builtin:BasicRouter",
+              "version": 1,
+              "parameters": null,
+              "mapper": null,
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 150,
+                  "name": "Gate: Answer from the knowledge base"
+                }
+              },
+              "routes": [
+                {
+                  "flow": [
+                    {
+                      "id": 12,
+                      "module": "builtin:ThrowWarning",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "message": "Parked for a person — Answer from the knowledge base: {{6.summary}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2400,
+                          "y": 150,
+                          "name": "Needs a person: Answer from the knowledge base"
+                        }
+                      },
+                      "filter": {
+                        "name": "Needs a person?",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{6.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:equal"
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "flow": [
+                    {
+                      "id": 7,
+                      "module": "util:SetVariables",
+                      "version": 1,
+                      "parameters": null,
+                      "mapper": {
+                        "scope": "roundtrip",
+                        "variables": [
+                          {
+                            "name": "category",
+                            "value": "{{6.category}}"
+                          }
+                        ]
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2400,
+                          "y": 300,
+                          "name": "Self-service actions with approval (add a router here)"
+                        }
+                      },
+                      "filter": {
+                        "name": "Continue",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{6.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:notequal"
+                            }
+                          ]
+                        ]
+                      }
+                    },
+                    {
+                      "id": 8,
+                      "module": "okta:getUser",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "userId": "{{6.email}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2700,
+                          "y": 300,
+                          "name": "Okta: Execute through the systems"
+                        }
+                      }
+                    },
+                    {
+                      "id": 9,
+                      "module": "jira:ActionCreateIssue",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "projectKey": "",
+                        "issueType": "Task",
+                        "summary": "{{6.subject}}",
+                        "description": "{{6.summary}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3000,
+                          "y": 300,
+                          "name": "Jira: Create or update the ticket"
+                        }
+                      }
+                    },
+                    {
+                      "id": 10,
+                      "module": "slack:CreateMessage",
+                      "version": 4,
+                      "parameters": {},
+                      "mapper": {
+                        "channelType": "public",
+                        "channel": "{{2.config_approver}}",
+                        "text": "{{6.summary}}",
+                        "parseText": false,
+                        "mrkdwn": true
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3300,
+                          "y": 300,
+                          "name": "Slack: Route unresolved requests"
+                        }
+                      }
+                    },
+                    {
+                      "id": 11,
+                      "module": "util:SetVariables",
+                      "version": 1,
+                      "parameters": null,
+                      "mapper": {
+                        "scope": "roundtrip",
+                        "variables": [
+                          {
+                            "name": "run_at",
+                            "value": "{{now}}"
+                          }
+                        ]
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3600,
+                          "y": 300,
+                          "name": "Improve the knowledge base (runs on the scenario schedule)"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "notes": [
+      {
+        "moduleIds": [
+          2
+        ],
+        "content": "## Resolve IT requests from Slack with Claude, Okta and Jira Service Management\n\nSmall IT teams that answer password resets and access requests all day.\n\n### How it works\nTrigger: Messages to the IT bot or #it-help channel, and new tickets in Jira Service Management, Freshservice or ServiceNow.\n1. Receive the request\n2. Classify the request\n3. Answer from the knowledge base\n4. Self-service actions with approval\n5. Execute through the systems\n6. Create or update the ticket\n7. Route unresolved requests\n8. Improve the knowledge base\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Okta / Entra ID / Google Workspace, Jamf / Intune, Jira Service Management / Freshservice.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nEdit the request types and the self-service rules in the Config node; add Jamf or Intune for device actions.\nGuardrail to keep: Identity is taken from the chat platform's SSO, never from the message; sensitive actions require a fresh MFA step.\n\nFull blueprint: https://agentmelt.com/workflows/it-helpdesk-automation/",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#F5D451"
+        }
+      }
+    ],
+    "zone": "eu1.make.com"
+  }
+}

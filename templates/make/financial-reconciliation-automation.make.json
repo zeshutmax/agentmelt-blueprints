@@ -1,0 +1,435 @@
+{
+  "name": "Reconcile Stripe payouts against NetSuite with Claude and flag exceptions in Slack",
+  "flow": [
+    {
+      "id": 1,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "config_your_name",
+            "value": "Your name — signs every outgoing message"
+          },
+          {
+            "name": "config_your_email",
+            "value": "you@example.com"
+          },
+          {
+            "name": "config_your_company",
+            "value": "Your company or brokerage"
+          },
+          {
+            "name": "config_timezone",
+            "value": "Europe/London"
+          },
+          {
+            "name": "config_quiet_hours_start",
+            "value": "21"
+          },
+          {
+            "name": "config_quiet_hours_end",
+            "value": "8"
+          },
+          {
+            "name": "config_approval_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_approver",
+            "value": "#approvals — a Slack channel, or an email address"
+          },
+          {
+            "name": "config_test_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_schedule",
+            "value": "scenario schedule: Schedule Trigger (daily, after bank feeds settle)"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "stripe:retrieveCustomer",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "customerId": "{{1.customer_id}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Stripe: Pull the three sides"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "result",
+            "value": ""
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "Match deterministically (port the rule here)"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "result",
+            "value": ""
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Classify the breaks (port the rule here)"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "model": "claude-sonnet-5",
+        "system": "You are the \"Explain the unknowns\" step of the Financial Reconciliation Workflow workflow run by Agentmelt.\nTask: For remaining breaks the agent reads the descriptions, amounts, dates and nearby transactions and writes the most likely explanation with the evidence — never posting anything.\n\nRules:\n- Nothing posts to the ledger without an accountant's approval; auto-matching only marks, it does not create entries.\n- The agent explains; it never proposes an amount that is not derivable from the data.\n- Every posted entry carries the match evidence and approver for audit.\n- Aged open items escalate automatically so nothing hides until close.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Explain the unknowns.\n\nItem (map the fields your source provides here):\n{{2.text}}{{2.body}}{{2.message}}{{2.subject}}{{2.email}}{{2.name}}{{2.data}}"
+              }
+            ]
+          }
+        ],
+        "max_tokens": "2000",
+        "temperature": "0.2",
+        "metadata": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "Claude: Explain the unknowns"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{5.textResponse}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 0,
+          "name": "Parse Claude's JSON: Explain the unknowns"
+        }
+      }
+    },
+    {
+      "id": 14,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": null,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 1800,
+          "y": 0,
+          "name": "Gate: Explain the unknowns"
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 13,
+              "module": "builtin:ThrowWarning",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "message": "Parked for a person — Explain the unknowns: {{6.summary}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 0,
+                  "name": "Needs a person: Explain the unknowns"
+                }
+              },
+              "filter": {
+                "name": "Needs a person?",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{6.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:equal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 7,
+              "module": "slack:CreateMessage",
+              "version": 4,
+              "parameters": {},
+              "mapper": {
+                "channelType": "public",
+                "channel": "{{1.config_approver}}",
+                "text": "Approve? {{6.summary}}\n\nReply in the thread with APPROVE or REJECT. With config_approval_mode = true nothing is written until the item is re-run with approved = true.",
+                "parseText": false,
+                "mrkdwn": true
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 150,
+                  "name": "Slack approval: Route for approval"
+                }
+              },
+              "filter": {
+                "name": "Continue",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{6.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:notequal"
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "id": 12,
+              "module": "builtin:BasicRouter",
+              "version": 1,
+              "parameters": null,
+              "mapper": null,
+              "metadata": {
+                "designer": {
+                  "x": 2400,
+                  "y": 150,
+                  "name": "Approval gate: Route for approval"
+                }
+              },
+              "routes": [
+                {
+                  "flow": [
+                    {
+                      "id": 11,
+                      "module": "builtin:ThrowWarning",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "message": "Approval requested. Re-run the item with approved = true (or set config_approval_mode = false) to write it back."
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2700,
+                          "y": 150,
+                          "name": "Waiting for approval: Route for approval"
+                        }
+                      },
+                      "filter": {
+                        "name": "Approval mode on",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{1.config_approval_mode}}",
+                              "b": "true",
+                              "o": "text:equal"
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "flow": [
+                    {
+                      "id": 8,
+                      "module": "http:MakeRequest",
+                      "version": 4,
+                      "parameters": {
+                        "authenticationType": "apiKey"
+                      },
+                      "mapper": {
+                        "url": "https://api.xero.com/api.xro/2.0/ManualJournals",
+                        "method": "put",
+                        "headers": [],
+                        "queryParameters": [],
+                        "parseResponse": true,
+                        "stopOnHttpError": true,
+                        "timeout": "",
+                        "allowRedirects": true,
+                        "shareCookies": false,
+                        "requestCompressedContent": true,
+                        "contentType": "json",
+                        "inputMethod": "jsonString",
+                        "jsonStringBodyContent": "{\n  \"Narration\": \"{{ $json.narration }}\",\n  \"JournalLines\": \"{{ $json.lines }}\"\n}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2700,
+                          "y": 300,
+                          "name": "Xero API: Post approved entries"
+                        }
+                      },
+                      "filter": {
+                        "name": "Approved or approval mode off",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{1.config_approval_mode}}",
+                              "b": "false",
+                              "o": "text:equal"
+                            }
+                          ],
+                          [
+                            {
+                              "a": "{{1.approved}}",
+                              "b": "true",
+                              "o": "boolean:equal"
+                            }
+                          ]
+                        ]
+                      }
+                    },
+                    {
+                      "id": 9,
+                      "module": "google-sheets:addRow",
+                      "version": 2,
+                      "parameters": {},
+                      "mapper": {
+                        "from": "drive",
+                        "mode": "select",
+                        "values": {
+                          "0": "{{6.summary}}"
+                        },
+                        "sheetId": "Sheet1",
+                        "spreadsheetId": "",
+                        "includesHeaders": true,
+                        "insertDataOption": "INSERT_ROWS",
+                        "valueInputOption": "USER_ENTERED",
+                        "insertUnformatted": false
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3000,
+                          "y": 300,
+                          "name": "Google Sheets: Maintain the reconciliation file"
+                        }
+                      }
+                    },
+                    {
+                      "id": 10,
+                      "module": "util:SetVariables",
+                      "version": 1,
+                      "parameters": null,
+                      "mapper": {
+                        "scope": "roundtrip",
+                        "variables": [
+                          {
+                            "name": "run_at",
+                            "value": "{{now}}"
+                          }
+                        ]
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3300,
+                          "y": 300,
+                          "name": "Close-readiness report (runs on the scenario schedule)"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "notes": [
+      {
+        "moduleIds": [
+          1
+        ],
+        "content": "## Reconcile Stripe payouts against NetSuite with Claude and flag exceptions in Slack\n\nFinance teams that match bank feeds, processor payouts and the ledger in spreadsheets every morning.\n\n### How it works\nTrigger: Daily run at 6am after bank and processor feeds update; on-demand run before close.\n1. Pull the three sides\n2. Match deterministically\n3. Classify the breaks\n4. Explain the unknowns\n5. Route for approval\n6. Post approved entries\n7. Maintain the reconciliation file\n8. Close-readiness report\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus NetSuite / Xero / QuickBooks, Stripe / Adyen + Plaid.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the matching tolerances and the exception owners in the Config node; swap NetSuite for Xero or QuickBooks.\nGuardrail to keep: Nothing posts to the ledger without an accountant's approval; auto-matching only marks, it does not create entries.\n\nFull blueprint: https://agentmelt.com/workflows/financial-reconciliation-automation/",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#F5D451"
+        }
+      }
+    ],
+    "zone": "eu1.make.com"
+  }
+}

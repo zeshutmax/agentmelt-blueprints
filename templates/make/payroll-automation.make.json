@@ -1,0 +1,354 @@
+{
+  "name": "Prepare payroll from Gusto time data with Claude and approve in Slack",
+  "flow": [
+    {
+      "id": 1,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "config_your_name",
+            "value": "Your name — signs every outgoing message"
+          },
+          {
+            "name": "config_your_email",
+            "value": "you@example.com"
+          },
+          {
+            "name": "config_your_company",
+            "value": "Your company or brokerage"
+          },
+          {
+            "name": "config_timezone",
+            "value": "Europe/London"
+          },
+          {
+            "name": "config_quiet_hours_start",
+            "value": "21"
+          },
+          {
+            "name": "config_quiet_hours_end",
+            "value": "8"
+          },
+          {
+            "name": "config_approval_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_approver",
+            "value": "#approvals — a Slack channel, or an email address"
+          },
+          {
+            "name": "config_test_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_schedule",
+            "value": "scenario schedule: Schedule Trigger (pay-period cut-off)"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "bamboohr:ListEmployees",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "limit": 200
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "BambooHR: Collect period inputs"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "result",
+            "value": ""
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "Normalise into one employee ledger (port the rule here)"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "confidence",
+            "value": "{{2.confidence}}"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Validate against policy (add a filter on the next module)"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "model": "claude-sonnet-5",
+        "system": "You are the \"Anomaly review\" step of the Payroll Automation Workflow workflow run by Agentmelt.\nTask: Compares each employee's line to their last six periods and explains outliers in one sentence with the evidence. It never changes a number — it annotates.\n\nRules:\n- The workflow never submits without an explicit human approval; the Wait node is the control.\n- The AI step annotates only; it has no write access to amounts.\n- Every submitted file is stored with a hash and the approver's identity for audit.\n- Provider totals are reconciled against the submitted ledger before payslips release.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Anomaly review.\n\nItem (map the fields your source provides here):\n{{2.text}}{{2.body}}{{2.message}}{{2.subject}}{{2.email}}{{2.name}}{{2.data}}"
+              }
+            ]
+          }
+        ],
+        "max_tokens": "2000",
+        "temperature": "0.2",
+        "metadata": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "Claude: Anomaly review"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{5.textResponse}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 0,
+          "name": "Parse Claude's JSON: Anomaly review"
+        }
+      }
+    },
+    {
+      "id": 12,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": null,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 1800,
+          "y": 0,
+          "name": "Gate: Anomaly review"
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 11,
+              "module": "builtin:ThrowWarning",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "message": "Parked for a person — Anomaly review: {{6.summary}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 0,
+                  "name": "Needs a person: Anomaly review"
+                }
+              },
+              "filter": {
+                "name": "Needs a person?",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{6.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:equal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 7,
+              "module": "slack:CreateMessage",
+              "version": 4,
+              "parameters": {},
+              "mapper": {
+                "channelType": "public",
+                "channel": "{{1.config_approver}}",
+                "text": "{{6.summary}}",
+                "parseText": false,
+                "mrkdwn": true
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 150,
+                  "name": "Slack: Send the exceptions report"
+                }
+              },
+              "filter": {
+                "name": "Continue",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{6.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:notequal"
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "id": 8,
+              "module": "util:FunctionSleep",
+              "version": 1,
+              "parameters": null,
+              "mapper": {
+                "duration": 300
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2400,
+                  "y": 150,
+                  "name": "Wait: Wait for approval"
+                }
+              }
+            },
+            {
+              "id": 9,
+              "module": "http:MakeRequest",
+              "version": 4,
+              "parameters": {
+                "authenticationType": "apiKey"
+              },
+              "mapper": {
+                "url": "https://api.gusto.com/v1/companies/{{ $json.company_id }}/payrolls/{{ $json.payroll_id }}",
+                "method": "put",
+                "headers": [],
+                "queryParameters": [],
+                "parseResponse": true,
+                "stopOnHttpError": true,
+                "timeout": "",
+                "allowRedirects": true,
+                "shareCookies": false,
+                "requestCompressedContent": true,
+                "contentType": "json",
+                "inputMethod": "jsonString",
+                "jsonStringBodyContent": "{\n  \"version\": \"{{ $json.version }}\",\n  \"employee_compensations\": \"{{ $json.compensations }}\"\n}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2700,
+                  "y": 150,
+                  "name": "Gusto API: Push the run to the provider"
+                }
+              }
+            },
+            {
+              "id": 10,
+              "module": "util:SetVariables",
+              "version": 1,
+              "parameters": null,
+              "mapper": {
+                "scope": "roundtrip",
+                "variables": [
+                  {
+                    "name": "diff",
+                    "value": ""
+                  }
+                ]
+              },
+              "metadata": {
+                "designer": {
+                  "x": 3000,
+                  "y": 150,
+                  "name": "Reconcile after the run (compare here)"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "notes": [
+      {
+        "moduleIds": [
+          1
+        ],
+        "content": "## Prepare payroll from Gusto time data with Claude and approve in Slack\n\nSmall HR and finance teams that run payroll checks by hand every period and still find errors after the fact.\n\n### How it works\nTrigger: Runs on the cut-off date each period, plus a preview run three days earlier so managers can fix missing approvals.\n1. Collect period inputs\n2. Normalise into one employee ledger\n3. Validate against policy\n4. Anomaly review\n5. Send the exceptions report\n6. Wait for approval\n7. Push the run to the provider\n8. Reconcile after the run\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Gusto / ADP / Rippling / Deel, Slack, Google Sheets.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the pay-period rules and the anomaly thresholds in the Config node; connect Gusto, ADP, Rippling or Deel.\nGuardrail to keep: The workflow never submits without an explicit human approval; the Wait node is the control.\n\nFull blueprint: https://agentmelt.com/workflows/payroll-automation/",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#F5D451"
+        }
+      }
+    ],
+    "zone": "eu1.make.com"
+  }
+}

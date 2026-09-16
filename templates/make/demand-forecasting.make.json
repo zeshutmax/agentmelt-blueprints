@@ -1,0 +1,356 @@
+{
+  "name": "Forecast weekly demand from sales data with Claude and publish to Google Sheets",
+  "flow": [
+    {
+      "id": 1,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "config_your_name",
+            "value": "Your name — signs every outgoing message"
+          },
+          {
+            "name": "config_your_email",
+            "value": "you@example.com"
+          },
+          {
+            "name": "config_your_company",
+            "value": "Your company or brokerage"
+          },
+          {
+            "name": "config_timezone",
+            "value": "Europe/London"
+          },
+          {
+            "name": "config_quiet_hours_start",
+            "value": "21"
+          },
+          {
+            "name": "config_quiet_hours_end",
+            "value": "8"
+          },
+          {
+            "name": "config_approval_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_approver",
+            "value": "#approvals — a Slack channel, or an email address"
+          },
+          {
+            "name": "config_test_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_schedule",
+            "value": "scenario schedule: Schedule Trigger (weekly, after the sales data closes)"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "postgres:Query",
+      "version": 2,
+      "parameters": {
+        "continueWhenNoRes": false,
+        "isToManageDataInSharedTransaction": true
+      },
+      "mapper": {
+        "query": "SELECT 1; -- replace with your query"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Postgres: Pull sales history"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "google-bigquery:writeQuery",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "projectId": "",
+        "query": "SELECT 1 -- replace with your query",
+        "useLegacySql": false
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "BigQuery: Pull the signals"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "result",
+            "value": ""
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Clean and align (port the rule here)"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "module": "http:MakeRequest",
+      "version": 4,
+      "parameters": {
+        "authenticationType": "apiKey"
+      },
+      "mapper": {
+        "url": "https://forecast.example.com/predict",
+        "method": "post",
+        "headers": [],
+        "queryParameters": [],
+        "parseResponse": true,
+        "stopOnHttpError": true,
+        "timeout": "",
+        "allowRedirects": true,
+        "shareCookies": false,
+        "requestCompressedContent": true,
+        "contentType": "json",
+        "inputMethod": "jsonString",
+        "jsonStringBodyContent": "{\n  \"series\": \"{{ $json.series }}\",\n  \"horizon_weeks\": 12\n}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "Forecast model endpoint: Run the forecasting model"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "result",
+            "value": ""
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 0,
+          "name": "Score last week's forecast (port the rule here)"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "module": "postgres:Query",
+      "version": 2,
+      "parameters": {
+        "continueWhenNoRes": false,
+        "isToManageDataInSharedTransaction": true
+      },
+      "mapper": {
+        "query": "SELECT 1; -- replace with your query"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1800,
+          "y": 0,
+          "name": "Postgres: Write forecasts to the planning system"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "model": "claude-sonnet-5",
+        "system": "You are the \"Explain the exceptions\" step of the AI Demand Forecasting Workflow workflow run by Agentmelt.\nTask: For SKUs where the forecast moved by more than a threshold or error was worst, the agent reads the feature changes (a new promotion, a price drop, a stockout) and writes a one-line explanation with the numbers. It never changes a forecast.\n\nRules:\n- The model forecasts; the agent explains. No language model touches a number that goes into replenishment.\n- Every run scores the previous run's accuracy so drift is visible within a week.\n- Planner overrides are captured and evaluated against the model, not silently overwritten.\n- Forecasts carry quantiles, and safety stock uses them — a point forecast alone hides the uncertainty that drives stockouts.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Explain the exceptions.\n\nItem (map the fields your source provides here):\n{{7.text}}{{7.body}}{{7.message}}{{7.subject}}{{7.email}}{{7.name}}{{7.data}}"
+              }
+            ]
+          }
+        ],
+        "max_tokens": "2000",
+        "temperature": "0.2",
+        "metadata": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 2100,
+          "y": 0,
+          "name": "Claude: Explain the exceptions"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{8.textResponse}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 2400,
+          "y": 0,
+          "name": "Parse Claude's JSON: Explain the exceptions"
+        }
+      }
+    },
+    {
+      "id": 12,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": null,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 2700,
+          "y": 0,
+          "name": "Gate: Explain the exceptions"
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 11,
+              "module": "builtin:ThrowWarning",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "message": "Parked for a person — Explain the exceptions: {{9.summary}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 3000,
+                  "y": 0,
+                  "name": "Needs a person: Explain the exceptions"
+                }
+              },
+              "filter": {
+                "name": "Needs a person?",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{9.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:equal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 10,
+              "module": "slack:CreateMessage",
+              "version": 4,
+              "parameters": {},
+              "mapper": {
+                "channelType": "public",
+                "channel": "{{1.config_approver}}",
+                "text": "{{9.summary}}",
+                "parseText": false,
+                "mrkdwn": true
+              },
+              "metadata": {
+                "designer": {
+                  "x": 3000,
+                  "y": 150,
+                  "name": "Slack: Publish the weekly review"
+                }
+              },
+              "filter": {
+                "name": "Continue",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{9.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:notequal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "notes": [
+      {
+        "moduleIds": [
+          1
+        ],
+        "content": "## Forecast weekly demand from sales data with Claude and publish to Google Sheets\n\nOperations and supply-chain planners who forecast in spreadsheets and want a repeatable weekly run with explanations.\n\n### How it works\nTrigger: Runs Sunday night after the ERP's weekly close.\n1. Pull sales history\n2. Pull the signals\n3. Clean and align\n4. Run the forecasting model\n5. Score last week's forecast\n6. Write forecasts to the planning system\n7. Explain the exceptions\n8. Publish the weekly review\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus LightGBM / Chronos / TimesFM / TimeGPT, BigQuery / Snowflake / Postgres, Google Sheets / planning tool.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nChange the horizon and aggregation level in the Config node; replace the statistical model step with your own endpoint if you already run one.\nGuardrail to keep: The model forecasts; the agent explains.\n\nFull blueprint: https://agentmelt.com/workflows/demand-forecasting/",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#F5D451"
+        }
+      }
+    ],
+    "zone": "eu1.make.com"
+  }
+}

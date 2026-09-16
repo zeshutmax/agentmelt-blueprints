@@ -1,0 +1,431 @@
+{
+  "name": "Send personalized candidate outreach from Greenhouse projects with Claude and Gmail",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Webhook: Receive the candidate"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "config_your_name",
+            "value": "Your name — signs every outgoing message"
+          },
+          {
+            "name": "config_your_email",
+            "value": "you@example.com"
+          },
+          {
+            "name": "config_your_company",
+            "value": "Your company or brokerage"
+          },
+          {
+            "name": "config_timezone",
+            "value": "Europe/London"
+          },
+          {
+            "name": "config_quiet_hours_start",
+            "value": "21"
+          },
+          {
+            "name": "config_quiet_hours_end",
+            "value": "8"
+          },
+          {
+            "name": "config_approval_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_approver",
+            "value": "#approvals — a Slack channel, or an email address"
+          },
+          {
+            "name": "config_test_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_schedule",
+            "value": "instant (webhook)"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "clearbit:findPersonByEmail",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "email": "{{1.email}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "Clearbit: Research"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "model": "claude-sonnet-5",
+        "system": "You are the \"Pick the hook\" step of the Candidate Outreach Automation Workflow workflow run by Agentmelt.\nTask: One specific, recent, professional thing the candidate did that relates to the role. Not their title, not their employer's tagline.\n\nRules:\n- Only public, professional information is used; nothing personal, nothing inferred about protected characteristics.\n- Sending limits: 40 new messages a day per mailbox, spaced, so the recruiter's domain reputation is protected.\n- Every message is sent from a person's address and signed by that person; replies go to them.\n- Opt-out language in every message; an opt-out suppresses the candidate across all roles.\n- Follow-ups stop on any reply, including 'not now', which is logged as a future-contact date.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Pick the hook.\n\nItem (map the fields your source provides here):\n{{3.text}}{{3.body}}{{3.message}}{{3.subject}}{{3.email}}{{3.name}}{{3.data}}"
+              }
+            ]
+          }
+        ],
+        "max_tokens": "2000",
+        "temperature": "0.2",
+        "metadata": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Claude: Pick the hook"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{4.textResponse}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "Parse Claude's JSON: Pick the hook"
+        }
+      }
+    },
+    {
+      "id": 15,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": null,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 0,
+          "name": "Gate: Pick the hook"
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 14,
+              "module": "builtin:ThrowWarning",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "message": "Parked for a person — Pick the hook: {{5.summary}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 0,
+                  "name": "Needs a person: Pick the hook"
+                }
+              },
+              "filter": {
+                "name": "Needs a person?",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{5.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:equal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 6,
+              "module": "anthropic-claude:createAMessage",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "model": "claude-sonnet-5",
+                "system": "You are the \"Draft the message\" step of the Candidate Outreach Automation Workflow workflow run by Agentmelt.\nTask: Under 90 words: the hook, why the role is relevant to it, one question. Plain text, no tracking pixels, no 'I hope this finds you well'.\n\nRules:\n- Only public, professional information is used; nothing personal, nothing inferred about protected characteristics.\n- Sending limits: 40 new messages a day per mailbox, spaced, so the recruiter's domain reputation is protected.\n- Every message is sent from a person's address and signed by that person; replies go to them.\n- Opt-out language in every message; an opt-out suppresses the candidate across all roles.\n- Follow-ups stop on any reply, including 'not now', which is logged as a future-contact date.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+                "messages": [
+                  {
+                    "role": "user",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Draft the message.\n\nItem (map the fields your source provides here):\n{{5.summary}}\n\n{{5.text}}{{5.body}}{{5.message}}{{5.subject}}{{5.email}}{{5.name}}{{5.data}}"
+                      }
+                    ]
+                  }
+                ],
+                "max_tokens": "2000",
+                "temperature": "0.2",
+                "metadata": {}
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 150,
+                  "name": "Claude: Draft the message"
+                }
+              },
+              "filter": {
+                "name": "Continue",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{5.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:notequal"
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "id": 7,
+              "module": "json:ParseJSON",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "json": "{{6.textResponse}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 150,
+                  "name": "Parse Claude's JSON: Draft the message"
+                }
+              }
+            },
+            {
+              "id": 13,
+              "module": "builtin:BasicRouter",
+              "version": 1,
+              "parameters": null,
+              "mapper": null,
+              "metadata": {
+                "designer": {
+                  "x": 2400,
+                  "y": 150,
+                  "name": "Gate: Draft the message"
+                }
+              },
+              "routes": [
+                {
+                  "flow": [
+                    {
+                      "id": 12,
+                      "module": "builtin:ThrowWarning",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "message": "Parked for a person — Draft the message: {{7.summary}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2700,
+                          "y": 150,
+                          "name": "Needs a person: Draft the message"
+                        }
+                      },
+                      "filter": {
+                        "name": "Needs a person?",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{7.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:equal"
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "flow": [
+                    {
+                      "id": 8,
+                      "module": "google-email:ActionSendEmail",
+                      "version": 2,
+                      "parameters": {},
+                      "mapper": {
+                        "to": [
+                          "{{7.email}}"
+                        ],
+                        "subject": "{{7.subject}}",
+                        "html": "{{7.draft}}",
+                        "attachments": []
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2700,
+                          "y": 300,
+                          "name": "Gmail: Send from the recruiter"
+                        }
+                      },
+                      "filter": {
+                        "name": "Continue",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{7.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:notequal"
+                            }
+                          ]
+                        ]
+                      }
+                    },
+                    {
+                      "id": 9,
+                      "module": "util:FunctionSleep",
+                      "version": 1,
+                      "parameters": null,
+                      "mapper": {
+                        "duration": 300
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3000,
+                          "y": 300,
+                          "name": "Wait: Follow up twice"
+                        }
+                      }
+                    },
+                    {
+                      "id": 10,
+                      "module": "google-email:TriggerNewEmail",
+                      "version": 2,
+                      "parameters": {
+                        "searchType": "simple",
+                        "criteria": "UNSEEN",
+                        "markSeen": false,
+                        "maxResults": 1
+                      },
+                      "mapper": {},
+                      "metadata": {
+                        "designer": {
+                          "x": 3300,
+                          "y": 300,
+                          "name": "Gmail: Stop on reply"
+                        }
+                      }
+                    },
+                    {
+                      "id": 11,
+                      "module": "google-sheets:addRow",
+                      "version": 2,
+                      "parameters": {},
+                      "mapper": {
+                        "from": "drive",
+                        "mode": "select",
+                        "values": {
+                          "0": "{{7.summary}}"
+                        },
+                        "sheetId": "Sheet1",
+                        "spreadsheetId": "",
+                        "includesHeaders": true,
+                        "insertDataOption": "INSERT_ROWS",
+                        "valueInputOption": "USER_ENTERED",
+                        "insertUnformatted": false
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3600,
+                          "y": 300,
+                          "name": "Google Sheets: Measure"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "notes": [
+      {
+        "moduleIds": [
+          2
+        ],
+        "content": "## Send personalized candidate outreach from Greenhouse projects with Claude and Gmail\n\nRecruiters who source in the ATS and write every first message by hand.\n\n### How it works\nTrigger: A candidate added to a sourcing project in the ATS or a row added to the outreach sheet starts a sequence for that person.\n1. Receive the candidate\n2. Research\n3. Pick the hook\n4. Draft the message\n5. Send from the recruiter\n6. Follow up twice\n7. Stop on reply\n8. Measure\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Greenhouse / Lever / Ashby, Gmail / Outlook, Google Sheets.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the outreach voice and the follow-up cadence in the Config node; swap Gmail for Outlook and Greenhouse for Lever or Ashby.\nGuardrail to keep: Only public, professional information is used; nothing personal, nothing inferred about protected characteristics.\n\nFull blueprint: https://agentmelt.com/workflows/candidate-outreach-automation/",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#F5D451"
+        }
+      }
+    ],
+    "zone": "eu1.make.com"
+  }
+}

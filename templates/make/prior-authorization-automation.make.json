@@ -1,0 +1,466 @@
+{
+  "name": "Prepare prior authorization requests from EHR orders with Claude",
+  "flow": [
+    {
+      "id": 1,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "config_your_name",
+            "value": "Your name — signs every outgoing message"
+          },
+          {
+            "name": "config_your_email",
+            "value": "you@example.com"
+          },
+          {
+            "name": "config_your_company",
+            "value": "Your company or brokerage"
+          },
+          {
+            "name": "config_timezone",
+            "value": "Europe/London"
+          },
+          {
+            "name": "config_quiet_hours_start",
+            "value": "21"
+          },
+          {
+            "name": "config_quiet_hours_end",
+            "value": "8"
+          },
+          {
+            "name": "config_approval_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_approver",
+            "value": "#approvals — a Slack channel, or an email address"
+          },
+          {
+            "name": "config_test_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_schedule",
+            "value": "scenario schedule: EHR order event / daily order scan"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "result",
+            "value": ""
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Detect auth requirement (port the rule here)"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "http:MakeRequest",
+      "version": 4,
+      "parameters": {
+        "authenticationType": "apiKey"
+      },
+      "mapper": {
+        "url": "https://fhir.example-ehr.com/R4/DocumentReference?patient={{ $json.patient_id }}&category=clinical-note",
+        "method": "get",
+        "headers": [],
+        "queryParameters": [],
+        "parseResponse": true,
+        "stopOnHttpError": true,
+        "timeout": "",
+        "allowRedirects": true,
+        "shareCookies": false,
+        "requestCompressedContent": true
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "EHR (FHIR R4) API: Gather documentation"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "result",
+            "value": ""
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Check completeness against criteria (port the rule here)"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "model": "claude-sonnet-5",
+        "system": "You are the \"Draft the medical-necessity summary\" step of the Prior Authorization Workflow workflow run by Agentmelt.\nTask: A structured summary mapping the documentation to each criterion in the payer's own language, with citations to the source notes; the clinician reviews and signs.\n\nRules:\n- Every submission and appeal is reviewed and signed by a clinician or authorised staff member; nothing is sent automatically.\n- PHI stays within HIPAA-covered infrastructure (self-hosted n8n or a covered cloud, model API under a BAA); the model sees the minimum necessary.\n- The summary maps documentation to criteria; it never asserts clinical facts that are not in the record.\n- Payer rules are versioned and updated from bulletins; a rule change re-checks open requests.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Draft the medical-necessity summary.\n\nItem (map the fields your source provides here):\n{{3.text}}{{3.body}}{{3.message}}{{3.subject}}{{3.email}}{{3.name}}{{3.data}}"
+              }
+            ]
+          }
+        ],
+        "max_tokens": "2000",
+        "temperature": "0.2",
+        "metadata": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "Claude: Draft the medical-necessity summary"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{5.textResponse}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 0,
+          "name": "Parse Claude's JSON: Draft the medical-necessity summary"
+        }
+      }
+    },
+    {
+      "id": 15,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": null,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 1800,
+          "y": 0,
+          "name": "Gate: Draft the medical-necessity summary"
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 14,
+              "module": "builtin:ThrowWarning",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "message": "Parked for a person — Draft the medical-necessity summary: {{6.summary}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 0,
+                  "name": "Needs a person: Draft the medical-necessity summary"
+                }
+              },
+              "filter": {
+                "name": "Needs a person?",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{6.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:equal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 7,
+              "module": "http:MakeRequest",
+              "version": 4,
+              "parameters": {
+                "authenticationType": "apiKey"
+              },
+              "mapper": {
+                "url": "https://api.availity.com/availity/v1/service-reviews",
+                "method": "post",
+                "headers": [],
+                "queryParameters": [],
+                "parseResponse": true,
+                "stopOnHttpError": true,
+                "timeout": "",
+                "allowRedirects": true,
+                "shareCookies": false,
+                "requestCompressedContent": true,
+                "contentType": "json",
+                "inputMethod": "jsonString",
+                "jsonStringBodyContent": "{\n  \"request\": \"{{ $json.packet }}\"\n}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 150,
+                  "name": "Availity / clearinghouse API: Submit"
+                }
+              },
+              "filter": {
+                "name": "Continue",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{6.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:notequal"
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "id": 8,
+              "module": "util:SetVariables",
+              "version": 1,
+              "parameters": null,
+              "mapper": {
+                "scope": "roundtrip",
+                "variables": [
+                  {
+                    "name": "run_at",
+                    "value": "{{now}}"
+                  }
+                ]
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2400,
+                  "y": 150,
+                  "name": "Track status (runs on the scenario schedule)"
+                }
+              }
+            },
+            {
+              "id": 9,
+              "module": "anthropic-claude:createAMessage",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "model": "claude-sonnet-5",
+                "system": "You are the \"Draft appeals\" step of the Prior Authorization Workflow workflow run by Agentmelt.\nTask: On denial, the agent reads the denial reason and drafts an appeal addressing it point by point with the evidence, for the clinician's review and signature.\n\nRules:\n- Every submission and appeal is reviewed and signed by a clinician or authorised staff member; nothing is sent automatically.\n- PHI stays within HIPAA-covered infrastructure (self-hosted n8n or a covered cloud, model API under a BAA); the model sees the minimum necessary.\n- The summary maps documentation to criteria; it never asserts clinical facts that are not in the record.\n- Payer rules are versioned and updated from bulletins; a rule change re-checks open requests.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+                "messages": [
+                  {
+                    "role": "user",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Draft appeals.\n\nItem (map the fields your source provides here):\n{{6.summary}}\n\n{{7.text}}{{7.body}}{{7.message}}{{7.subject}}{{7.email}}{{7.name}}{{7.data}}"
+                      }
+                    ]
+                  }
+                ],
+                "max_tokens": "2000",
+                "temperature": "0.2",
+                "metadata": {}
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2700,
+                  "y": 150,
+                  "name": "Claude: Draft appeals"
+                }
+              }
+            },
+            {
+              "id": 10,
+              "module": "json:ParseJSON",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "json": "{{9.textResponse}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 3000,
+                  "y": 150,
+                  "name": "Parse Claude's JSON: Draft appeals"
+                }
+              }
+            },
+            {
+              "id": 13,
+              "module": "builtin:BasicRouter",
+              "version": 1,
+              "parameters": null,
+              "mapper": null,
+              "metadata": {
+                "designer": {
+                  "x": 3300,
+                  "y": 150,
+                  "name": "Gate: Draft appeals"
+                }
+              },
+              "routes": [
+                {
+                  "flow": [
+                    {
+                      "id": 12,
+                      "module": "builtin:ThrowWarning",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "message": "Parked for a person — Draft appeals: {{10.summary}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3600,
+                          "y": 150,
+                          "name": "Needs a person: Draft appeals"
+                        }
+                      },
+                      "filter": {
+                        "name": "Needs a person?",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{10.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:equal"
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "flow": [
+                    {
+                      "id": 11,
+                      "module": "google-sheets:addRow",
+                      "version": 2,
+                      "parameters": {},
+                      "mapper": {
+                        "from": "drive",
+                        "mode": "select",
+                        "values": {
+                          "0": "{{10.summary}}"
+                        },
+                        "sheetId": "Sheet1",
+                        "spreadsheetId": "",
+                        "includesHeaders": true,
+                        "insertDataOption": "INSERT_ROWS",
+                        "valueInputOption": "USER_ENTERED",
+                        "insertUnformatted": false
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3600,
+                          "y": 300,
+                          "name": "Google Sheets: Report"
+                        }
+                      },
+                      "filter": {
+                        "name": "Continue",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{10.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:notequal"
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "notes": [
+      {
+        "moduleIds": [
+          1
+        ],
+        "content": "## Prepare prior authorization requests from EHR orders with Claude\n\nClinic and practice staff who spend hours a day on payer portals and phone queues.\n\n### How it works\nTrigger: New orders and referrals from the EHR (via FHIR, HL7 or a daily export) are checked against payer rules; status polling runs twice daily.\n1. Detect auth requirement\n2. Gather documentation\n3. Check completeness against criteria\n4. Draft the medical-necessity summary\n5. Submit\n6. Track status\n7. Draft appeals\n8. Report\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus EHR (Epic, athenahealth, eClinicalWorks…), Availity / payer portals.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nKeep the payer rules in the Config node; this template assumes self-hosted n8n and a model under a BAA — set both before running on patient data.\nGuardrail to keep: Every submission and appeal is reviewed and signed by a clinician or authorised staff member; nothing is sent automatically.\n\nFull blueprint: https://agentmelt.com/workflows/prior-authorization-automation/",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#F5D451"
+        }
+      }
+    ],
+    "zone": "eu1.make.com"
+  }
+}

@@ -1,0 +1,443 @@
+{
+  "name": "Guide new signups to activation with Claude using Segment and HubSpot",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Webhook: Register the new account"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "config_your_name",
+            "value": "Your name — signs every outgoing message"
+          },
+          {
+            "name": "config_your_email",
+            "value": "you@example.com"
+          },
+          {
+            "name": "config_your_company",
+            "value": "Your company or brokerage"
+          },
+          {
+            "name": "config_timezone",
+            "value": "Europe/London"
+          },
+          {
+            "name": "config_quiet_hours_start",
+            "value": "21"
+          },
+          {
+            "name": "config_quiet_hours_end",
+            "value": "8"
+          },
+          {
+            "name": "config_approval_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_approver",
+            "value": "#approvals — a Slack channel, or an email address"
+          },
+          {
+            "name": "config_test_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_schedule",
+            "value": "instant (webhook)"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "http:MakeRequest",
+      "version": 4,
+      "parameters": {
+        "authenticationType": "apiKey"
+      },
+      "mapper": {
+        "url": "https://app.posthog.com/api/projects/{{ $json.project_id }}/query",
+        "method": "post",
+        "headers": [],
+        "queryParameters": [],
+        "parseResponse": true,
+        "stopOnHttpError": true,
+        "timeout": "",
+        "allowRedirects": true,
+        "shareCookies": false,
+        "requestCompressedContent": true,
+        "contentType": "json",
+        "inputMethod": "jsonString",
+        "jsonStringBodyContent": "{\n  \"query\": {\n    \"kind\": \"HogQLQuery\",\n    \"query\": \"SELECT event, timestamp FROM events WHERE distinct_id = {distinct_id} ORDER BY timestamp\"\n  },\n  \"values\": {\n    \"distinct_id\": \"{{ $json.user_id }}\"\n  }\n}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "PostHog Query API: Track milestones from product events"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "confidence",
+            "value": "{{3.confidence}}"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Detect stalls (add a filter on the next module)"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "model": "claude-sonnet-5",
+        "system": "You are the \"Send the right nudge\" step of the Customer Onboarding Automation Workflow workflow run by Agentmelt.\nTask: The agent writes a short message for this stall — the specific next step, one link, an offer to help — using the customer's plan and what they have already done. No generic drips.\n\nRules:\n- Nudges are sent only on stalls, with a cap of one per milestone; no message for customers making progress.\n- The setup-question agent answers from documentation with citations and escalates unknowns.\n- High-value accounts get a person on the first stall, not the third.\n- Every automated message is logged on the account so the CSM sees the full history.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Send the right nudge.\n\nItem (map the fields your source provides here):\n{{3.text}}{{3.body}}{{3.message}}{{3.subject}}{{3.email}}{{3.name}}{{3.data}}"
+              }
+            ]
+          }
+        ],
+        "max_tokens": "2000",
+        "temperature": "0.2",
+        "metadata": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "Claude: Send the right nudge"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{5.textResponse}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 0,
+          "name": "Parse Claude's JSON: Send the right nudge"
+        }
+      }
+    },
+    {
+      "id": 15,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": null,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 1800,
+          "y": 0,
+          "name": "Gate: Send the right nudge"
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 14,
+              "module": "builtin:ThrowWarning",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "message": "Parked for a person — Send the right nudge: {{6.summary}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 0,
+                  "name": "Needs a person: Send the right nudge"
+                }
+              },
+              "filter": {
+                "name": "Needs a person?",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{6.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:equal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 7,
+              "module": "anthropic-claude:createAMessage",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "model": "claude-sonnet-5",
+                "system": "You are the \"Answer setup questions\" step of the Customer Onboarding Automation Workflow workflow run by Agentmelt.\nTask: Replies to onboarding emails and in-app chat from the documentation with citations; questions it cannot answer become a ticket with the account's milestone context attached.\n\nRules:\n- Nudges are sent only on stalls, with a cap of one per milestone; no message for customers making progress.\n- The setup-question agent answers from documentation with citations and escalates unknowns.\n- High-value accounts get a person on the first stall, not the third.\n- Every automated message is logged on the account so the CSM sees the full history.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+                "messages": [
+                  {
+                    "role": "user",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Answer setup questions.\n\nItem (map the fields your source provides here):\n{{6.summary}}\n\n{{6.text}}{{6.body}}{{6.message}}{{6.subject}}{{6.email}}{{6.name}}{{6.data}}"
+                      }
+                    ]
+                  }
+                ],
+                "max_tokens": "2000",
+                "temperature": "0.2",
+                "metadata": {}
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 150,
+                  "name": "Claude: Answer setup questions"
+                }
+              },
+              "filter": {
+                "name": "Continue",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{6.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:notequal"
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "id": 8,
+              "module": "json:ParseJSON",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "json": "{{7.textResponse}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2400,
+                  "y": 150,
+                  "name": "Parse Claude's JSON: Answer setup questions"
+                }
+              }
+            },
+            {
+              "id": 13,
+              "module": "builtin:BasicRouter",
+              "version": 1,
+              "parameters": null,
+              "mapper": null,
+              "metadata": {
+                "designer": {
+                  "x": 2700,
+                  "y": 150,
+                  "name": "Gate: Answer setup questions"
+                }
+              },
+              "routes": [
+                {
+                  "flow": [
+                    {
+                      "id": 12,
+                      "module": "builtin:ThrowWarning",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "message": "Parked for a person — Answer setup questions: {{8.summary}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3000,
+                          "y": 150,
+                          "name": "Needs a person: Answer setup questions"
+                        }
+                      },
+                      "filter": {
+                        "name": "Needs a person?",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{8.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:equal"
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "flow": [
+                    {
+                      "id": 9,
+                      "module": "slack:CreateMessage",
+                      "version": 4,
+                      "parameters": {},
+                      "mapper": {
+                        "channelType": "public",
+                        "channel": "{{2.config_approver}}",
+                        "text": "{{8.summary}}",
+                        "parseText": false,
+                        "mrkdwn": true
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3000,
+                          "y": 300,
+                          "name": "Slack: Escalate to a person"
+                        }
+                      },
+                      "filter": {
+                        "name": "Continue",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{8.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:notequal"
+                            }
+                          ]
+                        ]
+                      }
+                    },
+                    {
+                      "id": 10,
+                      "module": "hubspotcrm:getContact",
+                      "version": 2,
+                      "parameters": {},
+                      "mapper": {
+                        "contactId": "{{9.contactId}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3300,
+                          "y": 300,
+                          "name": "HubSpot: Celebrate activation and hand over"
+                        }
+                      }
+                    },
+                    {
+                      "id": 11,
+                      "module": "util:SetVariables",
+                      "version": 1,
+                      "parameters": null,
+                      "mapper": {
+                        "scope": "roundtrip",
+                        "variables": [
+                          {
+                            "name": "run_at",
+                            "value": "{{now}}"
+                          }
+                        ]
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3600,
+                          "y": 300,
+                          "name": "Report the funnel (runs on the scenario schedule)"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "notes": [
+      {
+        "moduleIds": [
+          2
+        ],
+        "content": "## Guide new signups to activation with Claude using Segment and HubSpot\n\nProduct and success teams whose new customers stall between signup and first value.\n\n### How it works\nTrigger: The product or billing system posts new signups; a daily Schedule Trigger evaluates every account still in onboarding against milestone deadlines.\n1. Register the new account\n2. Track milestones from product events\n3. Detect stalls\n4. Send the right nudge\n5. Answer setup questions\n6. Escalate to a person\n7. Celebrate activation and hand over\n8. Report the funnel\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Segment / Mixpanel / PostHog, HubSpot / Intercom.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the milestones and the nudge timing in the Config node; replace Segment with Mixpanel or PostHog.\nGuardrail to keep: Nudges are sent only on stalls, with a cap of one per milestone; no message for customers making progress.\n\nFull blueprint: https://agentmelt.com/workflows/customer-onboarding-automation/",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#F5D451"
+        }
+      }
+    ],
+    "zone": "eu1.make.com"
+  }
+}

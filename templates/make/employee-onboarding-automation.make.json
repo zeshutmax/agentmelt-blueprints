@@ -1,0 +1,377 @@
+{
+  "name": "Onboard new hires from BambooHR to Slack, Jira and DocuSign with Claude",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Webhook: Receive the new-hire event"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "config_your_name",
+            "value": "Your name — signs every outgoing message"
+          },
+          {
+            "name": "config_your_email",
+            "value": "you@example.com"
+          },
+          {
+            "name": "config_your_company",
+            "value": "Your company or brokerage"
+          },
+          {
+            "name": "config_timezone",
+            "value": "Europe/London"
+          },
+          {
+            "name": "config_quiet_hours_start",
+            "value": "21"
+          },
+          {
+            "name": "config_quiet_hours_end",
+            "value": "8"
+          },
+          {
+            "name": "config_approval_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_approver",
+            "value": "#approvals — a Slack channel, or an email address"
+          },
+          {
+            "name": "config_test_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_schedule",
+            "value": "instant (webhook)"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "result",
+            "value": ""
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "Build the checklist for this role (port the rule here)"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "notion:createDataSourceItem",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "dataSourceId": "",
+        "properties": {
+          "Name": "{{1.subject}}"
+        }
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Notion: Create the tracking board"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "module": "jira:ActionCreateIssue",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "projectKey": "",
+        "issueType": "Task",
+        "summary": "{{4.subject}}",
+        "description": "{{4.summary}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "Jira: Request accounts and equipment"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "module": "http:MakeRequest",
+      "version": 4,
+      "parameters": {
+        "authenticationType": "apiKey"
+      },
+      "mapper": {
+        "url": "https://api.pandadoc.com/public/v1/documents",
+        "method": "post",
+        "headers": [],
+        "queryParameters": [],
+        "parseResponse": true,
+        "stopOnHttpError": true,
+        "timeout": "",
+        "allowRedirects": true,
+        "shareCookies": false,
+        "requestCompressedContent": true,
+        "contentType": "json",
+        "inputMethod": "jsonString",
+        "jsonStringBodyContent": "{\n  \"name\": \"{{ $json.document_name }}\",\n  \"template_uuid\": \"replace-with-your-template-uuid\",\n  \"recipients\": \"{{ $json.recipients }}\"\n}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 0,
+          "name": "PandaDoc API: Send documents for signature"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "module": "google-calendar:createAnEvent",
+      "version": 5,
+      "parameters": {},
+      "mapper": {
+        "calendar": "{{2.config_your_email}}",
+        "summary": "{{6.subject}}",
+        "start": "{{6.start}}",
+        "end": "{{6.end}}",
+        "allDay": false,
+        "visibility": "default",
+        "sendUpdates": "none"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1800,
+          "y": 0,
+          "name": "Google Calendar: Schedule the first two weeks"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "module": "google-email:ActionSendEmail",
+      "version": 2,
+      "parameters": {},
+      "mapper": {
+        "to": [
+          "{{7.email}}"
+        ],
+        "subject": "{{7.subject}}",
+        "html": "{{7.draft}}",
+        "attachments": []
+      },
+      "metadata": {
+        "designer": {
+          "x": 2100,
+          "y": 0,
+          "name": "Gmail: Run the welcome sequence"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "model": "claude-sonnet-5",
+        "system": "You are the \"Answer policy questions\" step of the Employee Onboarding Automation Workflow workflow run by Agentmelt.\nTask: A Slack bot backed by an AI Agent node with your handbook in a vector store. It answers PTO, benefits, expenses and equipment questions with citations to the handbook page, and hands anything about pay, performance or complaints to HR.\n\nRules:\n- The AI agent answers only from the handbook and cites the page; it refuses pay, performance and grievance topics and routes them to HR.\n- Account provisioning is requested, never executed, by the workflow — IT approves in their own tool.\n- Personal data stays in the HRIS; the workflow passes identifiers, not copies of documents.\n- Every automated message is logged on the hire's board so HR can see exactly what was sent.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Answer policy questions.\n\nItem (map the fields your source provides here):\n{{8.text}}{{8.body}}{{8.message}}{{8.subject}}{{8.email}}{{8.name}}{{8.data}}"
+              }
+            ]
+          }
+        ],
+        "max_tokens": "2000",
+        "temperature": "0.2",
+        "metadata": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 2400,
+          "y": 0,
+          "name": "Claude: Answer policy questions"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{9.textResponse}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 2700,
+          "y": 0,
+          "name": "Parse Claude's JSON: Answer policy questions"
+        }
+      }
+    },
+    {
+      "id": 13,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": null,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 3000,
+          "y": 0,
+          "name": "Gate: Answer policy questions"
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 12,
+              "module": "builtin:ThrowWarning",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "message": "Parked for a person — Answer policy questions: {{10.summary}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 3300,
+                  "y": 0,
+                  "name": "Needs a person: Answer policy questions"
+                }
+              },
+              "filter": {
+                "name": "Needs a person?",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{10.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:equal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 11,
+              "module": "util:SetVariables",
+              "version": 1,
+              "parameters": null,
+              "mapper": {
+                "scope": "roundtrip",
+                "variables": [
+                  {
+                    "name": "run_at",
+                    "value": "{{now}}"
+                  }
+                ]
+              },
+              "metadata": {
+                "designer": {
+                  "x": 3300,
+                  "y": 150,
+                  "name": "Chase overdue tasks and check in (runs on the scenario schedule)"
+                }
+              },
+              "filter": {
+                "name": "Continue",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{10.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:notequal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "notes": [
+      {
+        "moduleIds": [
+          2
+        ],
+        "content": "## Onboard new hires from BambooHR to Slack, Jira and DocuSign with Claude\n\nHR and people-ops teams that build every new hire's checklist, accounts and paperwork by hand.\n\n### How it works\nTrigger: BambooHR, Rippling, Workday or Personio sends a webhook when a candidate's status becomes Hired.\n1. Receive the new-hire event\n2. Build the checklist for this role\n3. Create the tracking board\n4. Request accounts and equipment\n5. Send documents for signature\n6. Schedule the first two weeks\n7. Run the welcome sequence\n8. Answer policy questions\n9. Chase overdue tasks and check in\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus BambooHR / Rippling / Workday, Notion / Jira / Google Sheets, DocuSign / PandaDoc.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nEdit the role-to-checklist mapping in the Config node and add your own account-provisioning nodes (Okta, Google Workspace) after the approval step.\nGuardrail to keep: The AI agent answers only from the handbook and cites the page; it refuses pay, performance and grievance topics and routes them to HR.\n\nFull blueprint: https://agentmelt.com/workflows/employee-onboarding-automation/",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#F5D451"
+        }
+      }
+    ],
+    "zone": "eu1.make.com"
+  }
+}

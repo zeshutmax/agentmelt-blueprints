@@ -1,0 +1,449 @@
+{
+  "name": "Reply to new real estate leads in minutes with Claude, Follow Up Boss and Twilio",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Webhook: Receive the lead"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "config_your_name",
+            "value": "Your name — signs every outgoing message"
+          },
+          {
+            "name": "config_your_email",
+            "value": "you@example.com"
+          },
+          {
+            "name": "config_your_company",
+            "value": "Your company or brokerage"
+          },
+          {
+            "name": "config_timezone",
+            "value": "Europe/London"
+          },
+          {
+            "name": "config_quiet_hours_start",
+            "value": "21"
+          },
+          {
+            "name": "config_quiet_hours_end",
+            "value": "8"
+          },
+          {
+            "name": "config_approval_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_approver",
+            "value": "#approvals — a Slack channel, or an email address"
+          },
+          {
+            "name": "config_test_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_schedule",
+            "value": "instant (webhook)"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "http:MakeRequest",
+      "version": 4,
+      "parameters": {
+        "authenticationType": "basicAuth"
+      },
+      "mapper": {
+        "url": "https://api.followupboss.com/v1/people?email={{encodeURL(1.email)}}&includeTrash=false",
+        "method": "get",
+        "headers": [],
+        "queryParameters": [],
+        "parseResponse": true,
+        "stopOnHttpError": true,
+        "timeout": "",
+        "allowRedirects": true,
+        "shareCookies": false,
+        "requestCompressedContent": true
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "Follow Up Boss API: Look up the lead in the CRM"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "model": "claude-sonnet-5",
+        "system": "You are the \"Qualify\" step of the Speed-to-Lead Automation Workflow workflow run by Agentmelt.\nTask: Timeline, pre-approval, price band and intent from the enquiry text; 'hot' only when the timeline is near and something specific is named. Nothing is inferred beyond the text.\n\nRules:\n- Quiet hours: nothing sent 9 pm–8 am in the lead's time zone; messages queue until morning.\n- One question per message; the second message asks the next question, never both at once.\n- SMS only with a number the lead gave on a form; STOP honoured on the first word and written to the CRM.\n- Fair-housing language check on every draft; flagged drafts cannot be sent.\n- Approval mode for the first week: drafts go to the agent for a tap before sending.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Qualify.\n\nItem (map the fields your source provides here):\n{{3.text}}{{3.body}}{{3.message}}{{3.subject}}{{3.email}}{{3.name}}{{3.data}}"
+              }
+            ]
+          }
+        ],
+        "max_tokens": "2000",
+        "temperature": "0.2",
+        "metadata": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Claude: Qualify"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{4.textResponse}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "Parse Claude's JSON: Qualify"
+        }
+      }
+    },
+    {
+      "id": 15,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": null,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 0,
+          "name": "Gate: Qualify"
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 14,
+              "module": "builtin:ThrowWarning",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "message": "Parked for a person — Qualify: {{5.summary}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 0,
+                  "name": "Needs a person: Qualify"
+                }
+              },
+              "filter": {
+                "name": "Needs a person?",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{5.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:equal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 6,
+              "module": "anthropic-claude:createAMessage",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "model": "claude-sonnet-5",
+                "system": "You are the \"Draft the first reply\" step of the Speed-to-Lead Automation Workflow workflow run by Agentmelt.\nTask: Two to four sentences in the agent's voice, referencing the property or page, with exactly one question. Fair-housing wordlist applied.\n\nRules:\n- Quiet hours: nothing sent 9 pm–8 am in the lead's time zone; messages queue until morning.\n- One question per message; the second message asks the next question, never both at once.\n- SMS only with a number the lead gave on a form; STOP honoured on the first word and written to the CRM.\n- Fair-housing language check on every draft; flagged drafts cannot be sent.\n- Approval mode for the first week: drafts go to the agent for a tap before sending.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+                "messages": [
+                  {
+                    "role": "user",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Draft the first reply.\n\nItem (map the fields your source provides here):\n{{5.summary}}\n\n{{5.text}}{{5.body}}{{5.message}}{{5.subject}}{{5.email}}{{5.name}}{{5.data}}"
+                      }
+                    ]
+                  }
+                ],
+                "max_tokens": "2000",
+                "temperature": "0.2",
+                "metadata": {}
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 150,
+                  "name": "Claude: Draft the first reply"
+                }
+              },
+              "filter": {
+                "name": "Continue",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{5.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:notequal"
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "id": 7,
+              "module": "json:ParseJSON",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "json": "{{6.textResponse}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 150,
+                  "name": "Parse Claude's JSON: Draft the first reply"
+                }
+              }
+            },
+            {
+              "id": 13,
+              "module": "builtin:BasicRouter",
+              "version": 1,
+              "parameters": null,
+              "mapper": null,
+              "metadata": {
+                "designer": {
+                  "x": 2400,
+                  "y": 150,
+                  "name": "Gate: Draft the first reply"
+                }
+              },
+              "routes": [
+                {
+                  "flow": [
+                    {
+                      "id": 12,
+                      "module": "builtin:ThrowWarning",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "message": "Parked for a person — Draft the first reply: {{7.summary}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2700,
+                          "y": 150,
+                          "name": "Needs a person: Draft the first reply"
+                        }
+                      },
+                      "filter": {
+                        "name": "Needs a person?",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{7.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:equal"
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "flow": [
+                    {
+                      "id": 8,
+                      "module": "util:SetVariables",
+                      "version": 1,
+                      "parameters": null,
+                      "mapper": {
+                        "scope": "roundtrip",
+                        "variables": [
+                          {
+                            "name": "result",
+                            "value": ""
+                          }
+                        ]
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2700,
+                          "y": 300,
+                          "name": "Check quiet hours and consent (port the rule here)"
+                        }
+                      },
+                      "filter": {
+                        "name": "Continue",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{7.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:notequal"
+                            }
+                          ]
+                        ]
+                      }
+                    },
+                    {
+                      "id": 9,
+                      "module": "google-email:ActionSendEmail",
+                      "version": 2,
+                      "parameters": {},
+                      "mapper": {
+                        "to": [
+                          "{{7.email}}"
+                        ],
+                        "subject": "{{7.subject}}",
+                        "html": "{{7.draft}}",
+                        "attachments": []
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3000,
+                          "y": 300,
+                          "name": "Gmail: Send the reply"
+                        }
+                      }
+                    },
+                    {
+                      "id": 10,
+                      "module": "http:MakeRequest",
+                      "version": 4,
+                      "parameters": {
+                        "authenticationType": "basicAuth"
+                      },
+                      "mapper": {
+                        "url": "https://api.followupboss.com/v1/events",
+                        "method": "post",
+                        "headers": [],
+                        "queryParameters": [],
+                        "parseResponse": true,
+                        "stopOnHttpError": true,
+                        "timeout": "",
+                        "allowRedirects": true,
+                        "shareCookies": false,
+                        "requestCompressedContent": true,
+                        "contentType": "json",
+                        "inputMethod": "jsonString",
+                        "jsonStringBodyContent": "{\n  \"source\": \"n8n\",\n  \"type\": \"Note\",\n  \"person\": {\n    \"emails\": [\n      {\n        \"value\": \"{{ $json.email }}\"\n      }\n    ]\n  },\n  \"note\": \"{{ $json.output?.summary }}\"\n}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3300,
+                          "y": 300,
+                          "name": "Follow Up Boss API: Log and hand off"
+                        }
+                      }
+                    },
+                    {
+                      "id": 11,
+                      "module": "util:FunctionSleep",
+                      "version": 1,
+                      "parameters": null,
+                      "mapper": {
+                        "duration": 300
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3600,
+                          "y": 300,
+                          "name": "Wait: Follow up on silence"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "notes": [
+      {
+        "moduleIds": [
+          2
+        ],
+        "content": "## Reply to new real estate leads in minutes with Claude, Follow Up Boss and Twilio\n\nReal-estate agents and teams who lose portal leads to whoever answers first.\n\n### How it works\nTrigger: A lead email from Zillow or Realtor.com, a website form submission, or a new-person webhook from Follow Up Boss or kvCORE starts the run.\n1. Receive the lead\n2. Look up the lead in the CRM\n3. Qualify\n4. Draft the first reply\n5. Check quiet hours and consent\n6. Send the reply\n7. Log and hand off\n8. Follow up on silence\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Follow Up Boss / kvCORE / HubSpot, Gmail / Outlook, Twilio.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nPut your first-reply rules and quiet hours in the Config node; swap Follow Up Boss for kvCORE or HubSpot and Twilio for your SMS provider.\nGuardrail to keep: Quiet hours: nothing sent 9 pm–8 am in the lead's time zone; messages queue until morning.\n\nFull blueprint: https://agentmelt.com/workflows/speed-to-lead-automation/",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#F5D451"
+        }
+      }
+    ],
+    "zone": "eu1.make.com"
+  }
+}

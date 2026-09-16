@@ -1,0 +1,445 @@
+{
+  "name": "Classify AP and PO lines with Claude and build a spend cube in Postgres",
+  "flow": [
+    {
+      "id": 1,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "config_your_name",
+            "value": "Your name — signs every outgoing message"
+          },
+          {
+            "name": "config_your_email",
+            "value": "you@example.com"
+          },
+          {
+            "name": "config_your_company",
+            "value": "Your company or brokerage"
+          },
+          {
+            "name": "config_timezone",
+            "value": "Europe/London"
+          },
+          {
+            "name": "config_quiet_hours_start",
+            "value": "21"
+          },
+          {
+            "name": "config_quiet_hours_end",
+            "value": "8"
+          },
+          {
+            "name": "config_approval_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_approver",
+            "value": "#approvals — a Slack channel, or an email address"
+          },
+          {
+            "name": "config_test_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_schedule",
+            "value": "scenario schedule: Schedule Trigger (monthly, after AP close)"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "postgres:Query",
+      "version": 2,
+      "parameters": {
+        "continueWhenNoRes": false,
+        "isToManageDataInSharedTransaction": true
+      },
+      "mapper": {
+        "query": "SELECT 1; -- replace with your query"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Postgres: Extract AP and PO lines"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "result",
+            "value": ""
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "Normalise suppliers (port the rule here)"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "model": "claude-sonnet-5",
+        "system": "You are the \"Classify each line\" step of the AI Spend Analysis Workflow workflow run by Agentmelt.\nTask: An LLM classification step assigns each line a level-1/2/3 category from your taxonomy (UNSPSC or a custom tree) using the description, supplier, GL account and cost centre, and returns a confidence score. High-confidence lines are accepted; the rest go to review.\n\nRules:\n- Classification below the confidence threshold is reviewed by a person before it enters the cube.\n- Supplier merges are logged and reversible; tax-ID matches are the only automatic merges.\n- The AI agent drafts briefs; savings are only reported as realised when finance confirms them.\n- Source lines are never altered — the cube is a derived table with a run id.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Classify each line.\n\nItem (map the fields your source provides here):\n{{2.text}}{{2.body}}{{2.message}}{{2.subject}}{{2.email}}{{2.name}}{{2.data}}"
+              }
+            ]
+          }
+        ],
+        "max_tokens": "2000",
+        "temperature": "0.2",
+        "metadata": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Claude: Classify each line"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{4.textResponse}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "Parse Claude's JSON: Classify each line"
+        }
+      }
+    },
+    {
+      "id": 15,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": null,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 0,
+          "name": "Gate: Classify each line"
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 14,
+              "module": "builtin:ThrowWarning",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "message": "Parked for a person — Classify each line: {{5.summary}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 0,
+                  "name": "Needs a person: Classify each line"
+                }
+              },
+              "filter": {
+                "name": "Needs a person?",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{5.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:equal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 6,
+              "module": "google-sheets:addRow",
+              "version": 2,
+              "parameters": {},
+              "mapper": {
+                "from": "drive",
+                "mode": "select",
+                "values": {
+                  "0": "{{5.summary}}"
+                },
+                "sheetId": "Sheet1",
+                "spreadsheetId": "",
+                "includesHeaders": true,
+                "insertDataOption": "INSERT_ROWS",
+                "valueInputOption": "USER_ENTERED",
+                "insertUnformatted": false
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 150,
+                  "name": "Google Sheets: Learn from corrections"
+                }
+              },
+              "filter": {
+                "name": "Continue",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{5.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:notequal"
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "id": 7,
+              "module": "postgres:Query",
+              "version": 2,
+              "parameters": {
+                "continueWhenNoRes": false,
+                "isToManageDataInSharedTransaction": true
+              },
+              "mapper": {
+                "query": "SELECT 1; -- replace with your query"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 150,
+                  "name": "Postgres: Build the spend cube"
+                }
+              }
+            },
+            {
+              "id": 8,
+              "module": "util:SetVariables",
+              "version": 1,
+              "parameters": null,
+              "mapper": {
+                "scope": "roundtrip",
+                "variables": [
+                  {
+                    "name": "result",
+                    "value": ""
+                  }
+                ]
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2400,
+                  "y": 150,
+                  "name": "Detect opportunities (port the rule here)"
+                }
+              }
+            },
+            {
+              "id": 9,
+              "module": "anthropic-claude:createAMessage",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "model": "claude-sonnet-5",
+                "system": "You are the \"Write the opportunity briefs\" step of the AI Spend Analysis Workflow workflow run by Agentmelt.\nTask: For each flagged opportunity the agent drafts a half-page brief with the numbers, the suppliers involved and a suggested action (consolidate, renegotiate, enforce PO policy). Category managers edit and own the brief.\n\nRules:\n- Classification below the confidence threshold is reviewed by a person before it enters the cube.\n- Supplier merges are logged and reversible; tax-ID matches are the only automatic merges.\n- The AI agent drafts briefs; savings are only reported as realised when finance confirms them.\n- Source lines are never altered — the cube is a derived table with a run id.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+                "messages": [
+                  {
+                    "role": "user",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Write the opportunity briefs.\n\nItem (map the fields your source provides here):\n{{5.summary}}\n\n{{7.text}}{{7.body}}{{7.message}}{{7.subject}}{{7.email}}{{7.name}}{{7.data}}"
+                      }
+                    ]
+                  }
+                ],
+                "max_tokens": "2000",
+                "temperature": "0.2",
+                "metadata": {}
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2700,
+                  "y": 150,
+                  "name": "Claude: Write the opportunity briefs"
+                }
+              }
+            },
+            {
+              "id": 10,
+              "module": "json:ParseJSON",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "json": "{{9.textResponse}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 3000,
+                  "y": 150,
+                  "name": "Parse Claude's JSON: Write the opportunity briefs"
+                }
+              }
+            },
+            {
+              "id": 13,
+              "module": "builtin:BasicRouter",
+              "version": 1,
+              "parameters": null,
+              "mapper": null,
+              "metadata": {
+                "designer": {
+                  "x": 3300,
+                  "y": 150,
+                  "name": "Gate: Write the opportunity briefs"
+                }
+              },
+              "routes": [
+                {
+                  "flow": [
+                    {
+                      "id": 12,
+                      "module": "builtin:ThrowWarning",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "message": "Parked for a person — Write the opportunity briefs: {{10.summary}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3600,
+                          "y": 150,
+                          "name": "Needs a person: Write the opportunity briefs"
+                        }
+                      },
+                      "filter": {
+                        "name": "Needs a person?",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{10.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:equal"
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "flow": [
+                    {
+                      "id": 11,
+                      "module": "slack:CreateMessage",
+                      "version": 4,
+                      "parameters": {},
+                      "mapper": {
+                        "channelType": "public",
+                        "channel": "{{1.config_approver}}",
+                        "text": "{{10.summary}}",
+                        "parseText": false,
+                        "mrkdwn": true
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3600,
+                          "y": 300,
+                          "name": "Slack: Publish and track"
+                        }
+                      },
+                      "filter": {
+                        "name": "Continue",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{10.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:notequal"
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "notes": [
+      {
+        "moduleIds": [
+          1
+        ],
+        "content": "## Classify AP and PO lines with Claude and build a spend cube in Postgres\n\nProcurement and finance teams that want category-level spend visibility without a six-figure spend-analytics suite.\n\n### How it works\nTrigger: Runs after accounts payable closes the month.\n1. Extract AP and PO lines\n2. Normalise suppliers\n3. Classify each line\n4. Learn from corrections\n5. Build the spend cube\n6. Detect opportunities\n7. Write the opportunity briefs\n8. Publish and track\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Postgres / BigQuery, Looker / Power BI / Metabase, Google Sheets.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSwap the category taxonomy in the Config node for your own (UNSPSC or in-house), and point the reporting node at Looker, Power BI or a Google Sheet.\nGuardrail to keep: Classification below the confidence threshold is reviewed by a person before it enters the cube.\n\nFull blueprint: https://agentmelt.com/workflows/spend-analysis/",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#F5D451"
+        }
+      }
+    ],
+    "zone": "eu1.make.com"
+  }
+}

@@ -1,0 +1,306 @@
+{
+  "name": "Prepare meeting briefs from Google Calendar with Claude, HubSpot and Clay",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Webhook: Find upcoming external meetings"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "config_your_name",
+            "value": "Your name — signs every outgoing message"
+          },
+          {
+            "name": "config_your_email",
+            "value": "you@example.com"
+          },
+          {
+            "name": "config_your_company",
+            "value": "Your company or brokerage"
+          },
+          {
+            "name": "config_timezone",
+            "value": "Europe/London"
+          },
+          {
+            "name": "config_quiet_hours_start",
+            "value": "21"
+          },
+          {
+            "name": "config_quiet_hours_end",
+            "value": "8"
+          },
+          {
+            "name": "config_approval_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_approver",
+            "value": "#approvals — a Slack channel, or an email address"
+          },
+          {
+            "name": "config_test_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_schedule",
+            "value": "instant (webhook)"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "hubspotcrm:getContact",
+      "version": 2,
+      "parameters": {},
+      "mapper": {
+        "contactId": "{{1.contactId}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "HubSpot: Identify attendees and account"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "clearbit:findPersonByEmail",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "email": "{{3.email}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Clearbit: Research the company"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "module": "clearbit:findPersonByEmail",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "email": "{{4.email}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "Clearbit: Research the people"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "model": "claude-sonnet-5",
+        "system": "You are the \"Write the brief\" step of the Meeting Prep Workflow workflow run by Agentmelt.\nTask: One page: company in two lines, what changed recently, attendees and roles, relationship history and open items, live account signals, and three suggested angles tied to the evidence. Nothing without a source.\n\nRules:\n- Only public and first-party data; no scraping behind logins, no personal data beyond professional role.\n- Every statement in the brief carries a source; the agent is instructed to omit rather than guess.\n- Briefs go only to the rep and the CRM; they are not forwarded externally.\n- Enrichment credits are spent only for meetings that survive the external-attendee filter.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Write the brief.\n\nItem (map the fields your source provides here):\n{{5.text}}{{5.body}}{{5.message}}{{5.subject}}{{5.email}}{{5.name}}{{5.data}}"
+              }
+            ]
+          }
+        ],
+        "max_tokens": "2000",
+        "temperature": "0.2",
+        "metadata": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 0,
+          "name": "Claude: Write the brief"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{6.textResponse}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1800,
+          "y": 0,
+          "name": "Parse Claude's JSON: Write the brief"
+        }
+      }
+    },
+    {
+      "id": 11,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": null,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 2100,
+          "y": 0,
+          "name": "Gate: Write the brief"
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 10,
+              "module": "builtin:ThrowWarning",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "message": "Parked for a person — Write the brief: {{7.summary}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2400,
+                  "y": 0,
+                  "name": "Needs a person: Write the brief"
+                }
+              },
+              "filter": {
+                "name": "Needs a person?",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{7.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:equal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 8,
+              "module": "slack:CreateMessage",
+              "version": 4,
+              "parameters": {},
+              "mapper": {
+                "channelType": "public",
+                "channel": "{{2.config_approver}}",
+                "text": "{{7.summary}}",
+                "parseText": false,
+                "mrkdwn": true
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2400,
+                  "y": 150,
+                  "name": "Slack: Deliver"
+                }
+              },
+              "filter": {
+                "name": "Continue",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{7.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:notequal"
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "id": 9,
+              "module": "util:FunctionSleep",
+              "version": 1,
+              "parameters": null,
+              "mapper": {
+                "duration": 300
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2700,
+                  "y": 150,
+                  "name": "Wait: Capture the outcome"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "notes": [
+      {
+        "moduleIds": [
+          2
+        ],
+        "content": "## Prepare meeting briefs from Google Calendar with Claude, HubSpot and Clay\n\nSales reps and founders who walk into external meetings with two minutes of research.\n\n### How it works\nTrigger: Google or Microsoft calendar scanned for meetings with external attendees in the next 24 hours; new bookings via webhook.\n1. Find upcoming external meetings\n2. Identify attendees and account\n3. Research the company\n4. Research the people\n5. Write the brief\n6. Deliver\n7. Capture the outcome\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus HubSpot / Salesforce, Clay / Apollo.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the lookahead window and the brief sections in the Config node; swap HubSpot for Salesforce.\nGuardrail to keep: Only public and first-party data; no scraping behind logins, no personal data beyond professional role.\n\nFull blueprint: https://agentmelt.com/workflows/meeting-prep-research/",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#F5D451"
+        }
+      }
+    ],
+    "zone": "eu1.make.com"
+  }
+}

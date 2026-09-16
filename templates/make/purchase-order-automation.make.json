@@ -1,0 +1,370 @@
+{
+  "name": "Route purchase requests from Slack to approval and create POs in NetSuite with Claude",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Webhook: Receive the request"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "config_your_name",
+            "value": "Your name — signs every outgoing message"
+          },
+          {
+            "name": "config_your_email",
+            "value": "you@example.com"
+          },
+          {
+            "name": "config_your_company",
+            "value": "Your company or brokerage"
+          },
+          {
+            "name": "config_timezone",
+            "value": "Europe/London"
+          },
+          {
+            "name": "config_quiet_hours_start",
+            "value": "21"
+          },
+          {
+            "name": "config_quiet_hours_end",
+            "value": "8"
+          },
+          {
+            "name": "config_approval_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_approver",
+            "value": "#approvals — a Slack channel, or an email address"
+          },
+          {
+            "name": "config_test_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_schedule",
+            "value": "instant (webhook)"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "model": "claude-sonnet-5",
+        "system": "You are the \"Normalise and complete\" step of the Purchase Order Workflow workflow run by Agentmelt.\nTask: Maps the free-text item to a category, suggests the preferred supplier from the catalogue, fills the budget line from the cost centre, and asks the requester for anything missing.\n\nRules:\n- No PO is created without the approvals the policy matrix requires; the workflow enforces, it does not decide.\n- Supplier suggestions come from the approved catalogue; new suppliers go through onboarding first.\n- Budget checks use live data; over-budget requests are flagged, not blocked silently.\n- Every step is logged with actor and timestamp for audit.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Normalise and complete.\n\nItem (map the fields your source provides here):\n{{1.text}}{{1.body}}{{1.message}}{{1.subject}}{{1.email}}{{1.name}}{{1.data}}"
+              }
+            ]
+          }
+        ],
+        "max_tokens": "2000",
+        "temperature": "0.2",
+        "metadata": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "Claude: Normalise and complete"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{3.textResponse}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Parse Claude's JSON: Normalise and complete"
+        }
+      }
+    },
+    {
+      "id": 12,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": null,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "Gate: Normalise and complete"
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 11,
+              "module": "builtin:ThrowWarning",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "message": "Parked for a person — Normalise and complete: {{4.summary}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 0,
+                  "name": "Needs a person: Normalise and complete"
+                }
+              },
+              "filter": {
+                "name": "Needs a person?",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{4.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:equal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 5,
+              "module": "http:MakeRequest",
+              "version": 4,
+              "parameters": {
+                "authenticationType": "apiKey"
+              },
+              "mapper": {
+                "url": "https://api.xero.com/api.xro/2.0/Reports/BudgetSummary",
+                "method": "get",
+                "headers": [],
+                "queryParameters": [],
+                "parseResponse": true,
+                "stopOnHttpError": true,
+                "timeout": "",
+                "allowRedirects": true,
+                "shareCookies": false,
+                "requestCompressedContent": true
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 150,
+                  "name": "Xero API: Check budget and policy"
+                }
+              },
+              "filter": {
+                "name": "Continue",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{4.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:notequal"
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "id": 6,
+              "module": "util:SetVariables",
+              "version": 1,
+              "parameters": null,
+              "mapper": {
+                "scope": "roundtrip",
+                "variables": [
+                  {
+                    "name": "category",
+                    "value": "{{4.category}}"
+                  }
+                ]
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 150,
+                  "name": "Route approvals (add a router here)"
+                }
+              }
+            },
+            {
+              "id": 7,
+              "module": "http:MakeRequest",
+              "version": 4,
+              "parameters": {
+                "authenticationType": "apiKey"
+              },
+              "mapper": {
+                "url": "https://api.xero.com/api.xro/2.0/PurchaseOrders",
+                "method": "put",
+                "headers": [],
+                "queryParameters": [],
+                "parseResponse": true,
+                "stopOnHttpError": true,
+                "timeout": "",
+                "allowRedirects": true,
+                "shareCookies": false,
+                "requestCompressedContent": true,
+                "contentType": "json",
+                "inputMethod": "jsonString",
+                "jsonStringBodyContent": "{\n  \"Contact\": {\n    \"ContactID\": \"{{ $json.supplier_contact_id }}\"\n  },\n  \"LineItems\": \"{{ $json.lines }}\",\n  \"Status\": \"AUTHORISED\"\n}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 150,
+                  "name": "Xero API: Create the PO"
+                }
+              }
+            },
+            {
+              "id": 8,
+              "module": "google-email:ActionSendEmail",
+              "version": 2,
+              "parameters": {},
+              "mapper": {
+                "to": [
+                  "{{7.email}}"
+                ],
+                "subject": "{{4.subject}}",
+                "html": "{{4.draft}}",
+                "attachments": []
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2400,
+                  "y": 150,
+                  "name": "Gmail: Send to the supplier"
+                }
+              }
+            },
+            {
+              "id": 9,
+              "module": "util:SetVariables",
+              "version": 1,
+              "parameters": null,
+              "mapper": {
+                "scope": "roundtrip",
+                "variables": [
+                  {
+                    "name": "run_at",
+                    "value": "{{now}}"
+                  }
+                ]
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2700,
+                  "y": 150,
+                  "name": "Track receipt (runs on the scenario schedule)"
+                }
+              }
+            },
+            {
+              "id": 10,
+              "module": "google-sheets:addRow",
+              "version": 2,
+              "parameters": {},
+              "mapper": {
+                "from": "drive",
+                "mode": "select",
+                "values": {
+                  "0": "{{4.summary}}"
+                },
+                "sheetId": "Sheet1",
+                "spreadsheetId": "",
+                "includesHeaders": true,
+                "insertDataOption": "INSERT_ROWS",
+                "valueInputOption": "USER_ENTERED",
+                "insertUnformatted": false
+              },
+              "metadata": {
+                "designer": {
+                  "x": 3000,
+                  "y": 150,
+                  "name": "Google Sheets: Report committed spend"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "notes": [
+      {
+        "moduleIds": [
+          2
+        ],
+        "content": "## Route purchase requests from Slack to approval and create POs in NetSuite with Claude\n\nFinance and operations teams that approve purchases in email threads and lose track of them.\n\n### How it works\nTrigger: A purchase-request form (or a Slack slash command) starts the workflow; email requests to procurement@ are parsed the same way.\n1. Receive the request\n2. Normalise and complete\n3. Check budget and policy\n4. Route approvals\n5. Create the PO\n6. Send to the supplier\n7. Track receipt\n8. Report committed spend\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus NetSuite / Dynamics / Xero, Slack.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the approval thresholds and the approver map in the Config node; swap NetSuite for Dynamics or Xero.\nGuardrail to keep: No PO is created without the approvals the policy matrix requires; the workflow enforces, it does not decide.\n\nFull blueprint: https://agentmelt.com/workflows/purchase-order-automation/",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#F5D451"
+        }
+      }
+    ],
+    "zone": "eu1.make.com"
+  }
+}

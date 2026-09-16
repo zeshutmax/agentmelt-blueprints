@@ -1,0 +1,532 @@
+{
+  "name": "Extract supplier invoices from Gmail with Claude and post them to Xero for approval",
+  "flow": [
+    {
+      "id": 1,
+      "module": "google-email:TriggerNewEmail",
+      "version": 2,
+      "parameters": {
+        "searchType": "simple",
+        "criteria": "UNSEEN",
+        "markSeen": false,
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Gmail: Capture the invoice"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "config_your_name",
+            "value": "Your name — signs every outgoing message"
+          },
+          {
+            "name": "config_your_email",
+            "value": "you@example.com"
+          },
+          {
+            "name": "config_your_company",
+            "value": "Your company or brokerage"
+          },
+          {
+            "name": "config_timezone",
+            "value": "Europe/London"
+          },
+          {
+            "name": "config_quiet_hours_start",
+            "value": "21"
+          },
+          {
+            "name": "config_quiet_hours_end",
+            "value": "8"
+          },
+          {
+            "name": "config_approval_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_approver",
+            "value": "#approvals — a Slack channel, or an email address"
+          },
+          {
+            "name": "config_test_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_schedule",
+            "value": "poll the inbox every 15 minutes"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "model": "claude-sonnet-5",
+        "system": "You are the \"Extract fields\" step of the Invoice Processing Automation Workflow workflow run by Agentmelt.\nTask: Supplier, invoice number, dates, line items, quantities, unit prices, tax, totals, PO reference and bank details, with a confidence per field. Multi-page and multi-currency handled.\n\nRules:\n- Bank-detail changes never post automatically; they trigger a verification call with the supplier.\n- Auto-approval applies only to PO-matched invoices within tolerance and policy limits; everything else has a named approver.\n- Duplicates are blocked before posting, not caught at month end.\n- Low-confidence extractions are reviewed by a person before matching.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Extract fields.\n\nItem (map the fields your source provides here):\n{{1.text}}{{1.body}}{{1.message}}{{1.subject}}{{1.email}}{{1.name}}{{1.data}}"
+              }
+            ]
+          }
+        ],
+        "max_tokens": "2000",
+        "temperature": "0.2",
+        "metadata": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "Claude: Extract fields"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{3.textResponse}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Parse Claude's JSON: Extract fields"
+        }
+      }
+    },
+    {
+      "id": 18,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": null,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "Gate: Extract fields"
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 17,
+              "module": "builtin:ThrowWarning",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "message": "Parked for a person — Extract fields: {{4.summary}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 0,
+                  "name": "Needs a person: Extract fields"
+                }
+              },
+              "filter": {
+                "name": "Needs a person?",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{4.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:equal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 5,
+              "module": "util:SetVariables",
+              "version": 1,
+              "parameters": null,
+              "mapper": {
+                "scope": "roundtrip",
+                "variables": [
+                  {
+                    "name": "result",
+                    "value": ""
+                  }
+                ]
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 150,
+                  "name": "Validate and detect duplicates (port the rule here)"
+                }
+              },
+              "filter": {
+                "name": "Continue",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{4.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:notequal"
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "id": 6,
+              "module": "http:MakeRequest",
+              "version": 4,
+              "parameters": {
+                "authenticationType": "apiKey"
+              },
+              "mapper": {
+                "url": "https://api.xero.com/api.xro/2.0/PurchaseOrders?where=PurchaseOrderNumber%3D%3D%22{{ $json.output?.po_reference }}%22",
+                "method": "get",
+                "headers": [],
+                "queryParameters": [],
+                "parseResponse": true,
+                "stopOnHttpError": true,
+                "timeout": "",
+                "allowRedirects": true,
+                "shareCookies": false,
+                "requestCompressedContent": true
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 150,
+                  "name": "Xero API: Match to PO and receipt"
+                }
+              }
+            },
+            {
+              "id": 7,
+              "module": "util:SetVariables",
+              "version": 1,
+              "parameters": null,
+              "mapper": {
+                "scope": "roundtrip",
+                "variables": [
+                  {
+                    "name": "category",
+                    "value": "{{4.category}}"
+                  }
+                ]
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 150,
+                  "name": "Route exceptions and approvals (add a router here)"
+                }
+              }
+            },
+            {
+              "id": 8,
+              "module": "slack:CreateMessage",
+              "version": 4,
+              "parameters": {},
+              "mapper": {
+                "channelType": "public",
+                "channel": "{{2.config_approver}}",
+                "text": "Approve? {{4.summary}}\n\nReply in the thread with APPROVE or REJECT. With config_approval_mode = true nothing is written until the item is re-run with approved = true.",
+                "parseText": false,
+                "mrkdwn": true
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2400,
+                  "y": 150,
+                  "name": "Slack approval: Approve on the phone"
+                }
+              }
+            },
+            {
+              "id": 16,
+              "module": "builtin:BasicRouter",
+              "version": 1,
+              "parameters": null,
+              "mapper": null,
+              "metadata": {
+                "designer": {
+                  "x": 2700,
+                  "y": 150,
+                  "name": "Approval gate: Approve on the phone"
+                }
+              },
+              "routes": [
+                {
+                  "flow": [
+                    {
+                      "id": 15,
+                      "module": "builtin:ThrowWarning",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "message": "Approval requested. Re-run the item with approved = true (or set config_approval_mode = false) to write it back."
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3000,
+                          "y": 150,
+                          "name": "Waiting for approval: Approve on the phone"
+                        }
+                      },
+                      "filter": {
+                        "name": "Approval mode on",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{2.config_approval_mode}}",
+                              "b": "true",
+                              "o": "text:equal"
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "flow": [
+                    {
+                      "id": 9,
+                      "module": "xero:CreateInvoice",
+                      "version": 2,
+                      "parameters": {},
+                      "mapper": {
+                        "type": "ACCPAY",
+                        "contactId": "{{8.supplier_contact_id}}",
+                        "status": "DRAFT",
+                        "invoiceNumber": "{{4.invoice_number}}",
+                        "lineAmountTypes": "Exclusive",
+                        "lineItems": [
+                          {
+                            "description": "{{4.line_description}}",
+                            "quantity": "{{4.quantity}}",
+                            "unitAmount": "{{4.unit_amount}}",
+                            "accountCode": "{{4.account_code}}"
+                          }
+                        ]
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3000,
+                          "y": 300,
+                          "name": "Xero: Post to the ERP"
+                        }
+                      },
+                      "filter": {
+                        "name": "Approved or approval mode off",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{2.config_approval_mode}}",
+                              "b": "false",
+                              "o": "text:equal"
+                            }
+                          ],
+                          [
+                            {
+                              "a": "{{1.approved}}",
+                              "b": "true",
+                              "o": "boolean:equal"
+                            }
+                          ]
+                        ]
+                      }
+                    },
+                    {
+                      "id": 10,
+                      "module": "anthropic-claude:createAMessage",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "model": "claude-sonnet-5",
+                        "system": "You are the \"Supplier status replies\" step of the Invoice Processing Automation Workflow workflow run by Agentmelt.\nTask: Supplier emails asking about payment status are answered from the ERP data (received, approved, scheduled for date) so AP stops fielding calls.\n\nRules:\n- Bank-detail changes never post automatically; they trigger a verification call with the supplier.\n- Auto-approval applies only to PO-matched invoices within tolerance and policy limits; everything else has a named approver.\n- Duplicates are blocked before posting, not caught at month end.\n- Low-confidence extractions are reviewed by a person before matching.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+                        "messages": [
+                          {
+                            "role": "user",
+                            "content": [
+                              {
+                                "type": "text",
+                                "text": "Supplier status replies.\n\nItem (map the fields your source provides here):\n{{4.summary}}\n\n{{9.text}}{{9.body}}{{9.message}}{{9.subject}}{{9.email}}{{9.name}}{{9.data}}"
+                              }
+                            ]
+                          }
+                        ],
+                        "max_tokens": "2000",
+                        "temperature": "0.2",
+                        "metadata": {}
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3300,
+                          "y": 300,
+                          "name": "Claude: Supplier status replies"
+                        }
+                      }
+                    },
+                    {
+                      "id": 11,
+                      "module": "json:ParseJSON",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "json": "{{10.textResponse}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3600,
+                          "y": 300,
+                          "name": "Parse Claude's JSON: Supplier status replies"
+                        }
+                      }
+                    },
+                    {
+                      "id": 13,
+                      "module": "builtin:BasicRouter",
+                      "version": 1,
+                      "parameters": null,
+                      "mapper": null,
+                      "metadata": {
+                        "designer": {
+                          "x": 3900,
+                          "y": 300,
+                          "name": "Gate: Supplier status replies"
+                        }
+                      },
+                      "routes": [
+                        {
+                          "flow": [
+                            {
+                              "id": 12,
+                              "module": "builtin:ThrowWarning",
+                              "version": 1,
+                              "parameters": {},
+                              "mapper": {
+                                "message": "Parked for a person — Supplier status replies: {{11.summary}}"
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 4200,
+                                  "y": 300,
+                                  "name": "Needs a person: Supplier status replies"
+                                }
+                              },
+                              "filter": {
+                                "name": "Needs a person?",
+                                "conditions": [
+                                  [
+                                    {
+                                      "a": "{{11.needs_human}}",
+                                      "b": "true",
+                                      "o": "boolean:equal"
+                                    }
+                                  ]
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "flow": [
+                            {
+                              "id": 14,
+                              "module": "util:SetVariable2",
+                              "version": 1,
+                              "parameters": {},
+                              "mapper": {
+                                "name": "done",
+                                "scope": "roundtrip",
+                                "value": "true"
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 4200,
+                                  "y": 450,
+                                  "name": "Done"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "notes": [
+      {
+        "moduleIds": [
+          2
+        ],
+        "content": "## Extract supplier invoices from Gmail with Claude and post them to Xero for approval\n\nAccountants, bookkeepers and AP teams that key invoices in by hand and chase approvals by email.\n\n### How it works\nTrigger: New attachments to ap@ start the run; supplier portals and scanned batches are polled hourly.\n1. Capture the invoice\n2. Extract fields\n3. Validate and detect duplicates\n4. Match to PO and receipt\n5. Route exceptions and approvals\n6. Approve on the phone\n7. Post to the ERP\n8. Supplier status replies\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus NetSuite / Xero / QuickBooks / Sage, Slack / email, Google Drive / S3.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the coding rules and the approval thresholds in the Config node; swap Xero for QuickBooks, NetSuite or Sage.\nGuardrail to keep: Bank-detail changes never post automatically; they trigger a verification call with the supplier.\n\nFull blueprint: https://agentmelt.com/workflows/invoice-processing-automation/",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#F5D451"
+        }
+      }
+    ],
+    "zone": "eu1.make.com"
+  }
+}

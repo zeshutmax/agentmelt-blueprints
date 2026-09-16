@@ -1,0 +1,352 @@
+{
+  "name": "Send appointment reminders and handle replies with Twilio and Claude",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Webhook: Pull upcoming appointments"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "config_your_name",
+            "value": "Your name — signs every outgoing message"
+          },
+          {
+            "name": "config_your_email",
+            "value": "you@example.com"
+          },
+          {
+            "name": "config_your_company",
+            "value": "Your company or brokerage"
+          },
+          {
+            "name": "config_timezone",
+            "value": "Europe/London"
+          },
+          {
+            "name": "config_quiet_hours_start",
+            "value": "21"
+          },
+          {
+            "name": "config_quiet_hours_end",
+            "value": "8"
+          },
+          {
+            "name": "config_approval_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_approver",
+            "value": "#approvals — a Slack channel, or an email address"
+          },
+          {
+            "name": "config_test_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_schedule",
+            "value": "instant (webhook)"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "result",
+            "value": ""
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "Decide the cadence and channel (port the rule here)"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "twilio:SendSMS",
+      "version": 2,
+      "parameters": {},
+      "mapper": {
+        "to": "{{1.phone}}",
+        "body": "{{1.draft}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Twilio: Send the reminder"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "model": "claude-sonnet-5",
+        "system": "You are the \"Understand replies\" step of the Appointment Reminder Workflow workflow run by Agentmelt.\nTask: Free-text replies are classified — confirm, cancel, reschedule (with the proposed time extracted), question — and the agent drafts a short reply; ambiguous messages go to the front desk.\n\nRules:\n- Only patients with recorded consent for SMS or automated calls are messaged; opt-out words stop the sequence immediately.\n- Messages contain no clinical detail — appointment type, time and location only — to stay within HIPAA-safe messaging practice.\n- Reschedules are booked only into real availability; the agent never promises a slot it cannot see.\n- Ambiguous or emotional replies route to a person, with the thread.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Understand replies.\n\nItem (map the fields your source provides here):\n{{4.text}}{{4.body}}{{4.message}}{{4.subject}}{{4.email}}{{4.name}}{{4.data}}"
+              }
+            ]
+          }
+        ],
+        "max_tokens": "2000",
+        "temperature": "0.2",
+        "metadata": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "Claude: Understand replies"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{5.textResponse}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 0,
+          "name": "Parse Claude's JSON: Understand replies"
+        }
+      }
+    },
+    {
+      "id": 12,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": null,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 1800,
+          "y": 0,
+          "name": "Gate: Understand replies"
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 11,
+              "module": "builtin:ThrowWarning",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "message": "Parked for a person — Understand replies: {{6.summary}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 0,
+                  "name": "Needs a person: Understand replies"
+                }
+              },
+              "filter": {
+                "name": "Needs a person?",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{6.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:equal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 7,
+              "module": "http:MakeRequest",
+              "version": 4,
+              "parameters": {
+                "authenticationType": "basicAuth"
+              },
+              "mapper": {
+                "url": "https://acuityscheduling.com/api/v1/availability/times?appointmentTypeID={{ $json.type_id }}&date={{ $json.date }}",
+                "method": "get",
+                "headers": [],
+                "queryParameters": [],
+                "parseResponse": true,
+                "stopOnHttpError": true,
+                "timeout": "",
+                "allowRedirects": true,
+                "shareCookies": false,
+                "requestCompressedContent": true
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 150,
+                  "name": "Acuity Scheduling API: Book reschedules from real availability"
+                }
+              },
+              "filter": {
+                "name": "Continue",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{6.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:notequal"
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "id": 8,
+              "module": "builtin:BasicFeeder",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "array": "{{7.items}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2400,
+                  "y": 150,
+                  "name": "Iterate: Fill cancellations from the waitlist"
+                }
+              }
+            },
+            {
+              "id": 9,
+              "module": "google-sheets:addRow",
+              "version": 2,
+              "parameters": {},
+              "mapper": {
+                "from": "drive",
+                "mode": "select",
+                "values": {
+                  "0": "{{6.summary}}"
+                },
+                "sheetId": "Sheet1",
+                "spreadsheetId": "",
+                "includesHeaders": true,
+                "insertDataOption": "INSERT_ROWS",
+                "valueInputOption": "USER_ENTERED",
+                "insertUnformatted": false
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2700,
+                  "y": 150,
+                  "name": "Google Sheets: Update the record and the desk"
+                }
+              }
+            },
+            {
+              "id": 10,
+              "module": "util:SetVariables",
+              "version": 1,
+              "parameters": null,
+              "mapper": {
+                "scope": "roundtrip",
+                "variables": [
+                  {
+                    "name": "run_at",
+                    "value": "{{now}}"
+                  }
+                ]
+              },
+              "metadata": {
+                "designer": {
+                  "x": 3000,
+                  "y": 150,
+                  "name": "Report weekly (runs on the scenario schedule)"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "notes": [
+      {
+        "moduleIds": [
+          2
+        ],
+        "content": "## Send appointment reminders and handle replies with Twilio and Claude\n\nClinics, salons and service businesses losing revenue to no-shows.\n\n### How it works\nTrigger: Hourly scan of upcoming appointments in the scheduling system; webhooks for new bookings, cancellations and inbound SMS replies.\n1. Pull upcoming appointments\n2. Decide the cadence and channel\n3. Send the reminder\n4. Understand replies\n5. Book reschedules from real availability\n6. Fill cancellations from the waitlist\n7. Update the record and the desk\n8. Report weekly\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Twilio, Scheduling system (Dentrix, Cliniko, Acuity, Calendly…).\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the reminder timing and the reschedule rules in the Config node; connect your scheduling system (Acuity, Calendly, Cliniko…).\nGuardrail to keep: Only patients with recorded consent for SMS or automated calls are messaged; opt-out words stop the sequence immediately.\n\nFull blueprint: https://agentmelt.com/workflows/appointment-reminders-automation/",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#F5D451"
+        }
+      }
+    ],
+    "zone": "eu1.make.com"
+  }
+}

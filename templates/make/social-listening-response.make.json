@@ -1,0 +1,547 @@
+{
+  "name": "Monitor brand mentions with Claude and draft replies for approval in Slack",
+  "flow": [
+    {
+      "id": 1,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "config_your_name",
+            "value": "Your name — signs every outgoing message"
+          },
+          {
+            "name": "config_your_email",
+            "value": "you@example.com"
+          },
+          {
+            "name": "config_your_company",
+            "value": "Your company or brokerage"
+          },
+          {
+            "name": "config_timezone",
+            "value": "Europe/London"
+          },
+          {
+            "name": "config_quiet_hours_start",
+            "value": "21"
+          },
+          {
+            "name": "config_quiet_hours_end",
+            "value": "8"
+          },
+          {
+            "name": "config_approval_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_approver",
+            "value": "#approvals — a Slack channel, or an email address"
+          },
+          {
+            "name": "config_test_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_schedule",
+            "value": "scenario schedule: Schedule Trigger (hourly collection)"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "http:MakeRequest",
+      "version": 4,
+      "parameters": {
+        "authenticationType": "apiKey"
+      },
+      "mapper": {
+        "url": "https://api.mention.net/api/accounts/{{ $json.account_id }}/alerts/{{ $json.alert_id }}/mentions?since_id={{ $json.since_id }}",
+        "method": "get",
+        "headers": [],
+        "queryParameters": [],
+        "parseResponse": true,
+        "stopOnHttpError": true,
+        "timeout": "",
+        "allowRedirects": true,
+        "shareCookies": false,
+        "requestCompressedContent": true
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Mention API: Collect mentions"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "result",
+            "value": ""
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "De-duplicate and filter (port the rule here)"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "model": "claude-sonnet-5",
+        "system": "You are the \"Classify intent and sentiment\" step of the Social Listening & Response Workflow workflow run by Agentmelt.\nTask: Buying question, complaint, support request, praise, competitor comparison, PR risk, irrelevant — plus sentiment and an urgency score based on author reach and tone.\n\nRules:\n- Nothing is posted publicly without human approval; the agent drafts.\n- Complaints are acknowledged publicly and resolved privately — the agent never debates in public.\n- PR-risk classifications bypass drafting and go straight to a person.\n- Author reach and account age feed urgency so a journalist's question is not treated like a bot's.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Classify intent and sentiment.\n\nItem (map the fields your source provides here):\n{{2.text}}{{2.body}}{{2.message}}{{2.subject}}{{2.email}}{{2.name}}{{2.data}}"
+              }
+            ]
+          }
+        ],
+        "max_tokens": "2000",
+        "temperature": "0.2",
+        "metadata": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Claude: Classify intent and sentiment"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{4.textResponse}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "Parse Claude's JSON: Classify intent and sentiment"
+        }
+      }
+    },
+    {
+      "id": 19,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": null,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 0,
+          "name": "Gate: Classify intent and sentiment"
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 18,
+              "module": "builtin:ThrowWarning",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "message": "Parked for a person — Classify intent and sentiment: {{5.summary}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 0,
+                  "name": "Needs a person: Classify intent and sentiment"
+                }
+              },
+              "filter": {
+                "name": "Needs a person?",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{5.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:equal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 6,
+              "module": "anthropic-claude:createAMessage",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "model": "claude-sonnet-5",
+                "system": "You are the \"Draft the response\" step of the Social Listening & Response Workflow workflow run by Agentmelt.\nTask: For replyable categories, a short response in your brand voice that answers the actual question, references the right resource, and never argues. Complaints get an acknowledgement and a route to support, not a public defence.\n\nRules:\n- Nothing is posted publicly without human approval; the agent drafts.\n- Complaints are acknowledged publicly and resolved privately — the agent never debates in public.\n- PR-risk classifications bypass drafting and go straight to a person.\n- Author reach and account age feed urgency so a journalist's question is not treated like a bot's.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+                "messages": [
+                  {
+                    "role": "user",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Draft the response.\n\nItem (map the fields your source provides here):\n{{5.summary}}\n\n{{5.text}}{{5.body}}{{5.message}}{{5.subject}}{{5.email}}{{5.name}}{{5.data}}"
+                      }
+                    ]
+                  }
+                ],
+                "max_tokens": "2000",
+                "temperature": "0.2",
+                "metadata": {}
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 150,
+                  "name": "Claude: Draft the response"
+                }
+              },
+              "filter": {
+                "name": "Continue",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{5.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:notequal"
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "id": 7,
+              "module": "json:ParseJSON",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "json": "{{6.textResponse}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 150,
+                  "name": "Parse Claude's JSON: Draft the response"
+                }
+              }
+            },
+            {
+              "id": 17,
+              "module": "builtin:BasicRouter",
+              "version": 1,
+              "parameters": null,
+              "mapper": null,
+              "metadata": {
+                "designer": {
+                  "x": 2400,
+                  "y": 150,
+                  "name": "Gate: Draft the response"
+                }
+              },
+              "routes": [
+                {
+                  "flow": [
+                    {
+                      "id": 16,
+                      "module": "builtin:ThrowWarning",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "message": "Parked for a person — Draft the response: {{7.summary}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2700,
+                          "y": 150,
+                          "name": "Needs a person: Draft the response"
+                        }
+                      },
+                      "filter": {
+                        "name": "Needs a person?",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{7.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:equal"
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "flow": [
+                    {
+                      "id": 8,
+                      "module": "util:SetVariables",
+                      "version": 1,
+                      "parameters": null,
+                      "mapper": {
+                        "scope": "roundtrip",
+                        "variables": [
+                          {
+                            "name": "category",
+                            "value": "{{7.category}}"
+                          }
+                        ]
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2700,
+                          "y": 300,
+                          "name": "Route by category (add a router here)"
+                        }
+                      },
+                      "filter": {
+                        "name": "Continue",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{7.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:notequal"
+                            }
+                          ]
+                        ]
+                      }
+                    },
+                    {
+                      "id": 9,
+                      "module": "util:FunctionSleep",
+                      "version": 1,
+                      "parameters": null,
+                      "mapper": {
+                        "duration": 300
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3000,
+                          "y": 300,
+                          "name": "Wait: Approve and post"
+                        }
+                      }
+                    },
+                    {
+                      "id": 10,
+                      "module": "google-sheets:addRow",
+                      "version": 2,
+                      "parameters": {},
+                      "mapper": {
+                        "from": "drive",
+                        "mode": "select",
+                        "values": {
+                          "0": "{{7.summary}}"
+                        },
+                        "sheetId": "Sheet1",
+                        "spreadsheetId": "",
+                        "includesHeaders": true,
+                        "insertDataOption": "INSERT_ROWS",
+                        "valueInputOption": "USER_ENTERED",
+                        "insertUnformatted": false
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3300,
+                          "y": 300,
+                          "name": "Google Sheets: Log everything"
+                        }
+                      }
+                    },
+                    {
+                      "id": 11,
+                      "module": "anthropic-claude:createAMessage",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "model": "claude-sonnet-5",
+                        "system": "You are the \"Weekly listening report\" step of the Social Listening & Response Workflow workflow run by Agentmelt.\nTask: Share of voice vs competitors, sentiment trend, top themes with example mentions, unanswered buying questions, and three content ideas drawn from recurring questions.\n\nRules:\n- Nothing is posted publicly without human approval; the agent drafts.\n- Complaints are acknowledged publicly and resolved privately — the agent never debates in public.\n- PR-risk classifications bypass drafting and go straight to a person.\n- Author reach and account age feed urgency so a journalist's question is not treated like a bot's.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+                        "messages": [
+                          {
+                            "role": "user",
+                            "content": [
+                              {
+                                "type": "text",
+                                "text": "Weekly listening report.\n\nItem (map the fields your source provides here):\n{{7.summary}}\n\n{{10.text}}{{10.body}}{{10.message}}{{10.subject}}{{10.email}}{{10.name}}{{10.data}}"
+                              }
+                            ]
+                          }
+                        ],
+                        "max_tokens": "2000",
+                        "temperature": "0.2",
+                        "metadata": {}
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3600,
+                          "y": 300,
+                          "name": "Claude: Weekly listening report"
+                        }
+                      }
+                    },
+                    {
+                      "id": 12,
+                      "module": "json:ParseJSON",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "json": "{{11.textResponse}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3900,
+                          "y": 300,
+                          "name": "Parse Claude's JSON: Weekly listening report"
+                        }
+                      }
+                    },
+                    {
+                      "id": 14,
+                      "module": "builtin:BasicRouter",
+                      "version": 1,
+                      "parameters": null,
+                      "mapper": null,
+                      "metadata": {
+                        "designer": {
+                          "x": 4200,
+                          "y": 300,
+                          "name": "Gate: Weekly listening report"
+                        }
+                      },
+                      "routes": [
+                        {
+                          "flow": [
+                            {
+                              "id": 13,
+                              "module": "builtin:ThrowWarning",
+                              "version": 1,
+                              "parameters": {},
+                              "mapper": {
+                                "message": "Parked for a person — Weekly listening report: {{12.summary}}"
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 4500,
+                                  "y": 300,
+                                  "name": "Needs a person: Weekly listening report"
+                                }
+                              },
+                              "filter": {
+                                "name": "Needs a person?",
+                                "conditions": [
+                                  [
+                                    {
+                                      "a": "{{12.needs_human}}",
+                                      "b": "true",
+                                      "o": "boolean:equal"
+                                    }
+                                  ]
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "flow": [
+                            {
+                              "id": 15,
+                              "module": "util:SetVariable2",
+                              "version": 1,
+                              "parameters": {},
+                              "mapper": {
+                                "name": "done",
+                                "scope": "roundtrip",
+                                "value": "true"
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 4500,
+                                  "y": 450,
+                                  "name": "Done"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "notes": [
+      {
+        "moduleIds": [
+          1
+        ],
+        "content": "## Monitor brand mentions with Claude and draft replies for approval in Slack\n\nMarketing and support teams that answer social mentions by hand and miss the ones that matter.\n\n### How it works\nTrigger: Hourly pulls from each source's API or a listening provider; high-severity classifications trigger immediate alerts.\n1. Collect mentions\n2. De-duplicate and filter\n3. Classify intent and sentiment\n4. Draft the response\n5. Route by category\n6. Approve and post\n7. Log everything\n8. Weekly listening report\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Brand24 / Mention / platform APIs, Slack, HubSpot + Zendesk.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nChange the sources and the severity rules in the Config node; add a HubSpot or Zendesk node to open a ticket for complaints.\nGuardrail to keep: Nothing is posted publicly without human approval; the agent drafts.\n\nFull blueprint: https://agentmelt.com/workflows/social-listening-response/",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#F5D451"
+        }
+      }
+    ],
+    "zone": "eu1.make.com"
+  }
+}

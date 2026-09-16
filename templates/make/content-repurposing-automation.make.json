@@ -1,0 +1,539 @@
+{
+  "name": "Turn podcast episodes from Google Drive into posts with Deepgram and Claude",
+  "flow": [
+    {
+      "id": 1,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "config_your_name",
+            "value": "Your name — signs every outgoing message"
+          },
+          {
+            "name": "config_your_email",
+            "value": "you@example.com"
+          },
+          {
+            "name": "config_your_company",
+            "value": "Your company or brokerage"
+          },
+          {
+            "name": "config_timezone",
+            "value": "Europe/London"
+          },
+          {
+            "name": "config_quiet_hours_start",
+            "value": "21"
+          },
+          {
+            "name": "config_quiet_hours_end",
+            "value": "8"
+          },
+          {
+            "name": "config_approval_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_approver",
+            "value": "#approvals — a Slack channel, or an email address"
+          },
+          {
+            "name": "config_test_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_schedule",
+            "value": "scenario schedule: New file in a folder (Google Drive / Dropbox) or RSS"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "http:MakeRequest",
+      "version": 4,
+      "parameters": {
+        "authenticationType": "apiKey"
+      },
+      "mapper": {
+        "url": "https://api.deepgram.com/v1/listen?model=nova-3&diarize=true&smart_format=true",
+        "method": "post",
+        "headers": [],
+        "queryParameters": [],
+        "parseResponse": true,
+        "stopOnHttpError": true,
+        "timeout": "",
+        "allowRedirects": true,
+        "shareCookies": false,
+        "requestCompressedContent": true,
+        "contentType": "json",
+        "inputMethod": "jsonString",
+        "jsonStringBodyContent": "{\n  \"url\": \"{{ $json.audio_url }}\"\n}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Deepgram API: Transcribe"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "model": "claude-sonnet-5",
+        "system": "You are the \"Extract structure\" step of the Content Repurposing Workflow workflow run by Agentmelt.\nTask: Segments with titles and timestamps, key claims, the three most quotable lines, named people and resources mentioned, and the episode's single main idea.\n\nRules:\n- Nothing publishes without approval on the review board.\n- Quotes are verbatim from the transcript with timestamps; the agent cannot invent a quote.\n- Claims extracted from the episode are attributed to the speaker, not stated as fact by the brand.\n- Style rules (no emojis, no hashtags, sentence length) are enforced by structured output and checked before the board.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Extract structure.\n\nItem (map the fields your source provides here):\n{{2.text}}{{2.body}}{{2.message}}{{2.subject}}{{2.email}}{{2.name}}{{2.data}}"
+              }
+            ]
+          }
+        ],
+        "max_tokens": "2000",
+        "temperature": "0.2",
+        "metadata": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "Claude: Extract structure"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{3.textResponse}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Parse Claude's JSON: Extract structure"
+        }
+      }
+    },
+    {
+      "id": 18,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": null,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "Gate: Extract structure"
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 17,
+              "module": "builtin:ThrowWarning",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "message": "Parked for a person — Extract structure: {{4.summary}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 0,
+                  "name": "Needs a person: Extract structure"
+                }
+              },
+              "filter": {
+                "name": "Needs a person?",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{4.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:equal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 5,
+              "module": "anthropic-claude:createAMessage",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "model": "claude-sonnet-5",
+                "system": "You are the \"Draft the long-form\" step of the Content Repurposing Workflow workflow run by Agentmelt.\nTask: Show notes with timestamps and a blog post that restructures the conversation into an article — not a transcript summary — in your voice guide, with the resources linked.\n\nRules:\n- Nothing publishes without approval on the review board.\n- Quotes are verbatim from the transcript with timestamps; the agent cannot invent a quote.\n- Claims extracted from the episode are attributed to the speaker, not stated as fact by the brand.\n- Style rules (no emojis, no hashtags, sentence length) are enforced by structured output and checked before the board.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+                "messages": [
+                  {
+                    "role": "user",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Draft the long-form.\n\nItem (map the fields your source provides here):\n{{4.summary}}\n\n{{4.text}}{{4.body}}{{4.message}}{{4.subject}}{{4.email}}{{4.name}}{{4.data}}"
+                      }
+                    ]
+                  }
+                ],
+                "max_tokens": "2000",
+                "temperature": "0.2",
+                "metadata": {}
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 150,
+                  "name": "Claude: Draft the long-form"
+                }
+              },
+              "filter": {
+                "name": "Continue",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{4.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:notequal"
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "id": 6,
+              "module": "json:ParseJSON",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "json": "{{5.textResponse}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 150,
+                  "name": "Parse Claude's JSON: Draft the long-form"
+                }
+              }
+            },
+            {
+              "id": 16,
+              "module": "builtin:BasicRouter",
+              "version": 1,
+              "parameters": null,
+              "mapper": null,
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 150,
+                  "name": "Gate: Draft the long-form"
+                }
+              },
+              "routes": [
+                {
+                  "flow": [
+                    {
+                      "id": 15,
+                      "module": "builtin:ThrowWarning",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "message": "Parked for a person — Draft the long-form: {{6.summary}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2400,
+                          "y": 150,
+                          "name": "Needs a person: Draft the long-form"
+                        }
+                      },
+                      "filter": {
+                        "name": "Needs a person?",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{6.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:equal"
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "flow": [
+                    {
+                      "id": 7,
+                      "module": "anthropic-claude:createAMessage",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "model": "claude-sonnet-5",
+                        "system": "You are the \"Draft the short-form\" step of the Content Repurposing Workflow workflow run by Agentmelt.\nTask: Five LinkedIn posts (one per key idea, different hooks), an X thread, a newsletter section, and a pull-quote graphic brief; each within platform limits and your style rules.\n\nRules:\n- Nothing publishes without approval on the review board.\n- Quotes are verbatim from the transcript with timestamps; the agent cannot invent a quote.\n- Claims extracted from the episode are attributed to the speaker, not stated as fact by the brand.\n- Style rules (no emojis, no hashtags, sentence length) are enforced by structured output and checked before the board.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+                        "messages": [
+                          {
+                            "role": "user",
+                            "content": [
+                              {
+                                "type": "text",
+                                "text": "Draft the short-form.\n\nItem (map the fields your source provides here):\n{{6.summary}}\n\n{{6.text}}{{6.body}}{{6.message}}{{6.subject}}{{6.email}}{{6.name}}{{6.data}}"
+                              }
+                            ]
+                          }
+                        ],
+                        "max_tokens": "2000",
+                        "temperature": "0.2",
+                        "metadata": {}
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2400,
+                          "y": 300,
+                          "name": "Claude: Draft the short-form"
+                        }
+                      },
+                      "filter": {
+                        "name": "Continue",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{6.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:notequal"
+                            }
+                          ]
+                        ]
+                      }
+                    },
+                    {
+                      "id": 8,
+                      "module": "json:ParseJSON",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "json": "{{7.textResponse}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2700,
+                          "y": 300,
+                          "name": "Parse Claude's JSON: Draft the short-form"
+                        }
+                      }
+                    },
+                    {
+                      "id": 14,
+                      "module": "builtin:BasicRouter",
+                      "version": 1,
+                      "parameters": null,
+                      "mapper": null,
+                      "metadata": {
+                        "designer": {
+                          "x": 3000,
+                          "y": 300,
+                          "name": "Gate: Draft the short-form"
+                        }
+                      },
+                      "routes": [
+                        {
+                          "flow": [
+                            {
+                              "id": 13,
+                              "module": "builtin:ThrowWarning",
+                              "version": 1,
+                              "parameters": {},
+                              "mapper": {
+                                "message": "Parked for a person — Draft the short-form: {{8.summary}}"
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 3300,
+                                  "y": 300,
+                                  "name": "Needs a person: Draft the short-form"
+                                }
+                              },
+                              "filter": {
+                                "name": "Needs a person?",
+                                "conditions": [
+                                  [
+                                    {
+                                      "a": "{{8.needs_human}}",
+                                      "b": "true",
+                                      "o": "boolean:equal"
+                                    }
+                                  ]
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "flow": [
+                            {
+                              "id": 9,
+                              "module": "util:SetVariables",
+                              "version": 1,
+                              "parameters": null,
+                              "mapper": {
+                                "scope": "roundtrip",
+                                "variables": [
+                                  {
+                                    "name": "result",
+                                    "value": ""
+                                  }
+                                ]
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 3300,
+                                  "y": 450,
+                                  "name": "Clip list for the editor (port the rule here)"
+                                }
+                              },
+                              "filter": {
+                                "name": "Continue",
+                                "conditions": [
+                                  [
+                                    {
+                                      "a": "{{8.needs_human}}",
+                                      "b": "true",
+                                      "o": "boolean:notequal"
+                                    }
+                                  ]
+                                ]
+                              }
+                            },
+                            {
+                              "id": 10,
+                              "module": "notion:createDataSourceItem",
+                              "version": 1,
+                              "parameters": {},
+                              "mapper": {
+                                "dataSourceId": "",
+                                "properties": {
+                                  "Name": "{{8.subject}}"
+                                }
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 3600,
+                                  "y": 450,
+                                  "name": "Notion: Review board"
+                                }
+                              }
+                            },
+                            {
+                              "id": 11,
+                              "module": "wordpress:createPost",
+                              "version": 3,
+                              "parameters": {},
+                              "mapper": {
+                                "title": "{{8.title}}",
+                                "content": "{{8.body}}",
+                                "status": "draft"
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 3900,
+                                  "y": 450,
+                                  "name": "WordPress: Schedule approved assets"
+                                }
+                              }
+                            },
+                            {
+                              "id": 12,
+                              "module": "util:SetVariables",
+                              "version": 1,
+                              "parameters": null,
+                              "mapper": {
+                                "scope": "roundtrip",
+                                "variables": [
+                                  {
+                                    "name": "run_at",
+                                    "value": "{{now}}"
+                                  }
+                                ]
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 4200,
+                                  "y": 450,
+                                  "name": "Report performance back (runs on the scenario schedule)"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "notes": [
+      {
+        "moduleIds": [
+          1
+        ],
+        "content": "## Turn podcast episodes from Google Drive into posts with Deepgram and Claude\n\nContent teams that publish one long piece and never get to the ten short ones it could become.\n\n### How it works\nTrigger: A recording dropped in the 'episodes' folder, a new item in the podcast RSS feed, or a Riverside/Zoom recording webhook starts the run.\n1. Transcribe\n2. Extract structure\n3. Draft the long-form\n4. Draft the short-form\n5. Clip list for the editor\n6. Review board\n7. Schedule approved assets\n8. Report performance back\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Deepgram / AssemblyAI, Notion, Buffer / Hootsuite / CMS.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the output formats and your voice rules in the Config node; publish through Buffer, Hootsuite or your CMS.\nGuardrail to keep: Nothing publishes without approval on the review board.\n\nFull blueprint: https://agentmelt.com/workflows/content-repurposing-automation/",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#F5D451"
+        }
+      }
+    ],
+    "zone": "eu1.make.com"
+  }
+}

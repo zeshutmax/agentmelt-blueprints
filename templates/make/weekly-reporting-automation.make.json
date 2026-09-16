@@ -1,0 +1,350 @@
+{
+  "name": "Compile a weekly report from BigQuery with Claude into Google Docs and Slack",
+  "flow": [
+    {
+      "id": 1,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "config_your_name",
+            "value": "Your name — signs every outgoing message"
+          },
+          {
+            "name": "config_your_email",
+            "value": "you@example.com"
+          },
+          {
+            "name": "config_your_company",
+            "value": "Your company or brokerage"
+          },
+          {
+            "name": "config_timezone",
+            "value": "Europe/London"
+          },
+          {
+            "name": "config_quiet_hours_start",
+            "value": "21"
+          },
+          {
+            "name": "config_quiet_hours_end",
+            "value": "8"
+          },
+          {
+            "name": "config_approval_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_approver",
+            "value": "#approvals — a Slack channel, or an email address"
+          },
+          {
+            "name": "config_test_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_schedule",
+            "value": "scenario schedule: Schedule Trigger (Monday 6am)"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "postgres:Query",
+      "version": 2,
+      "parameters": {
+        "continueWhenNoRes": false,
+        "isToManageDataInSharedTransaction": true
+      },
+      "mapper": {
+        "query": "SELECT 1; -- replace with your query"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Postgres: Run the metric queries"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "result",
+            "value": ""
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "Assemble the metrics table (port the rule here)"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "google-calendar:createAnEvent",
+      "version": 5,
+      "parameters": {},
+      "mapper": {
+        "calendar": "{{1.config_your_email}}",
+        "summary": "{{2.subject}}",
+        "start": "{{2.start}}",
+        "end": "{{2.end}}",
+        "allDay": false,
+        "visibility": "default",
+        "sendUpdates": "none"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Google Calendar: Pull context"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "model": "claude-sonnet-5",
+        "system": "You are the \"Draft the narrative\" step of the Weekly Reporting Workflow workflow run by Agentmelt.\nTask: From the table, the context and last week's approved report, the agent writes the summary: the three biggest moves with likely causes from the context, metrics off target, and what to watch. Every claim references a number in the table.\n\nRules:\n- Every number in the narrative must appear in the metrics table; the agent cannot introduce figures.\n- Causal claims are phrased as likely and tied to a context event; where no event exists the narrative says the cause is unknown.\n- The report is approved by its owner before distribution.\n- Broken or missing metrics are flagged in the report, never silently omitted.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Draft the narrative.\n\nItem (map the fields your source provides here):\n{{4.text}}{{4.body}}{{4.message}}{{4.subject}}{{4.email}}{{4.name}}{{4.data}}"
+              }
+            ]
+          }
+        ],
+        "max_tokens": "2000",
+        "temperature": "0.2",
+        "metadata": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "Claude: Draft the narrative"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{5.textResponse}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 0,
+          "name": "Parse Claude's JSON: Draft the narrative"
+        }
+      }
+    },
+    {
+      "id": 12,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": null,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 1800,
+          "y": 0,
+          "name": "Gate: Draft the narrative"
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 11,
+              "module": "builtin:ThrowWarning",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "message": "Parked for a person — Draft the narrative: {{6.summary}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 0,
+                  "name": "Needs a person: Draft the narrative"
+                }
+              },
+              "filter": {
+                "name": "Needs a person?",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{6.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:equal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 7,
+              "module": "google-docs:createADocument",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "name": "{{6.subject}}",
+                "content": "{{6.draft}}",
+                "destination": "drive",
+                "folderId": ""
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 150,
+                  "name": "Google Docs: Render the report"
+                }
+              },
+              "filter": {
+                "name": "Continue",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{6.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:notequal"
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "id": 8,
+              "module": "util:FunctionSleep",
+              "version": 1,
+              "parameters": null,
+              "mapper": {
+                "duration": 300
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2400,
+                  "y": 150,
+                  "name": "Wait: Approve"
+                }
+              }
+            },
+            {
+              "id": 9,
+              "module": "slack:CreateMessage",
+              "version": 4,
+              "parameters": {},
+              "mapper": {
+                "channelType": "public",
+                "channel": "{{1.config_approver}}",
+                "text": "{{6.summary}}",
+                "parseText": false,
+                "mrkdwn": true
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2700,
+                  "y": 150,
+                  "name": "Slack: Distribute"
+                }
+              }
+            },
+            {
+              "id": 10,
+              "module": "google-sheets:addRow",
+              "version": 2,
+              "parameters": {},
+              "mapper": {
+                "from": "drive",
+                "mode": "select",
+                "values": {
+                  "0": "{{6.summary}}"
+                },
+                "sheetId": "Sheet1",
+                "spreadsheetId": "",
+                "includesHeaders": true,
+                "insertDataOption": "INSERT_ROWS",
+                "valueInputOption": "USER_ENTERED",
+                "insertUnformatted": false
+              },
+              "metadata": {
+                "designer": {
+                  "x": 3000,
+                  "y": 150,
+                  "name": "Google Sheets: Maintain the catalogue"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "notes": [
+      {
+        "moduleIds": [
+          1
+        ],
+        "content": "## Compile a weekly report from BigQuery with Claude into Google Docs and Slack\n\nOperations leads who spend Monday morning assembling the same report from five dashboards.\n\n### How it works\nTrigger: Weekly run after data sources have closed the week; on-demand run for ad-hoc periods.\n1. Run the metric queries\n2. Assemble the metrics table\n3. Pull context\n4. Draft the narrative\n5. Render the report\n6. Approve\n7. Distribute\n8. Maintain the catalogue\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus BigQuery / Snowflake / Postgres, Google Docs + Slack.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nList the metrics and their queries in the Config node; replace BigQuery with Snowflake or Postgres.\nGuardrail to keep: Every number in the narrative must appear in the metrics table; the agent cannot introduce figures.\n\nFull blueprint: https://agentmelt.com/workflows/weekly-reporting-automation/",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#F5D451"
+        }
+      }
+    ],
+    "zone": "eu1.make.com"
+  }
+}

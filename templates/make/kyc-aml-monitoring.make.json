@@ -1,0 +1,417 @@
+{
+  "name": "Screen customers against sanctions lists with ComplyAdvantage and Claude",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Webhook: Screen the customer"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "config_your_name",
+            "value": "Your name — signs every outgoing message"
+          },
+          {
+            "name": "config_your_email",
+            "value": "you@example.com"
+          },
+          {
+            "name": "config_your_company",
+            "value": "Your company or brokerage"
+          },
+          {
+            "name": "config_timezone",
+            "value": "Europe/London"
+          },
+          {
+            "name": "config_quiet_hours_start",
+            "value": "21"
+          },
+          {
+            "name": "config_quiet_hours_end",
+            "value": "8"
+          },
+          {
+            "name": "config_approval_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_approver",
+            "value": "#approvals — a Slack channel, or an email address"
+          },
+          {
+            "name": "config_test_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_schedule",
+            "value": "instant (webhook)"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "model": "claude-sonnet-5",
+        "system": "You are the \"Pre-assess matches\" step of the KYC/AML Monitoring Workflow workflow run by Agentmelt.\nTask: For each hit the agent compares the customer profile to the list entry — dates, locations, identifiers, context — and drafts an assessment: likely true match, likely false positive, or needs more information, with the reasoning.\n\nRules:\n- No case is closed without an analyst's recorded decision; the agent drafts, never decides.\n- Sanctions matches always reach a senior analyst regardless of the draft assessment.\n- Every decision is logged in a tamper-evident store with actor, rationale and timestamp.\n- Rules and thresholds are versioned; changes require compliance-officer approval and are logged.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Pre-assess matches.\n\nItem (map the fields your source provides here):\n{{1.text}}{{1.body}}{{1.message}}{{1.subject}}{{1.email}}{{1.name}}{{1.data}}"
+              }
+            ]
+          }
+        ],
+        "max_tokens": "2000",
+        "temperature": "0.2",
+        "metadata": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "Claude: Pre-assess matches"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{3.textResponse}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Parse Claude's JSON: Pre-assess matches"
+        }
+      }
+    },
+    {
+      "id": 14,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": null,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "Gate: Pre-assess matches"
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 13,
+              "module": "builtin:ThrowWarning",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "message": "Parked for a person — Pre-assess matches: {{4.summary}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 0,
+                  "name": "Needs a person: Pre-assess matches"
+                }
+              },
+              "filter": {
+                "name": "Needs a person?",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{4.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:equal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 5,
+              "module": "util:SetVariables",
+              "version": 1,
+              "parameters": null,
+              "mapper": {
+                "scope": "roundtrip",
+                "variables": [
+                  {
+                    "name": "result",
+                    "value": ""
+                  }
+                ]
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 150,
+                  "name": "Evaluate transactions (port the rule here)"
+                }
+              },
+              "filter": {
+                "name": "Continue",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{4.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:notequal"
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "id": 6,
+              "module": "util:SetVariables",
+              "version": 1,
+              "parameters": null,
+              "mapper": {
+                "scope": "roundtrip",
+                "variables": [
+                  {
+                    "name": "result",
+                    "value": ""
+                  }
+                ]
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 150,
+                  "name": "Build the case (port the rule here)"
+                }
+              }
+            },
+            {
+              "id": 7,
+              "module": "slack:CreateMessage",
+              "version": 4,
+              "parameters": {},
+              "mapper": {
+                "channelType": "public",
+                "channel": "{{2.config_approver}}",
+                "text": "Approve? {{4.summary}}\n\nReply in the thread with APPROVE or REJECT. With config_approval_mode = true nothing is written until the item is re-run with approved = true.",
+                "parseText": false,
+                "mrkdwn": true
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 150,
+                  "name": "Slack approval: Route to the analyst"
+                }
+              }
+            },
+            {
+              "id": 12,
+              "module": "builtin:BasicRouter",
+              "version": 1,
+              "parameters": null,
+              "mapper": null,
+              "metadata": {
+                "designer": {
+                  "x": 2400,
+                  "y": 150,
+                  "name": "Approval gate: Route to the analyst"
+                }
+              },
+              "routes": [
+                {
+                  "flow": [
+                    {
+                      "id": 11,
+                      "module": "builtin:ThrowWarning",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "message": "Approval requested. Re-run the item with approved = true (or set config_approval_mode = false) to write it back."
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2700,
+                          "y": 150,
+                          "name": "Waiting for approval: Route to the analyst"
+                        }
+                      },
+                      "filter": {
+                        "name": "Approval mode on",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{2.config_approval_mode}}",
+                              "b": "true",
+                              "o": "text:equal"
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "flow": [
+                    {
+                      "id": 8,
+                      "module": "postgres:Query",
+                      "version": 2,
+                      "parameters": {
+                        "continueWhenNoRes": false,
+                        "isToManageDataInSharedTransaction": true
+                      },
+                      "mapper": {
+                        "query": "SELECT 1; -- replace with your query"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2700,
+                          "y": 300,
+                          "name": "Postgres: Record the decision"
+                        }
+                      },
+                      "filter": {
+                        "name": "Approved or approval mode off",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{2.config_approval_mode}}",
+                              "b": "false",
+                              "o": "text:equal"
+                            }
+                          ],
+                          [
+                            {
+                              "a": "{{1.approved}}",
+                              "b": "true",
+                              "o": "boolean:equal"
+                            }
+                          ]
+                        ]
+                      }
+                    },
+                    {
+                      "id": 9,
+                      "module": "util:SetVariables",
+                      "version": 1,
+                      "parameters": null,
+                      "mapper": {
+                        "scope": "roundtrip",
+                        "variables": [
+                          {
+                            "name": "run_at",
+                            "value": "{{now}}"
+                          }
+                        ]
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3000,
+                          "y": 300,
+                          "name": "Continuous re-screening (runs on the scenario schedule)"
+                        }
+                      }
+                    },
+                    {
+                      "id": 10,
+                      "module": "google-docs:createADocument",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "name": "{{4.subject}}",
+                        "content": "{{4.draft}}",
+                        "destination": "drive",
+                        "folderId": ""
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3300,
+                          "y": 300,
+                          "name": "Google Docs: Regulatory reporting"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "notes": [
+      {
+        "moduleIds": [
+          2
+        ],
+        "content": "## Screen customers against sanctions lists with ComplyAdvantage and Claude\n\nCompliance teams at fintechs and payment companies that screen and re-screen by hand.\n\n### How it works\nTrigger: New customers screened at onboarding; the full book re-screened daily against list updates; transaction events evaluated in near real time.\n1. Screen the customer\n2. Pre-assess matches\n3. Evaluate transactions\n4. Build the case\n5. Route to the analyst\n6. Record the decision\n7. Continuous re-screening\n8. Regulatory reporting\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus ComplyAdvantage / Dow Jones / OpenSanctions, Postgres.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the screening sources and the match thresholds in the Config node; this template assumes self-hosted n8n and a Postgres audit table.\nGuardrail to keep: No case is closed without an analyst's recorded decision; the agent drafts, never decides.\n\nFull blueprint: https://agentmelt.com/workflows/kyc-aml-monitoring/",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#F5D451"
+        }
+      }
+    ],
+    "zone": "eu1.make.com"
+  }
+}

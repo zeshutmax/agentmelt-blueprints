@@ -1,0 +1,360 @@
+{
+  "name": "Schedule interviews from Greenhouse stage changes with Google Calendar, Claude and Twilio",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Webhook: Read the stage"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "config_your_name",
+            "value": "Your name — signs every outgoing message"
+          },
+          {
+            "name": "config_your_email",
+            "value": "you@example.com"
+          },
+          {
+            "name": "config_your_company",
+            "value": "Your company or brokerage"
+          },
+          {
+            "name": "config_timezone",
+            "value": "Europe/London"
+          },
+          {
+            "name": "config_quiet_hours_start",
+            "value": "21"
+          },
+          {
+            "name": "config_quiet_hours_end",
+            "value": "8"
+          },
+          {
+            "name": "config_approval_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_approver",
+            "value": "#approvals — a Slack channel, or an email address"
+          },
+          {
+            "name": "config_test_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_schedule",
+            "value": "instant (webhook)"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "google-calendar:createAnEvent",
+      "version": 5,
+      "parameters": {},
+      "mapper": {
+        "calendar": "{{2.config_your_email}}",
+        "summary": "{{1.subject}}",
+        "start": "{{1.start}}",
+        "end": "{{1.end}}",
+        "allDay": false,
+        "visibility": "default",
+        "sendUpdates": "none"
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "Google Calendar: Find common slots"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "google-email:ActionSendEmail",
+      "version": 2,
+      "parameters": {},
+      "mapper": {
+        "to": [
+          "{{3.email}}"
+        ],
+        "subject": "{{3.subject}}",
+        "html": "{{3.draft}}",
+        "attachments": []
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Gmail: Offer the slots"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "module": "google-calendar:createAnEvent",
+      "version": 5,
+      "parameters": {},
+      "mapper": {
+        "calendar": "{{2.config_your_email}}",
+        "summary": "{{4.subject}}",
+        "start": "{{4.start}}",
+        "end": "{{4.end}}",
+        "allDay": false,
+        "visibility": "default",
+        "sendUpdates": "none"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "Google Calendar: Book"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "module": "twilio:SendSMS",
+      "version": 2,
+      "parameters": {},
+      "mapper": {
+        "to": "{{5.phone}}",
+        "body": "{{5.draft}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 0,
+          "name": "Twilio: Remind"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "model": "claude-sonnet-5",
+        "system": "You are the \"Handle changes\" step of the Interview Scheduling Automation Workflow workflow run by Agentmelt.\nTask: A reply asking to move, cancel or ask a question is understood and acted on in the same thread; new slots are offered without the recruiter.\n\nRules:\n- Panel working hours and blocked times are respected; the workflow never books over a 'focus' block or outside hours.\n- Candidates are never offered a slot less than 24 hours away unless the recruiter allows it for the stage.\n- Every change is written to the same email thread, so the candidate has one conversation, not five.\n- SMS only with a number the candidate gave; opt-out honoured.\n- The recruiter is copied on every candidate-facing message and can take over any thread by replying.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Handle changes.\n\nItem (map the fields your source provides here):\n{{6.text}}{{6.body}}{{6.message}}{{6.subject}}{{6.email}}{{6.name}}{{6.data}}"
+              }
+            ]
+          }
+        ],
+        "max_tokens": "2000",
+        "temperature": "0.2",
+        "metadata": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 1800,
+          "y": 0,
+          "name": "Claude: Handle changes"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{7.textResponse}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 2100,
+          "y": 0,
+          "name": "Parse Claude's JSON: Handle changes"
+        }
+      }
+    },
+    {
+      "id": 12,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": null,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 2400,
+          "y": 0,
+          "name": "Gate: Handle changes"
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 11,
+              "module": "builtin:ThrowWarning",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "message": "Parked for a person — Handle changes: {{8.summary}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2700,
+                  "y": 0,
+                  "name": "Needs a person: Handle changes"
+                }
+              },
+              "filter": {
+                "name": "Needs a person?",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{8.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:equal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 9,
+              "module": "http:MakeRequest",
+              "version": 4,
+              "parameters": {
+                "authenticationType": "basicAuth"
+              },
+              "mapper": {
+                "url": "https://harvest.greenhouse.io/v1/applications/{{ $json.application_id }}/move",
+                "method": "post",
+                "headers": [],
+                "queryParameters": [],
+                "parseResponse": true,
+                "stopOnHttpError": true,
+                "timeout": "",
+                "allowRedirects": true,
+                "shareCookies": false,
+                "requestCompressedContent": true,
+                "contentType": "json",
+                "inputMethod": "jsonString",
+                "jsonStringBodyContent": "{\n  \"from_stage_id\": \"{{ $json.from_stage_id }}\",\n  \"to_stage_id\": \"{{ $json.to_stage_id }}\"\n}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2700,
+                  "y": 150,
+                  "name": "Greenhouse Harvest API: Sync the ATS"
+                }
+              },
+              "filter": {
+                "name": "Continue",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{8.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:notequal"
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "id": 10,
+              "module": "google-sheets:addRow",
+              "version": 2,
+              "parameters": {},
+              "mapper": {
+                "from": "drive",
+                "mode": "select",
+                "values": {
+                  "0": "{{8.summary}}"
+                },
+                "sheetId": "Sheet1",
+                "spreadsheetId": "",
+                "includesHeaders": true,
+                "insertDataOption": "INSERT_ROWS",
+                "valueInputOption": "USER_ENTERED",
+                "insertUnformatted": false
+              },
+              "metadata": {
+                "designer": {
+                  "x": 3000,
+                  "y": 150,
+                  "name": "Google Sheets: Report"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "notes": [
+      {
+        "moduleIds": [
+          2
+        ],
+        "content": "## Schedule interviews from Greenhouse stage changes with Google Calendar, Claude and Twilio\n\nRecruiters and coordinators who spend their week on calendar tennis.\n\n### How it works\nTrigger: Moving a candidate to an interview stage in Greenhouse, Lever or Ashby — or a row change in the tracking sheet — starts scheduling for that stage's panel.\n1. Read the stage\n2. Find common slots\n3. Offer the slots\n4. Book\n5. Remind\n6. Handle changes\n7. Sync the ATS\n8. Report\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Greenhouse / Lever / Ashby, Google Calendar / Outlook, Twilio.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the interviewer pools and the working hours in the Config node; swap Google Calendar for Outlook.\nGuardrail to keep: Panel working hours and blocked times are respected; the workflow never books over a 'focus' block or outside hours.\n\nFull blueprint: https://agentmelt.com/workflows/interview-scheduling-automation/",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#F5D451"
+        }
+      }
+    ],
+    "zone": "eu1.make.com"
+  }
+}

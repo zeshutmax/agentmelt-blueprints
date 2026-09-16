@@ -1,0 +1,519 @@
+{
+  "name": "Draft monthly client reports from Xero with Claude in Google Docs",
+  "flow": [
+    {
+      "id": 1,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "config_your_name",
+            "value": "Your name — signs every outgoing message"
+          },
+          {
+            "name": "config_your_email",
+            "value": "you@example.com"
+          },
+          {
+            "name": "config_your_company",
+            "value": "Your company or brokerage"
+          },
+          {
+            "name": "config_timezone",
+            "value": "Europe/London"
+          },
+          {
+            "name": "config_quiet_hours_start",
+            "value": "21"
+          },
+          {
+            "name": "config_quiet_hours_end",
+            "value": "8"
+          },
+          {
+            "name": "config_approval_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_approver",
+            "value": "#approvals — a Slack channel, or an email address"
+          },
+          {
+            "name": "config_test_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_schedule",
+            "value": "scenario schedule: Schedule (monthly, after the ledger closes) or on demand"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "http:MakeRequest",
+      "version": 4,
+      "parameters": {
+        "authenticationType": "apiKey"
+      },
+      "mapper": {
+        "url": "https://api.xero.com/api.xro/2.0/Reports/ProfitAndLoss?fromDate={{ $json.from }}&toDate={{ $json.to }}",
+        "method": "get",
+        "headers": [],
+        "queryParameters": [],
+        "parseResponse": true,
+        "stopOnHttpError": true,
+        "timeout": "",
+        "allowRedirects": true,
+        "shareCookies": false,
+        "requestCompressedContent": true
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Xero API: Pull the numbers"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "result",
+            "value": ""
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "Check the close (port the rule here)"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "result",
+            "value": ""
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Compute the comparisons (port the rule here)"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "model": "claude-sonnet-5",
+        "system": "You are the \"Find the variances that matter\" step of the Client Reporting Automation Workflow workflow run by Agentmelt.\nTask: Ranks movements by size and by whether they are one-off, timing or trend, and names the three a client should hear about — with the evidence lines.\n\nRules:\n- No pack is drafted on an unclean close; the workflow reports what is open instead.\n- The narrative can only cite movements present in the numbers; causes are stated as 'appears to be' unless the ledger shows them.\n- Every pack is approved by the accountant before it reaches a client.\n- Numbers in the narrative are checked against the tables before the draft is shown.\n- Client data stays in the ledger and the client folder; model calls use an API with no data retention.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Find the variances that matter.\n\nItem (map the fields your source provides here):\n{{2.text}}{{2.body}}{{2.message}}{{2.subject}}{{2.email}}{{2.name}}{{2.data}}"
+              }
+            ]
+          }
+        ],
+        "max_tokens": "2000",
+        "temperature": "0.2",
+        "metadata": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "Claude: Find the variances that matter"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{5.textResponse}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 0,
+          "name": "Parse Claude's JSON: Find the variances that matter"
+        }
+      }
+    },
+    {
+      "id": 17,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": null,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 1800,
+          "y": 0,
+          "name": "Gate: Find the variances that matter"
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 16,
+              "module": "builtin:ThrowWarning",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "message": "Parked for a person — Find the variances that matter: {{6.summary}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 0,
+                  "name": "Needs a person: Find the variances that matter"
+                }
+              },
+              "filter": {
+                "name": "Needs a person?",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{6.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:equal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 7,
+              "module": "anthropic-claude:createAMessage",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "model": "claude-sonnet-5",
+                "system": "You are the \"Draft the narrative\" step of the Client Reporting Automation Workflow workflow run by Agentmelt.\nTask: In the practice's style from past packs: what happened, why, what to watch — two to four paragraphs and the partner's questions, never invented causes.\n\nRules:\n- No pack is drafted on an unclean close; the workflow reports what is open instead.\n- The narrative can only cite movements present in the numbers; causes are stated as 'appears to be' unless the ledger shows them.\n- Every pack is approved by the accountant before it reaches a client.\n- Numbers in the narrative are checked against the tables before the draft is shown.\n- Client data stays in the ledger and the client folder; model calls use an API with no data retention.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+                "messages": [
+                  {
+                    "role": "user",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Draft the narrative.\n\nItem (map the fields your source provides here):\n{{6.summary}}\n\n{{6.text}}{{6.body}}{{6.message}}{{6.subject}}{{6.email}}{{6.name}}{{6.data}}"
+                      }
+                    ]
+                  }
+                ],
+                "max_tokens": "2000",
+                "temperature": "0.2",
+                "metadata": {}
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 150,
+                  "name": "Claude: Draft the narrative"
+                }
+              },
+              "filter": {
+                "name": "Continue",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{6.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:notequal"
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "id": 8,
+              "module": "json:ParseJSON",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "json": "{{7.textResponse}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2400,
+                  "y": 150,
+                  "name": "Parse Claude's JSON: Draft the narrative"
+                }
+              }
+            },
+            {
+              "id": 15,
+              "module": "builtin:BasicRouter",
+              "version": 1,
+              "parameters": null,
+              "mapper": null,
+              "metadata": {
+                "designer": {
+                  "x": 2700,
+                  "y": 150,
+                  "name": "Gate: Draft the narrative"
+                }
+              },
+              "routes": [
+                {
+                  "flow": [
+                    {
+                      "id": 14,
+                      "module": "builtin:ThrowWarning",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "message": "Parked for a person — Draft the narrative: {{8.summary}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3000,
+                          "y": 150,
+                          "name": "Needs a person: Draft the narrative"
+                        }
+                      },
+                      "filter": {
+                        "name": "Needs a person?",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{8.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:equal"
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "flow": [
+                    {
+                      "id": 9,
+                      "module": "google-docs:createADocument",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "name": "{{8.subject}}",
+                        "content": "{{8.draft}}",
+                        "destination": "drive",
+                        "folderId": ""
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3000,
+                          "y": 300,
+                          "name": "Google Docs: Assemble the pack"
+                        }
+                      },
+                      "filter": {
+                        "name": "Continue",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{8.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:notequal"
+                            }
+                          ]
+                        ]
+                      }
+                    },
+                    {
+                      "id": 10,
+                      "module": "slack:CreateMessage",
+                      "version": 4,
+                      "parameters": {},
+                      "mapper": {
+                        "channelType": "public",
+                        "channel": "{{1.config_approver}}",
+                        "text": "Approve? {{8.summary}}\n\nReply in the thread with APPROVE or REJECT. With config_approval_mode = true nothing is written until the item is re-run with approved = true.",
+                        "parseText": false,
+                        "mrkdwn": true
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3300,
+                          "y": 300,
+                          "name": "Slack approval: Review and sign off"
+                        }
+                      }
+                    },
+                    {
+                      "id": 13,
+                      "module": "builtin:BasicRouter",
+                      "version": 1,
+                      "parameters": null,
+                      "mapper": null,
+                      "metadata": {
+                        "designer": {
+                          "x": 3600,
+                          "y": 300,
+                          "name": "Approval gate: Review and sign off"
+                        }
+                      },
+                      "routes": [
+                        {
+                          "flow": [
+                            {
+                              "id": 12,
+                              "module": "builtin:ThrowWarning",
+                              "version": 1,
+                              "parameters": {},
+                              "mapper": {
+                                "message": "Approval requested. Re-run the item with approved = true (or set config_approval_mode = false) to write it back."
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 3900,
+                                  "y": 300,
+                                  "name": "Waiting for approval: Review and sign off"
+                                }
+                              },
+                              "filter": {
+                                "name": "Approval mode on",
+                                "conditions": [
+                                  [
+                                    {
+                                      "a": "{{1.config_approval_mode}}",
+                                      "b": "true",
+                                      "o": "text:equal"
+                                    }
+                                  ]
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "flow": [
+                            {
+                              "id": 11,
+                              "module": "google-email:ActionSendEmail",
+                              "version": 2,
+                              "parameters": {},
+                              "mapper": {
+                                "to": [
+                                  "{{10.email}}"
+                                ],
+                                "subject": "{{8.subject}}",
+                                "html": "{{8.draft}}",
+                                "attachments": []
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 3900,
+                                  "y": 450,
+                                  "name": "Gmail: Deliver and log"
+                                }
+                              },
+                              "filter": {
+                                "name": "Approved or approval mode off",
+                                "conditions": [
+                                  [
+                                    {
+                                      "a": "{{1.config_approval_mode}}",
+                                      "b": "false",
+                                      "o": "text:equal"
+                                    }
+                                  ],
+                                  [
+                                    {
+                                      "a": "{{1.approved}}",
+                                      "b": "true",
+                                      "o": "boolean:equal"
+                                    }
+                                  ]
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "notes": [
+      {
+        "moduleIds": [
+          1
+        ],
+        "content": "## Draft monthly client reports from Xero with Claude in Google Docs\n\nAccountants and bookkeepers who write the same month-end commentary for every client.\n\n### How it works\nTrigger: On the day you set after month-end close — or when an accountant asks for a client by name — the pack for that client is built.\n1. Pull the numbers\n2. Check the close\n3. Compute the comparisons\n4. Find the variances that matter\n5. Draft the narrative\n6. Assemble the pack\n7. Review and sign off\n8. Deliver and log\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Xero / QuickBooks / Sage, Google Docs / Word, Gmail / Outlook.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the report sections and the thresholds that trigger commentary in the Config node; swap Xero for QuickBooks or Sage.\nGuardrail to keep: No pack is drafted on an unclean close; the workflow reports what is open instead.\n\nFull blueprint: https://agentmelt.com/workflows/client-reporting-automation/",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#F5D451"
+        }
+      }
+    ],
+    "zone": "eu1.make.com"
+  }
+}

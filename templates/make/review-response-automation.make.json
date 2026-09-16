@@ -1,0 +1,533 @@
+{
+  "name": "Draft replies to Google reviews with Claude and approve them in Slack",
+  "flow": [
+    {
+      "id": 1,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "config_your_name",
+            "value": "Your name — signs every outgoing message"
+          },
+          {
+            "name": "config_your_email",
+            "value": "you@example.com"
+          },
+          {
+            "name": "config_your_company",
+            "value": "Your company or brokerage"
+          },
+          {
+            "name": "config_timezone",
+            "value": "Europe/London"
+          },
+          {
+            "name": "config_quiet_hours_start",
+            "value": "21"
+          },
+          {
+            "name": "config_quiet_hours_end",
+            "value": "8"
+          },
+          {
+            "name": "config_approval_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_approver",
+            "value": "#approvals — a Slack channel, or an email address"
+          },
+          {
+            "name": "config_test_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_schedule",
+            "value": "scenario schedule: Schedule Trigger (hourly review collection)"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "google-my-business:createUpdateAReply",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "account": "",
+        "location": "",
+        "review": "{{1.review_id}}",
+        "comment": "{{1.draft}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Google Business Profile: Collect new reviews"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "model": "claude-sonnet-5",
+        "system": "You are the \"Classify\" step of the Review Response Automation Workflow workflow run by Agentmelt.\nTask: Sentiment, star rating context, topics (service, product, wait time, staff, pricing, cleanliness), and whether it mentions a specific staff member or a resolvable issue.\n\nRules:\n- Negative and sensitive reviews are never answered publicly without a person's approval.\n- Replies never dispute facts in public, mention other customers, or reveal personal data.\n- Positive-review auto-posting is enabled only after a calibration period and can be turned off per location.\n- Platform rules (no incentives, no soliciting removal) are enforced in the response rules.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Classify.\n\nItem (map the fields your source provides here):\n{{2.text}}{{2.body}}{{2.message}}{{2.subject}}{{2.email}}{{2.name}}{{2.data}}"
+              }
+            ]
+          }
+        ],
+        "max_tokens": "2000",
+        "temperature": "0.2",
+        "metadata": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "Claude: Classify"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{3.textResponse}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Parse Claude's JSON: Classify"
+        }
+      }
+    },
+    {
+      "id": 19,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": null,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "Gate: Classify"
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 18,
+              "module": "builtin:ThrowWarning",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "message": "Parked for a person — Classify: {{4.summary}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 0,
+                  "name": "Needs a person: Classify"
+                }
+              },
+              "filter": {
+                "name": "Needs a person?",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{4.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:equal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 5,
+              "module": "hubspotcrm:getContact",
+              "version": 2,
+              "parameters": {},
+              "mapper": {
+                "contactId": "{{4.contactId}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 150,
+                  "name": "HubSpot: Fetch context"
+                }
+              },
+              "filter": {
+                "name": "Continue",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{4.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:notequal"
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "id": 6,
+              "module": "anthropic-claude:createAMessage",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "model": "claude-sonnet-5",
+                "system": "You are the \"Draft the response\" step of the Review Response Automation Workflow workflow run by Agentmelt.\nTask: Positive: a specific thank-you that echoes what they praised, in the business voice, varied so replies never read as templated. Negative: an empathetic acknowledgement, no defensiveness, an offer to resolve offline with a named contact.\n\nRules:\n- Negative and sensitive reviews are never answered publicly without a person's approval.\n- Replies never dispute facts in public, mention other customers, or reveal personal data.\n- Positive-review auto-posting is enabled only after a calibration period and can be turned off per location.\n- Platform rules (no incentives, no soliciting removal) are enforced in the response rules.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+                "messages": [
+                  {
+                    "role": "user",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Draft the response.\n\nItem (map the fields your source provides here):\n{{4.summary}}\n\n{{5.text}}{{5.body}}{{5.message}}{{5.subject}}{{5.email}}{{5.name}}{{5.data}}"
+                      }
+                    ]
+                  }
+                ],
+                "max_tokens": "2000",
+                "temperature": "0.2",
+                "metadata": {}
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 150,
+                  "name": "Claude: Draft the response"
+                }
+              }
+            },
+            {
+              "id": 7,
+              "module": "json:ParseJSON",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "json": "{{6.textResponse}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 150,
+                  "name": "Parse Claude's JSON: Draft the response"
+                }
+              }
+            },
+            {
+              "id": 17,
+              "module": "builtin:BasicRouter",
+              "version": 1,
+              "parameters": null,
+              "mapper": null,
+              "metadata": {
+                "designer": {
+                  "x": 2400,
+                  "y": 150,
+                  "name": "Gate: Draft the response"
+                }
+              },
+              "routes": [
+                {
+                  "flow": [
+                    {
+                      "id": 16,
+                      "module": "builtin:ThrowWarning",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "message": "Parked for a person — Draft the response: {{7.summary}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2700,
+                          "y": 150,
+                          "name": "Needs a person: Draft the response"
+                        }
+                      },
+                      "filter": {
+                        "name": "Needs a person?",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{7.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:equal"
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "flow": [
+                    {
+                      "id": 8,
+                      "module": "util:SetVariables",
+                      "version": 1,
+                      "parameters": null,
+                      "mapper": {
+                        "scope": "roundtrip",
+                        "variables": [
+                          {
+                            "name": "confidence",
+                            "value": "{{7.confidence}}"
+                          }
+                        ]
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2700,
+                          "y": 300,
+                          "name": "Route negatives to a person first (add a filter on the next module)"
+                        }
+                      },
+                      "filter": {
+                        "name": "Continue",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{7.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:notequal"
+                            }
+                          ]
+                        ]
+                      }
+                    },
+                    {
+                      "id": 9,
+                      "module": "util:FunctionSleep",
+                      "version": 1,
+                      "parameters": null,
+                      "mapper": {
+                        "duration": 300
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3000,
+                          "y": 300,
+                          "name": "Wait: Approve and post"
+                        }
+                      }
+                    },
+                    {
+                      "id": 10,
+                      "module": "google-sheets:addRow",
+                      "version": 2,
+                      "parameters": {},
+                      "mapper": {
+                        "from": "drive",
+                        "mode": "select",
+                        "values": {
+                          "0": "{{7.summary}}"
+                        },
+                        "sheetId": "Sheet1",
+                        "spreadsheetId": "",
+                        "includesHeaders": true,
+                        "insertDataOption": "INSERT_ROWS",
+                        "valueInputOption": "USER_ENTERED",
+                        "insertUnformatted": false
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3300,
+                          "y": 300,
+                          "name": "Google Sheets: Track resolution"
+                        }
+                      }
+                    },
+                    {
+                      "id": 11,
+                      "module": "anthropic-claude:createAMessage",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "model": "claude-sonnet-5",
+                        "system": "You are the \"Monthly insight report\" step of the Review Response Automation Workflow workflow run by Agentmelt.\nTask: Per location: rating trend, response rate and time, top praised and complained topics with examples, staff mentioned by name, and three operational suggestions drawn from the complaints.\n\nRules:\n- Negative and sensitive reviews are never answered publicly without a person's approval.\n- Replies never dispute facts in public, mention other customers, or reveal personal data.\n- Positive-review auto-posting is enabled only after a calibration period and can be turned off per location.\n- Platform rules (no incentives, no soliciting removal) are enforced in the response rules.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+                        "messages": [
+                          {
+                            "role": "user",
+                            "content": [
+                              {
+                                "type": "text",
+                                "text": "Monthly insight report.\n\nItem (map the fields your source provides here):\n{{7.summary}}\n\n{{10.text}}{{10.body}}{{10.message}}{{10.subject}}{{10.email}}{{10.name}}{{10.data}}"
+                              }
+                            ]
+                          }
+                        ],
+                        "max_tokens": "2000",
+                        "temperature": "0.2",
+                        "metadata": {}
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3600,
+                          "y": 300,
+                          "name": "Claude: Monthly insight report"
+                        }
+                      }
+                    },
+                    {
+                      "id": 12,
+                      "module": "json:ParseJSON",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "json": "{{11.textResponse}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3900,
+                          "y": 300,
+                          "name": "Parse Claude's JSON: Monthly insight report"
+                        }
+                      }
+                    },
+                    {
+                      "id": 14,
+                      "module": "builtin:BasicRouter",
+                      "version": 1,
+                      "parameters": null,
+                      "mapper": null,
+                      "metadata": {
+                        "designer": {
+                          "x": 4200,
+                          "y": 300,
+                          "name": "Gate: Monthly insight report"
+                        }
+                      },
+                      "routes": [
+                        {
+                          "flow": [
+                            {
+                              "id": 13,
+                              "module": "builtin:ThrowWarning",
+                              "version": 1,
+                              "parameters": {},
+                              "mapper": {
+                                "message": "Parked for a person — Monthly insight report: {{12.summary}}"
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 4500,
+                                  "y": 300,
+                                  "name": "Needs a person: Monthly insight report"
+                                }
+                              },
+                              "filter": {
+                                "name": "Needs a person?",
+                                "conditions": [
+                                  [
+                                    {
+                                      "a": "{{12.needs_human}}",
+                                      "b": "true",
+                                      "o": "boolean:equal"
+                                    }
+                                  ]
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "flow": [
+                            {
+                              "id": 15,
+                              "module": "util:SetVariable2",
+                              "version": 1,
+                              "parameters": {},
+                              "mapper": {
+                                "name": "done",
+                                "scope": "roundtrip",
+                                "value": "true"
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 4500,
+                                  "y": 450,
+                                  "name": "Done"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "notes": [
+      {
+        "moduleIds": [
+          1
+        ],
+        "content": "## Draft replies to Google reviews with Claude and approve them in Slack\n\nLocal businesses and franchises that answer reviews late, or only the bad ones.\n\n### How it works\nTrigger: Polls each platform's API or a review-aggregation provider hourly; negative reviews trigger immediate alerts.\n1. Collect new reviews\n2. Classify\n3. Fetch context\n4. Draft the response\n5. Route negatives to a person first\n6. Approve and post\n7. Track resolution\n8. Monthly insight report\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Google Business Profile API / Birdeye / Podium, Slack / SMS.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet your tone rules and the escalation words in the Config node; connect Birdeye or Podium if you aggregate reviews there.\nGuardrail to keep: Negative and sensitive reviews are never answered publicly without a person's approval.\n\nFull blueprint: https://agentmelt.com/workflows/review-response-automation/",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#F5D451"
+        }
+      }
+    ],
+    "zone": "eu1.make.com"
+  }
+}

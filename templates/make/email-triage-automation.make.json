@@ -1,0 +1,523 @@
+{
+  "name": "Triage a shared Gmail inbox with Claude and create tasks in Asana and Slack",
+  "flow": [
+    {
+      "id": 1,
+      "module": "google-email:TriggerNewEmail",
+      "version": 2,
+      "parameters": {
+        "searchType": "simple",
+        "criteria": "UNSEEN",
+        "markSeen": false,
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Gmail: Receive and de-duplicate"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "config_your_name",
+            "value": "Your name — signs every outgoing message"
+          },
+          {
+            "name": "config_your_email",
+            "value": "you@example.com"
+          },
+          {
+            "name": "config_your_company",
+            "value": "Your company or brokerage"
+          },
+          {
+            "name": "config_timezone",
+            "value": "Europe/London"
+          },
+          {
+            "name": "config_quiet_hours_start",
+            "value": "21"
+          },
+          {
+            "name": "config_quiet_hours_end",
+            "value": "8"
+          },
+          {
+            "name": "config_approval_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_approver",
+            "value": "#approvals — a Slack channel, or an email address"
+          },
+          {
+            "name": "config_test_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_schedule",
+            "value": "poll the inbox every 15 minutes"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "model": "claude-sonnet-5",
+        "system": "You are the \"Classify\" step of the Email Triage Automation Workflow workflow run by Agentmelt.\nTask: Intent (reply needed, task, meeting request, FYI, invoice, complaint, spam), urgency, and the internal owner if the inbox is shared. Rules for known senders override the model.\n\nRules:\n- Drafts require approval by default; auto-send is enabled per category by the inbox owner and logged.\n- Complaints, legal, HR and anything from unknown senders with attachments go to a person unread by the agent's reply logic.\n- The agent never invents facts about availability, pricing or commitments; it drafts from the context fetched or asks.\n- Every automated action is visible in the thread and the digest.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Classify.\n\nItem (map the fields your source provides here):\n{{1.text}}{{1.body}}{{1.message}}{{1.subject}}{{1.email}}{{1.name}}{{1.data}}"
+              }
+            ]
+          }
+        ],
+        "max_tokens": "2000",
+        "temperature": "0.2",
+        "metadata": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "Claude: Classify"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{3.textResponse}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Parse Claude's JSON: Classify"
+        }
+      }
+    },
+    {
+      "id": 18,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": null,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "Gate: Classify"
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 17,
+              "module": "builtin:ThrowWarning",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "message": "Parked for a person — Classify: {{4.summary}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 0,
+                  "name": "Needs a person: Classify"
+                }
+              },
+              "filter": {
+                "name": "Needs a person?",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{4.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:equal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 5,
+              "module": "hubspotcrm:getContact",
+              "version": 2,
+              "parameters": {},
+              "mapper": {
+                "contactId": "{{4.contactId}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 150,
+                  "name": "HubSpot: Fetch context"
+                }
+              },
+              "filter": {
+                "name": "Continue",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{4.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:notequal"
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "id": 6,
+              "module": "anthropic-claude:createAMessage",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "model": "claude-sonnet-5",
+                "system": "You are the \"Extract tasks and dates\" step of the Email Triage Automation Workflow workflow run by Agentmelt.\nTask: Any request with a deliverable and a date becomes a structured task with owner and deadline; ambiguous ones are flagged for confirmation.\n\nRules:\n- Drafts require approval by default; auto-send is enabled per category by the inbox owner and logged.\n- Complaints, legal, HR and anything from unknown senders with attachments go to a person unread by the agent's reply logic.\n- The agent never invents facts about availability, pricing or commitments; it drafts from the context fetched or asks.\n- Every automated action is visible in the thread and the digest.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+                "messages": [
+                  {
+                    "role": "user",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Extract tasks and dates.\n\nItem (map the fields your source provides here):\n{{4.summary}}\n\n{{5.text}}{{5.body}}{{5.message}}{{5.subject}}{{5.email}}{{5.name}}{{5.data}}"
+                      }
+                    ]
+                  }
+                ],
+                "max_tokens": "2000",
+                "temperature": "0.2",
+                "metadata": {}
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 150,
+                  "name": "Claude: Extract tasks and dates"
+                }
+              }
+            },
+            {
+              "id": 7,
+              "module": "json:ParseJSON",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "json": "{{6.textResponse}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 150,
+                  "name": "Parse Claude's JSON: Extract tasks and dates"
+                }
+              }
+            },
+            {
+              "id": 16,
+              "module": "builtin:BasicRouter",
+              "version": 1,
+              "parameters": null,
+              "mapper": null,
+              "metadata": {
+                "designer": {
+                  "x": 2400,
+                  "y": 150,
+                  "name": "Gate: Extract tasks and dates"
+                }
+              },
+              "routes": [
+                {
+                  "flow": [
+                    {
+                      "id": 15,
+                      "module": "builtin:ThrowWarning",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "message": "Parked for a person — Extract tasks and dates: {{7.summary}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2700,
+                          "y": 150,
+                          "name": "Needs a person: Extract tasks and dates"
+                        }
+                      },
+                      "filter": {
+                        "name": "Needs a person?",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{7.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:equal"
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "flow": [
+                    {
+                      "id": 8,
+                      "module": "anthropic-claude:createAMessage",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "model": "claude-sonnet-5",
+                        "system": "You are the \"Draft routine replies\" step of the Email Triage Automation Workflow workflow run by Agentmelt.\nTask: For categories with an approved playbook (pricing questions, scheduling, document requests, status updates) the agent drafts a reply in the owner's voice, grounded in the context fetched.\n\nRules:\n- Drafts require approval by default; auto-send is enabled per category by the inbox owner and logged.\n- Complaints, legal, HR and anything from unknown senders with attachments go to a person unread by the agent's reply logic.\n- The agent never invents facts about availability, pricing or commitments; it drafts from the context fetched or asks.\n- Every automated action is visible in the thread and the digest.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+                        "messages": [
+                          {
+                            "role": "user",
+                            "content": [
+                              {
+                                "type": "text",
+                                "text": "Draft routine replies.\n\nItem (map the fields your source provides here):\n{{7.summary}}\n\n{{7.text}}{{7.body}}{{7.message}}{{7.subject}}{{7.email}}{{7.name}}{{7.data}}"
+                              }
+                            ]
+                          }
+                        ],
+                        "max_tokens": "2000",
+                        "temperature": "0.2",
+                        "metadata": {}
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2700,
+                          "y": 300,
+                          "name": "Claude: Draft routine replies"
+                        }
+                      },
+                      "filter": {
+                        "name": "Continue",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{7.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:notequal"
+                            }
+                          ]
+                        ]
+                      }
+                    },
+                    {
+                      "id": 9,
+                      "module": "json:ParseJSON",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "json": "{{8.textResponse}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3000,
+                          "y": 300,
+                          "name": "Parse Claude's JSON: Draft routine replies"
+                        }
+                      }
+                    },
+                    {
+                      "id": 14,
+                      "module": "builtin:BasicRouter",
+                      "version": 1,
+                      "parameters": null,
+                      "mapper": null,
+                      "metadata": {
+                        "designer": {
+                          "x": 3300,
+                          "y": 300,
+                          "name": "Gate: Draft routine replies"
+                        }
+                      },
+                      "routes": [
+                        {
+                          "flow": [
+                            {
+                              "id": 13,
+                              "module": "builtin:ThrowWarning",
+                              "version": 1,
+                              "parameters": {},
+                              "mapper": {
+                                "message": "Parked for a person — Draft routine replies: {{9.summary}}"
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 3600,
+                                  "y": 300,
+                                  "name": "Needs a person: Draft routine replies"
+                                }
+                              },
+                              "filter": {
+                                "name": "Needs a person?",
+                                "conditions": [
+                                  [
+                                    {
+                                      "a": "{{9.needs_human}}",
+                                      "b": "true",
+                                      "o": "boolean:equal"
+                                    }
+                                  ]
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "flow": [
+                            {
+                              "id": 10,
+                              "module": "util:SetVariables",
+                              "version": 1,
+                              "parameters": null,
+                              "mapper": {
+                                "scope": "roundtrip",
+                                "variables": [
+                                  {
+                                    "name": "category",
+                                    "value": "{{9.category}}"
+                                  }
+                                ]
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 3600,
+                                  "y": 450,
+                                  "name": "Route (add a router here)"
+                                }
+                              },
+                              "filter": {
+                                "name": "Continue",
+                                "conditions": [
+                                  [
+                                    {
+                                      "a": "{{9.needs_human}}",
+                                      "b": "true",
+                                      "o": "boolean:notequal"
+                                    }
+                                  ]
+                                ]
+                              }
+                            },
+                            {
+                              "id": 11,
+                              "module": "util:FunctionSleep",
+                              "version": 1,
+                              "parameters": null,
+                              "mapper": {
+                                "duration": 300
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 3900,
+                                  "y": 450,
+                                  "name": "Wait: Approve and send"
+                                }
+                              }
+                            },
+                            {
+                              "id": 12,
+                              "module": "util:SetVariables",
+                              "version": 1,
+                              "parameters": null,
+                              "mapper": {
+                                "scope": "roundtrip",
+                                "variables": [
+                                  {
+                                    "name": "run_at",
+                                    "value": "{{now}}"
+                                  }
+                                ]
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 4200,
+                                  "y": 450,
+                                  "name": "Daily digest (runs on the scenario schedule)"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "notes": [
+      {
+        "moduleIds": [
+          2
+        ],
+        "content": "## Triage a shared Gmail inbox with Claude and create tasks in Asana and Slack\n\nOperations teams and assistants who sort a shared inbox by hand and lose requests in the pile.\n\n### How it works\nTrigger: Polls the mailbox every minute for new messages via Gmail or Microsoft Outlook triggers; threads are handled as a unit.\n1. Receive and de-duplicate\n2. Classify\n3. Fetch context\n4. Extract tasks and dates\n5. Draft routine replies\n6. Route\n7. Approve and send\n8. Daily digest\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Gmail / Outlook, Asana / Linear / Notion, Slack.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nEdit the categories and the routing rules in the Config node; replace Asana with Linear or Notion.\nGuardrail to keep: Drafts require approval by default; auto-send is enabled per category by the inbox owner and logged.\n\nFull blueprint: https://agentmelt.com/workflows/email-triage-automation/",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#F5D451"
+        }
+      }
+    ],
+    "zone": "eu1.make.com"
+  }
+}

@@ -1,0 +1,541 @@
+{
+  "name": "Analyze customer feedback from Zendesk and Gong with Claude and report in Notion",
+  "flow": [
+    {
+      "id": 1,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "config_your_name",
+            "value": "Your name — signs every outgoing message"
+          },
+          {
+            "name": "config_your_email",
+            "value": "you@example.com"
+          },
+          {
+            "name": "config_your_company",
+            "value": "Your company or brokerage"
+          },
+          {
+            "name": "config_timezone",
+            "value": "Europe/London"
+          },
+          {
+            "name": "config_quiet_hours_start",
+            "value": "21"
+          },
+          {
+            "name": "config_quiet_hours_end",
+            "value": "8"
+          },
+          {
+            "name": "config_approval_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_approver",
+            "value": "#approvals — a Slack channel, or an email address"
+          },
+          {
+            "name": "config_test_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_schedule",
+            "value": "scenario schedule: Schedule Trigger (daily collection, weekly report)"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "zendesk:UpdateTicket",
+      "version": 2,
+      "parameters": {},
+      "mapper": {
+        "ticketId": "{{1.ticket_id}}",
+        "status": "solved",
+        "comment": {
+          "body": "{{1.draft}}",
+          "public": true
+        },
+        "tags": [
+          "answered-by-assistant"
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Zendesk: Collect feedback"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "model": "claude-sonnet-5",
+        "system": "You are the \"Classify by theme and sentiment\" step of the Customer Feedback Analysis Workflow workflow run by Agentmelt.\nTask: Each item tagged with one or more themes from your taxonomy (pricing, onboarding, reliability, feature X…) and a sentiment; items that fit no theme are collected as candidates for a new one.\n\nRules:\n- Personal data is stripped from quotes; sources are linked, not reproduced.\n- The taxonomy is owned by product; the agent proposes new themes, it does not create them.\n- Inference is labelled as inference and separated from counts and quotes.\n- Spike alerts require a minimum volume to avoid false alarms from single items.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Classify by theme and sentiment.\n\nItem (map the fields your source provides here):\n{{2.text}}{{2.body}}{{2.message}}{{2.subject}}{{2.email}}{{2.name}}{{2.data}}"
+              }
+            ]
+          }
+        ],
+        "max_tokens": "2000",
+        "temperature": "0.2",
+        "metadata": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "Claude: Classify by theme and sentiment"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{3.textResponse}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Parse Claude's JSON: Classify by theme and sentiment"
+        }
+      }
+    },
+    {
+      "id": 18,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": null,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "Gate: Classify by theme and sentiment"
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 17,
+              "module": "builtin:ThrowWarning",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "message": "Parked for a person — Classify by theme and sentiment: {{4.summary}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 0,
+                  "name": "Needs a person: Classify by theme and sentiment"
+                }
+              },
+              "filter": {
+                "name": "Needs a person?",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{4.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:equal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 5,
+              "module": "anthropic-claude:createAMessage",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "model": "claude-sonnet-5",
+                "system": "You are the \"Extract the quotable line\" step of the Customer Feedback Analysis Workflow workflow run by Agentmelt.\nTask: The sentence that carries the feedback, cleaned of personal data, kept with a link to the source record.\n\nRules:\n- Personal data is stripped from quotes; sources are linked, not reproduced.\n- The taxonomy is owned by product; the agent proposes new themes, it does not create them.\n- Inference is labelled as inference and separated from counts and quotes.\n- Spike alerts require a minimum volume to avoid false alarms from single items.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+                "messages": [
+                  {
+                    "role": "user",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Extract the quotable line.\n\nItem (map the fields your source provides here):\n{{4.summary}}\n\n{{4.text}}{{4.body}}{{4.message}}{{4.subject}}{{4.email}}{{4.name}}{{4.data}}"
+                      }
+                    ]
+                  }
+                ],
+                "max_tokens": "2000",
+                "temperature": "0.2",
+                "metadata": {}
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 150,
+                  "name": "Claude: Extract the quotable line"
+                }
+              },
+              "filter": {
+                "name": "Continue",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{4.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:notequal"
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "id": 6,
+              "module": "json:ParseJSON",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "json": "{{5.textResponse}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 150,
+                  "name": "Parse Claude's JSON: Extract the quotable line"
+                }
+              }
+            },
+            {
+              "id": 16,
+              "module": "builtin:BasicRouter",
+              "version": 1,
+              "parameters": null,
+              "mapper": null,
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 150,
+                  "name": "Gate: Extract the quotable line"
+                }
+              },
+              "routes": [
+                {
+                  "flow": [
+                    {
+                      "id": 15,
+                      "module": "builtin:ThrowWarning",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "message": "Parked for a person — Extract the quotable line: {{6.summary}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2400,
+                          "y": 150,
+                          "name": "Needs a person: Extract the quotable line"
+                        }
+                      },
+                      "filter": {
+                        "name": "Needs a person?",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{6.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:equal"
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "flow": [
+                    {
+                      "id": 7,
+                      "module": "util:SetVariables",
+                      "version": 1,
+                      "parameters": null,
+                      "mapper": {
+                        "scope": "roundtrip",
+                        "variables": [
+                          {
+                            "name": "result",
+                            "value": ""
+                          }
+                        ]
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2400,
+                          "y": 300,
+                          "name": "Aggregate (port the rule here)"
+                        }
+                      },
+                      "filter": {
+                        "name": "Continue",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{6.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:notequal"
+                            }
+                          ]
+                        ]
+                      }
+                    },
+                    {
+                      "id": 8,
+                      "module": "anthropic-claude:createAMessage",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "model": "claude-sonnet-5",
+                        "system": "You are the \"Write the weekly report\" step of the Customer Feedback Analysis Workflow workflow run by Agentmelt.\nTask: Top themes with numbers and quotes, rising and falling themes, new themes to review, and — clearly separated as inference — what the pattern suggests. Every claim cites a count or a quote.\n\nRules:\n- Personal data is stripped from quotes; sources are linked, not reproduced.\n- The taxonomy is owned by product; the agent proposes new themes, it does not create them.\n- Inference is labelled as inference and separated from counts and quotes.\n- Spike alerts require a minimum volume to avoid false alarms from single items.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+                        "messages": [
+                          {
+                            "role": "user",
+                            "content": [
+                              {
+                                "type": "text",
+                                "text": "Write the weekly report.\n\nItem (map the fields your source provides here):\n{{6.summary}}\n\n{{6.text}}{{6.body}}{{6.message}}{{6.subject}}{{6.email}}{{6.name}}{{6.data}}"
+                              }
+                            ]
+                          }
+                        ],
+                        "max_tokens": "2000",
+                        "temperature": "0.2",
+                        "metadata": {}
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2700,
+                          "y": 300,
+                          "name": "Claude: Write the weekly report"
+                        }
+                      }
+                    },
+                    {
+                      "id": 9,
+                      "module": "json:ParseJSON",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "json": "{{8.textResponse}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3000,
+                          "y": 300,
+                          "name": "Parse Claude's JSON: Write the weekly report"
+                        }
+                      }
+                    },
+                    {
+                      "id": 14,
+                      "module": "builtin:BasicRouter",
+                      "version": 1,
+                      "parameters": null,
+                      "mapper": null,
+                      "metadata": {
+                        "designer": {
+                          "x": 3300,
+                          "y": 300,
+                          "name": "Gate: Write the weekly report"
+                        }
+                      },
+                      "routes": [
+                        {
+                          "flow": [
+                            {
+                              "id": 13,
+                              "module": "builtin:ThrowWarning",
+                              "version": 1,
+                              "parameters": {},
+                              "mapper": {
+                                "message": "Parked for a person — Write the weekly report: {{9.summary}}"
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 3600,
+                                  "y": 300,
+                                  "name": "Needs a person: Write the weekly report"
+                                }
+                              },
+                              "filter": {
+                                "name": "Needs a person?",
+                                "conditions": [
+                                  [
+                                    {
+                                      "a": "{{9.needs_human}}",
+                                      "b": "true",
+                                      "o": "boolean:equal"
+                                    }
+                                  ]
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "flow": [
+                            {
+                              "id": 10,
+                              "module": "util:SetVariables",
+                              "version": 1,
+                              "parameters": null,
+                              "mapper": {
+                                "scope": "roundtrip",
+                                "variables": [
+                                  {
+                                    "name": "confidence",
+                                    "value": "{{9.confidence}}"
+                                  }
+                                ]
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 3600,
+                                  "y": 450,
+                                  "name": "Route urgent items (add a filter on the next module)"
+                                }
+                              },
+                              "filter": {
+                                "name": "Continue",
+                                "conditions": [
+                                  [
+                                    {
+                                      "a": "{{9.needs_human}}",
+                                      "b": "true",
+                                      "o": "boolean:notequal"
+                                    }
+                                  ]
+                                ]
+                              }
+                            },
+                            {
+                              "id": 11,
+                              "module": "notion:createDataSourceItem",
+                              "version": 1,
+                              "parameters": {},
+                              "mapper": {
+                                "dataSourceId": "",
+                                "properties": {
+                                  "Name": "{{9.subject}}"
+                                }
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 3900,
+                                  "y": 450,
+                                  "name": "Notion: Deliver and store"
+                                }
+                              }
+                            },
+                            {
+                              "id": 12,
+                              "module": "google-sheets:addRow",
+                              "version": 2,
+                              "parameters": {},
+                              "mapper": {
+                                "from": "drive",
+                                "mode": "select",
+                                "values": {
+                                  "0": "{{9.summary}}"
+                                },
+                                "sheetId": "Sheet1",
+                                "spreadsheetId": "",
+                                "includesHeaders": true,
+                                "insertDataOption": "INSERT_ROWS",
+                                "valueInputOption": "USER_ENTERED",
+                                "insertUnformatted": false
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 4200,
+                                  "y": 450,
+                                  "name": "Google Sheets: Maintain the taxonomy"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "notes": [
+      {
+        "moduleIds": [
+          1
+        ],
+        "content": "## Analyze customer feedback from Zendesk and Gong with Claude and report in Notion\n\nProduct and success teams that read tickets one at a time and miss the pattern.\n\n### How it works\nTrigger: Daily pulls from each source; the weekly report compiles Monday morning.\n1. Collect feedback\n2. Classify by theme and sentiment\n3. Extract the quotable line\n4. Aggregate\n5. Write the weekly report\n6. Route urgent items\n7. Deliver and store\n8. Maintain the taxonomy\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Zendesk / Intercom / Gong, Notion + Google Sheets.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the theme taxonomy and the report cadence in the Config node; add Intercom or survey tools as sources.\nGuardrail to keep: Personal data is stripped from quotes; sources are linked, not reproduced.\n\nFull blueprint: https://agentmelt.com/workflows/customer-feedback-analysis/",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#F5D451"
+        }
+      }
+    ],
+    "zone": "eu1.make.com"
+  }
+}

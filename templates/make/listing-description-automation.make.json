@@ -1,0 +1,613 @@
+{
+  "name": "Write real estate listing descriptions with Claude from Follow Up Boss",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Webhook: Receive the listing"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "util:SetVariables",
+      "version": 1,
+      "parameters": null,
+      "mapper": {
+        "scope": "roundtrip",
+        "variables": [
+          {
+            "name": "config_your_name",
+            "value": "Your name — signs every outgoing message"
+          },
+          {
+            "name": "config_your_email",
+            "value": "you@example.com"
+          },
+          {
+            "name": "config_your_company",
+            "value": "Your company or brokerage"
+          },
+          {
+            "name": "config_timezone",
+            "value": "Europe/London"
+          },
+          {
+            "name": "config_quiet_hours_start",
+            "value": "21"
+          },
+          {
+            "name": "config_quiet_hours_end",
+            "value": "8"
+          },
+          {
+            "name": "config_approval_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_approver",
+            "value": "#approvals — a Slack channel, or an email address"
+          },
+          {
+            "name": "config_test_mode",
+            "value": "true"
+          },
+          {
+            "name": "config_schedule",
+            "value": "instant (webhook)"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "model": "claude-sonnet-5",
+        "system": "You are the \"Describe the photos\" step of the Real Estate Listing Automation Workflow workflow run by Agentmelt.\nTask: A vision-capable model describes each photo (kitchen with quartz island, west-facing deck, finished basement) so the copy references what buyers will actually see.\n\nRules:\n- Fair-housing language check runs on every asset before review; flagged copy cannot be approved without an edit.\n- Facts in the copy are checked against the listing data — no invented square footage or school ratings.\n- The agent approves every asset; nothing publishes automatically.\n- Brokerage disclaimers and MLS-required phrases are inserted, not left to the model.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Describe the photos.\n\nItem (map the fields your source provides here):\n{{1.text}}{{1.body}}{{1.message}}{{1.subject}}{{1.email}}{{1.name}}{{1.data}}"
+              }
+            ]
+          }
+        ],
+        "max_tokens": "2000",
+        "temperature": "0.2",
+        "metadata": {}
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "Claude: Describe the photos"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{3.textResponse}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Parse Claude's JSON: Describe the photos"
+        }
+      }
+    },
+    {
+      "id": 20,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": null,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "Gate: Describe the photos"
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 19,
+              "module": "builtin:ThrowWarning",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "message": "Parked for a person — Describe the photos: {{4.summary}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 0,
+                  "name": "Needs a person: Describe the photos"
+                }
+              },
+              "filter": {
+                "name": "Needs a person?",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{4.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:equal"
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 5,
+              "module": "anthropic-claude:createAMessage",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "model": "claude-sonnet-5",
+                "system": "You are the \"Draft the MLS description\" step of the Real Estate Listing Automation Workflow workflow run by Agentmelt.\nTask: Within the MLS character limit, in the agent's voice, leading with the strongest feature, with a fair-housing compliance check for protected-class language.\n\nRules:\n- Fair-housing language check runs on every asset before review; flagged copy cannot be approved without an edit.\n- Facts in the copy are checked against the listing data — no invented square footage or school ratings.\n- The agent approves every asset; nothing publishes automatically.\n- Brokerage disclaimers and MLS-required phrases are inserted, not left to the model.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+                "messages": [
+                  {
+                    "role": "user",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Draft the MLS description.\n\nItem (map the fields your source provides here):\n{{4.summary}}\n\n{{4.text}}{{4.body}}{{4.message}}{{4.subject}}{{4.email}}{{4.name}}{{4.data}}"
+                      }
+                    ]
+                  }
+                ],
+                "max_tokens": "2000",
+                "temperature": "0.2",
+                "metadata": {}
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 150,
+                  "name": "Claude: Draft the MLS description"
+                }
+              },
+              "filter": {
+                "name": "Continue",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{4.needs_human}}",
+                      "b": "true",
+                      "o": "boolean:notequal"
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "id": 6,
+              "module": "json:ParseJSON",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "json": "{{5.textResponse}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 150,
+                  "name": "Parse Claude's JSON: Draft the MLS description"
+                }
+              }
+            },
+            {
+              "id": 18,
+              "module": "builtin:BasicRouter",
+              "version": 1,
+              "parameters": null,
+              "mapper": null,
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 150,
+                  "name": "Gate: Draft the MLS description"
+                }
+              },
+              "routes": [
+                {
+                  "flow": [
+                    {
+                      "id": 17,
+                      "module": "builtin:ThrowWarning",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "message": "Parked for a person — Draft the MLS description: {{6.summary}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2400,
+                          "y": 150,
+                          "name": "Needs a person: Draft the MLS description"
+                        }
+                      },
+                      "filter": {
+                        "name": "Needs a person?",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{6.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:equal"
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "flow": [
+                    {
+                      "id": 7,
+                      "module": "anthropic-claude:createAMessage",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "model": "claude-sonnet-5",
+                        "system": "You are the \"Draft the derivatives\" step of the Real Estate Listing Automation Workflow workflow run by Agentmelt.\nTask: Instagram and Facebook captions, a 'just listed' story script, a buyer-list email with the three best photos, and a 60-second virtual-tour narration script.\n\nRules:\n- Fair-housing language check runs on every asset before review; flagged copy cannot be approved without an edit.\n- Facts in the copy are checked against the listing data — no invented square footage or school ratings.\n- The agent approves every asset; nothing publishes automatically.\n- Brokerage disclaimers and MLS-required phrases are inserted, not left to the model.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+                        "messages": [
+                          {
+                            "role": "user",
+                            "content": [
+                              {
+                                "type": "text",
+                                "text": "Draft the derivatives.\n\nItem (map the fields your source provides here):\n{{6.summary}}\n\n{{6.text}}{{6.body}}{{6.message}}{{6.subject}}{{6.email}}{{6.name}}{{6.data}}"
+                              }
+                            ]
+                          }
+                        ],
+                        "max_tokens": "2000",
+                        "temperature": "0.2",
+                        "metadata": {}
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2400,
+                          "y": 300,
+                          "name": "Claude: Draft the derivatives"
+                        }
+                      },
+                      "filter": {
+                        "name": "Continue",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{6.needs_human}}",
+                              "b": "true",
+                              "o": "boolean:notequal"
+                            }
+                          ]
+                        ]
+                      }
+                    },
+                    {
+                      "id": 8,
+                      "module": "json:ParseJSON",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "json": "{{7.textResponse}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2700,
+                          "y": 300,
+                          "name": "Parse Claude's JSON: Draft the derivatives"
+                        }
+                      }
+                    },
+                    {
+                      "id": 16,
+                      "module": "builtin:BasicRouter",
+                      "version": 1,
+                      "parameters": null,
+                      "mapper": null,
+                      "metadata": {
+                        "designer": {
+                          "x": 3000,
+                          "y": 300,
+                          "name": "Gate: Draft the derivatives"
+                        }
+                      },
+                      "routes": [
+                        {
+                          "flow": [
+                            {
+                              "id": 15,
+                              "module": "builtin:ThrowWarning",
+                              "version": 1,
+                              "parameters": {},
+                              "mapper": {
+                                "message": "Parked for a person — Draft the derivatives: {{8.summary}}"
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 3300,
+                                  "y": 300,
+                                  "name": "Needs a person: Draft the derivatives"
+                                }
+                              },
+                              "filter": {
+                                "name": "Needs a person?",
+                                "conditions": [
+                                  [
+                                    {
+                                      "a": "{{8.needs_human}}",
+                                      "b": "true",
+                                      "o": "boolean:equal"
+                                    }
+                                  ]
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "flow": [
+                            {
+                              "id": 9,
+                              "module": "util:SetVariables",
+                              "version": 1,
+                              "parameters": null,
+                              "mapper": {
+                                "scope": "roundtrip",
+                                "variables": [
+                                  {
+                                    "name": "result",
+                                    "value": ""
+                                  }
+                                ]
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 3300,
+                                  "y": 450,
+                                  "name": "Compliance and brand check (port the rule here)"
+                                }
+                              },
+                              "filter": {
+                                "name": "Continue",
+                                "conditions": [
+                                  [
+                                    {
+                                      "a": "{{8.needs_human}}",
+                                      "b": "true",
+                                      "o": "boolean:notequal"
+                                    }
+                                  ]
+                                ]
+                              }
+                            },
+                            {
+                              "id": 10,
+                              "module": "slack:CreateMessage",
+                              "version": 4,
+                              "parameters": {},
+                              "mapper": {
+                                "channelType": "public",
+                                "channel": "{{2.config_approver}}",
+                                "text": "Approve? {{8.summary}}\n\nReply in the thread with APPROVE or REJECT. With config_approval_mode = true nothing is written until the item is re-run with approved = true.",
+                                "parseText": false,
+                                "mrkdwn": true
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 3600,
+                                  "y": 450,
+                                  "name": "Slack approval: Review and approve"
+                                }
+                              }
+                            },
+                            {
+                              "id": 14,
+                              "module": "builtin:BasicRouter",
+                              "version": 1,
+                              "parameters": null,
+                              "mapper": null,
+                              "metadata": {
+                                "designer": {
+                                  "x": 3900,
+                                  "y": 450,
+                                  "name": "Approval gate: Review and approve"
+                                }
+                              },
+                              "routes": [
+                                {
+                                  "flow": [
+                                    {
+                                      "id": 13,
+                                      "module": "builtin:ThrowWarning",
+                                      "version": 1,
+                                      "parameters": {},
+                                      "mapper": {
+                                        "message": "Approval requested. Re-run the item with approved = true (or set config_approval_mode = false) to write it back."
+                                      },
+                                      "metadata": {
+                                        "designer": {
+                                          "x": 4200,
+                                          "y": 450,
+                                          "name": "Waiting for approval: Review and approve"
+                                        }
+                                      },
+                                      "filter": {
+                                        "name": "Approval mode on",
+                                        "conditions": [
+                                          [
+                                            {
+                                              "a": "{{2.config_approval_mode}}",
+                                              "b": "true",
+                                              "o": "text:equal"
+                                            }
+                                          ]
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                },
+                                {
+                                  "flow": [
+                                    {
+                                      "id": 11,
+                                      "module": "http:MakeRequest",
+                                      "version": 4,
+                                      "parameters": {
+                                        "authenticationType": "oAuth"
+                                      },
+                                      "mapper": {
+                                        "url": "https://graph.facebook.com/v21.0/{{10.page_id}}/feed",
+                                        "method": "post",
+                                        "headers": [],
+                                        "queryParameters": [],
+                                        "parseResponse": true,
+                                        "stopOnHttpError": true,
+                                        "timeout": "",
+                                        "allowRedirects": true,
+                                        "shareCookies": false,
+                                        "requestCompressedContent": true,
+                                        "contentType": "json",
+                                        "inputMethod": "jsonString",
+                                        "jsonStringBodyContent": "{\"message\": \"{{8.social_post}}\"}"
+                                      },
+                                      "metadata": {
+                                        "designer": {
+                                          "x": 4200,
+                                          "y": 600,
+                                          "name": "Facebook Graph API: Publish"
+                                        }
+                                      },
+                                      "filter": {
+                                        "name": "Approved or approval mode off",
+                                        "conditions": [
+                                          [
+                                            {
+                                              "a": "{{2.config_approval_mode}}",
+                                              "b": "false",
+                                              "o": "text:equal"
+                                            }
+                                          ],
+                                          [
+                                            {
+                                              "a": "{{1.approved}}",
+                                              "b": "true",
+                                              "o": "boolean:equal"
+                                            }
+                                          ]
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "id": 12,
+                                      "module": "google-sheets:addRow",
+                                      "version": 2,
+                                      "parameters": {},
+                                      "mapper": {
+                                        "from": "drive",
+                                        "mode": "select",
+                                        "values": {
+                                          "0": "{{8.summary}}"
+                                        },
+                                        "sheetId": "Sheet1",
+                                        "spreadsheetId": "",
+                                        "includesHeaders": true,
+                                        "insertDataOption": "INSERT_ROWS",
+                                        "valueInputOption": "USER_ENTERED",
+                                        "insertUnformatted": false
+                                      },
+                                      "metadata": {
+                                        "designer": {
+                                          "x": 4500,
+                                          "y": 600,
+                                          "name": "Google Sheets: Track"
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "notes": [
+      {
+        "moduleIds": [
+          2
+        ],
+        "content": "## Write real estate listing descriptions with Claude from Follow Up Boss\n\nReal-estate agents and teams that write every listing description and social post from scratch.\n\n### How it works\nTrigger: Follow Up Boss, kvCORE, a Google Form, or a change in the MLS feed for the agent's listings starts the run.\n1. Receive the listing\n2. Describe the photos\n3. Draft the MLS description\n4. Draft the derivatives\n5. Compliance and brand check\n6. Review and approve\n7. Publish\n8. Track\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Follow Up Boss / kvCORE, Mailchimp / Constant Contact, Buffer / Meta API.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nPut your voice rules and fair-housing checklist in the Config node; publish through Mailchimp, Buffer or the Meta API.\nGuardrail to keep: Fair-housing language check runs on every asset before review; flagged copy cannot be approved without an edit.\n\nFull blueprint: https://agentmelt.com/workflows/listing-description-automation/",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#F5D451"
+        }
+      }
+    ],
+    "zone": "eu1.make.com"
+  }
+}
