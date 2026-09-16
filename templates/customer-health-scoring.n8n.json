@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Score customer health from Mixpanel and Zendesk data with Claude into HubSpot\n\n**Who's it for**\nCustomer-success teams that manage renewals from gut feel and a quarterly spreadsheet.\n\n**How it works**\nTrigger: Weekly scoring; immediate re-score on high-severity events such as a champion's user being deactivated, a payment failure, or a very negative ticket.\n1. Collect the components\n2. Score each component\n3. Analyse ticket sentiment\n4. Compute score and trend\n5. Detect drops and thresholds\n6. Draft the intervention\n7. Alert the owner and update the CRM\n8. Calibrate quarterly\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Mixpanel / Amplitude / PostHog, Zendesk / Intercom, HubSpot / Salesforce (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nAdjust the score inputs and thresholds in the Config node; swap Mixpanel for Amplitude and HubSpot for Salesforce. Keep the guardrail: Scores show their components; no black-box number.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/customer-health-scoring/",
+        "content": "## Score customer health from Mixpanel and Zendesk data with Claude into HubSpot\n\nCustomer-success teams that manage renewals from gut feel and a quarterly spreadsheet.\n\n### How it works\nTrigger: Weekly scoring; immediate re-score on high-severity events such as a champion's user being deactivated, a payment failure, or a very negative ticket.\n1. Collect the components\n2. Score each component\n3. Analyse ticket sentiment\n4. Compute score and trend\n5. Detect drops and thresholds\n6. Draft the intervention\n7. Alert the owner and update the CRM\n8. Calibrate quarterly\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Mixpanel / Amplitude / PostHog, Zendesk / Intercom, HubSpot / Salesforce.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nAdjust the score inputs and thresholds in the Config node; swap Mixpanel for Amplitude and HubSpot for Salesforce.\nGuardrail to keep: Scores show their components; no black-box number.\n\nFull blueprint: https://agentmelt.com/workflows/customer-health-scoring/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "customer-health-scoring-about",
@@ -13,40 +13,168 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Customer Health Scoring Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Weekly scoring; immediate re-score on high-severity events such as a champion's user being deactivated, a payment failure, or a very negative ticket.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Scores show their components; no black-box number.\n   - Alerts are suppressed for accounts already in a save play, so CSMs are not double-pinged.\n   - Outreach is drafted for a person to send; nothing goes to the customer automatically.\n   - The score is calibrated against real churn quarterly, and the calibration report is visible to leadership.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/customer-health-scoring/\nWant it built and run for you? $297/month · custom $4,500–8,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "customer-health-scoring-note",
-      "name": "Read me first",
+      "id": "customer-health-scoring-section-0",
+      "name": "Section: Trigger and config",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Schedule Trigger (weekly)\n2. HTTP Request: Collect the components\n3. Code: Score each component\n4. Sentiment Analysis: Analyse ticket sentiment\n5. Code: Compute score and trend\n6. IF: Detect drops and thresholds\n7. AI Agent: Draft the intervention\n8. Slack: Alert the owner and update the CRM\n9. Schedule Trigger: Calibrate quarterly\n10. Code: Calibrate quarterly\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 1. Collect the components\nUsage (active users, sessions, key actions, trend vs previous 8 weeks), support (ticket volume, sentiment, resolution time), billing (late payments, downgrades), engagement (QBR attendance, email responses), and relationship (champion still active, number of contacts)",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "customer-health-scoring-steps",
-      "name": "Step outline",
+      "id": "customer-health-scoring-section-1",
+      "name": "Section: 1. Collect the components",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Score each component\nEach component becomes a 0–100 sub-score with segment-specific thresholds (an enterprise account's normal usage differs from an SMB's)",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "customer-health-scoring-section-2",
+      "name": "Section: 2. Score each component",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Analyse ticket sentiment\nRecent tickets are scored for sentiment and frustration markers; a single furious ticket outweighs three neutral ones",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "customer-health-scoring-section-3",
+      "name": "Section: 3. Analyse ticket sentiment",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Compute score and trend\nWeighted score, 8-week trend, and the top two components that changed",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "customer-health-scoring-section-4",
+      "name": "Section: 4. Compute score and trend",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Detect drops and thresholds\nDrop above the threshold, or score crossing into red, creates an alert; accounts already in an active save play are not re-alerted",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "customer-health-scoring-section-5",
+      "name": "Section: 5. Detect drops and thresholds",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Draft the intervention\nFrom the components and the account's history the agent drafts a check-in that names the observed change without sounding like surveillance, and suggests the play (re-onboard a new admin, executive check-in, training session)",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "customer-health-scoring-section-6",
+      "name": "Section: 6. Draft the intervention",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Alert the owner and update the CRM\nOwner gets the alert with score, cause and draft; the CRM health field and a timeline note are updated so the score is visible in every view",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "customer-health-scoring-section-7",
+      "name": "Section: 7. Alert the owner and update the CRM",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3160,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Calibrate quarterly\nCompares scores from 90 days ago to actual churn and downgrades, reports precision/recall by score band, and proposes weight changes for RevOps to approve",
+        "height": 240,
+        "width": 620,
+        "color": 7
+      },
+      "id": "customer-health-scoring-section-8",
+      "name": "Section: 8. Calibrate quarterly",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        750
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "customer-health-scoring-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -67,7 +195,7 @@
       "id": "customer-health-scoring-00",
       "name": "Schedule Trigger (weekly)",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         300
@@ -140,7 +268,7 @@
       "id": "customer-health-scoring-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -149,15 +277,21 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
-        "options": {},
-        "notes": "Usage (active users, sessions, key actions, trend vs previous 8 weeks), support (ticket volume, sentiment, resolution time), billing (late payments, downgrades), engagement (QBR attendance, email responses), and relationship (champion still active, number of contacts)."
+        "resource": "ticket",
+        "operation": "getAll",
+        "ticketType": "regular",
+        "returnAll": false,
+        "limit": 100,
+        "options": {
+          "status": "open",
+          "sortBy": "updated_at",
+          "sortOrder": "desc"
+        }
       },
       "id": "customer-health-scoring-01",
-      "name": "HTTP Request: Collect the components",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "Zendesk: Collect the components",
+      "type": "n8n-nodes-base.zendesk",
+      "typeVersion": 1,
       "position": [
         640,
         300
@@ -169,7 +303,7 @@
         "jsCode": "// Score each component\n// Each component becomes a 0–100 sub-score with segment-specific thresholds (an enterprise account's normal usage differs from an SMB's). Weights live in a sheet.\nreturn $input.all();"
       },
       "id": "customer-health-scoring-02",
-      "name": "Code: Score each component",
+      "name": "Score each component",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -186,7 +320,7 @@
       "id": "customer-health-scoring-03",
       "name": "Sentiment Analysis: Analyse ticket sentiment",
       "type": "@n8n/n8n-nodes-langchain.sentimentAnalysis",
-      "typeVersion": 1,
+      "typeVersion": 1.1,
       "position": [
         1280,
         300
@@ -207,9 +341,9 @@
       "id": "customer-health-scoring-03-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1600,
+        1280,
         520
       ]
     },
@@ -241,7 +375,7 @@
       "id": "customer-health-scoring-03-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1600,
         300
@@ -265,7 +399,7 @@
         "jsCode": "// Compute score and trend\n// Weighted score, 8-week trend, and the top two components that changed. Score history is stored per account.\nreturn $input.all();"
       },
       "id": "customer-health-scoring-04",
-      "name": "Code: Compute score and trend",
+      "name": "Compute score and trend",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -298,9 +432,9 @@
         "options": {}
       },
       "id": "customer-health-scoring-05",
-      "name": "IF: Detect drops and thresholds",
+      "name": "Detect drops and thresholds",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         2240,
         300
@@ -319,7 +453,7 @@
       "id": "customer-health-scoring-06",
       "name": "AI Agent: Draft the intervention",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         2560,
         300
@@ -340,9 +474,9 @@
       "id": "customer-health-scoring-06-llm",
       "name": "Claude (Anthropic Chat Model) 2",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        2880,
+        2560,
         520
       ]
     },
@@ -354,9 +488,9 @@
       "id": "customer-health-scoring-06-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        3080,
+        2740,
         520
       ]
     },
@@ -388,7 +522,7 @@
       "id": "customer-health-scoring-06-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         2880,
         300
@@ -423,7 +557,7 @@
       "id": "customer-health-scoring-07",
       "name": "Slack: Alert the owner and update the CRM",
       "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "typeVersion": 2.7,
       "position": [
         3200,
         300
@@ -445,7 +579,7 @@
       "id": "customer-health-scoring-08",
       "name": "Schedule Trigger: Calibrate quarterly",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         860
@@ -483,25 +617,25 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Collect the components",
+            "node": "Zendesk: Collect the components",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Collect the components": {
+    "Zendesk: Collect the components": {
       "main": [
         [
           {
-            "node": "Code: Score each component",
+            "node": "Score each component",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Score each component": {
+    "Score each component": {
       "main": [
         [
           {
@@ -545,25 +679,25 @@
         ],
         [
           {
-            "node": "Code: Compute score and trend",
+            "node": "Compute score and trend",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Compute score and trend": {
+    "Compute score and trend": {
       "main": [
         [
           {
-            "node": "IF: Detect drops and thresholds",
+            "node": "Detect drops and thresholds",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "IF: Detect drops and thresholds": {
+    "Detect drops and thresholds": {
       "main": [
         [
           {

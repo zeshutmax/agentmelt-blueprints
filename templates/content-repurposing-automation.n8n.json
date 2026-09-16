@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Turn podcast episodes from Google Drive into posts with Deepgram and Claude\n\n**Who's it for**\nContent teams that publish one long piece and never get to the ten short ones it could become.\n\n**How it works**\nTrigger: A recording dropped in the 'episodes' folder, a new item in the podcast RSS feed, or a Riverside/Zoom recording webhook starts the run.\n1. Transcribe\n2. Extract structure\n3. Draft the long-form\n4. Draft the short-form\n5. Clip list for the editor\n6. Review board\n7. Schedule approved assets\n8. Report performance back\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Deepgram / AssemblyAI, Notion, Buffer / Hootsuite / CMS (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet the output formats and your voice rules in the Config node; publish through Buffer, Hootsuite or your CMS. Keep the guardrail: Nothing publishes without approval on the review board.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/content-repurposing-automation/",
+        "content": "## Turn podcast episodes from Google Drive into posts with Deepgram and Claude\n\nContent teams that publish one long piece and never get to the ten short ones it could become.\n\n### How it works\nTrigger: A recording dropped in the 'episodes' folder, a new item in the podcast RSS feed, or a Riverside/Zoom recording webhook starts the run.\n1. Transcribe\n2. Extract structure\n3. Draft the long-form\n4. Draft the short-form\n5. Clip list for the editor\n6. Review board\n7. Schedule approved assets\n8. Report performance back\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Deepgram / AssemblyAI, Notion, Buffer / Hootsuite / CMS.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the output formats and your voice rules in the Config node; publish through Buffer, Hootsuite or your CMS.\nGuardrail to keep: Nothing publishes without approval on the review board.\n\nFull blueprint: https://agentmelt.com/workflows/content-repurposing-automation/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "content-repurposing-automation-about",
@@ -13,40 +13,168 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Content Repurposing Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: A recording dropped in the 'episodes' folder, a new item in the podcast RSS feed, or a Riverside/Zoom recording webhook starts the run.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Nothing publishes without approval on the review board.\n   - Quotes are verbatim from the transcript with timestamps; the agent cannot invent a quote.\n   - Claims extracted from the episode are attributed to the speaker, not stated as fact by the brand.\n   - Style rules (no emojis, no hashtags, sentence length) are enforced by structured output and checked before the board.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/content-repurposing-automation/\nWant it built and run for you? $297/month · custom $3,000–5,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "content-repurposing-automation-note",
-      "name": "Read me first",
+      "id": "content-repurposing-automation-section-0",
+      "name": "Section: Trigger and config",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Schedule Trigger (daily)\n2. HTTP Request: Transcribe\n3. Information Extractor: Extract structure\n4. AI Agent: Draft the long-form\n5. AI Agent: Draft the short-form\n6. Code: Clip list for the editor\n7. Notion: Review board\n8. HTTP Request: Schedule approved assets\n9. Schedule Trigger: Report performance back\n10. Code: Report performance back\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 1. Transcribe\nAudio to a speaker-labelled transcript with timestamps via Deepgram, AssemblyAI or Whisper; the transcript is stored next to the recording",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "content-repurposing-automation-steps",
-      "name": "Step outline",
+      "id": "content-repurposing-automation-section-1",
+      "name": "Section: 1. Transcribe",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Extract structure\nSegments with titles and timestamps, key claims, the three most quotable lines, named people and resources mentioned, and the episode's single main idea",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "content-repurposing-automation-section-2",
+      "name": "Section: 2. Extract structure",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Draft the long-form\nShow notes with timestamps and a blog post that restructures the conversation into an article — not a transcript summary — in your voice guide, with the resources linked",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "content-repurposing-automation-section-3",
+      "name": "Section: 3. Draft the long-form",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Draft the short-form\nFive LinkedIn posts (one per key idea, different hooks), an X thread, a newsletter section, and a pull-quote graphic brief; each within platform limits and your style rules",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "content-repurposing-automation-section-4",
+      "name": "Section: 4. Draft the short-form",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Clip list for the editor\nTimestamps for the six strongest 30–90-second segments with a suggested caption and hook, exported to the editor's tool or a sheet",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "content-repurposing-automation-section-5",
+      "name": "Section: 5. Clip list for the editor",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2840,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Review board\nOne page per episode with every asset, the transcript and the clip list; the owner edits and marks each asset approved",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "content-repurposing-automation-section-6",
+      "name": "Section: 6. Review board",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3160,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Schedule approved assets\nApproved posts go to Buffer, Hootsuite or the platform APIs on the cadence in the calendar rules; the blog post to the CMS as a draft; the newsletter section to the ESP draft",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "content-repurposing-automation-section-7",
+      "name": "Section: 7. Schedule approved assets",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3480,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Report performance back\nWeekly: engagement per asset and per hook style, so the prompts learn which hooks work for your audience",
+        "height": 240,
+        "width": 620,
+        "color": 7
+      },
+      "id": "content-repurposing-automation-section-8",
+      "name": "Section: 8. Report performance back",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        750
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "content-repurposing-automation-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -64,7 +192,7 @@
       "id": "content-repurposing-automation-00",
       "name": "Schedule Trigger (daily)",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         300
@@ -137,7 +265,7 @@
       "id": "content-repurposing-automation-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -146,15 +274,20 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
+        "method": "POST",
+        "url": "https://api.deepgram.com/v1/listen?model=nova-3&diarize=true&smart_format=true",
         "options": {},
-        "notes": "Audio to a speaker-labelled transcript with timestamps via Deepgram, AssemblyAI or Whisper; the transcript is stored next to the recording."
+        "notes": "Audio to a speaker-labelled transcript with timestamps via Deepgram, AssemblyAI or Whisper; the transcript is stored next to the recording.",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"url\": ($json.audio_url) } }}"
       },
       "id": "content-repurposing-automation-01",
-      "name": "HTTP Request: Transcribe",
+      "name": "Deepgram API: Transcribe",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.5,
       "position": [
         640,
         300
@@ -173,7 +306,7 @@
       "id": "content-repurposing-automation-02",
       "name": "Information Extractor: Extract structure",
       "type": "@n8n/n8n-nodes-langchain.informationExtractor",
-      "typeVersion": 1,
+      "typeVersion": 1.2,
       "position": [
         960,
         300
@@ -194,9 +327,9 @@
       "id": "content-repurposing-automation-02-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1280,
+        960,
         520
       ]
     },
@@ -228,7 +361,7 @@
       "id": "content-repurposing-automation-02-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1280,
         300
@@ -259,7 +392,7 @@
       "id": "content-repurposing-automation-03",
       "name": "AI Agent: Draft the long-form",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         1600,
         300
@@ -280,9 +413,9 @@
       "id": "content-repurposing-automation-03-llm",
       "name": "Claude (Anthropic Chat Model) 2",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1920,
+        1600,
         520
       ]
     },
@@ -294,9 +427,9 @@
       "id": "content-repurposing-automation-03-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        2120,
+        1780,
         520
       ]
     },
@@ -328,7 +461,7 @@
       "id": "content-repurposing-automation-03-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1920,
         300
@@ -359,7 +492,7 @@
       "id": "content-repurposing-automation-04",
       "name": "AI Agent: Draft the short-form",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         2240,
         300
@@ -380,9 +513,9 @@
       "id": "content-repurposing-automation-04-llm",
       "name": "Claude (Anthropic Chat Model) 3",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        2560,
+        2240,
         520
       ]
     },
@@ -394,9 +527,9 @@
       "id": "content-repurposing-automation-04-parser",
       "name": "Structured Output Parser 2",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        2760,
+        2420,
         520
       ]
     },
@@ -428,7 +561,7 @@
       "id": "content-repurposing-automation-04-gate",
       "name": "Needs a person? 3",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         2560,
         300
@@ -452,7 +585,7 @@
         "jsCode": "// Clip list for the editor\n// Timestamps for the six strongest 30–90-second segments with a suggested caption and hook, exported to the editor's tool or a sheet.\nreturn $input.all();"
       },
       "id": "content-repurposing-automation-05",
-      "name": "Code: Clip list for the editor",
+      "name": "Clip list for the editor",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -465,10 +598,10 @@
       "parameters": {
         "resource": "databasePage",
         "operation": "create",
-        "databaseId": {
+        "dataSourceId": {
           "__rl": true,
           "mode": "id",
-          "value": "={{ 'replace-with-your-notion-database-id' }}"
+          "value": "={{ 'replace-with-your-notion-data-source-id' }}"
         },
         "title": "={{ $json.output?.subject || $json.title || $json.summary || 'Untitled' }}",
         "options": {}
@@ -476,7 +609,7 @@
       "id": "content-repurposing-automation-06",
       "name": "Notion: Review board",
       "type": "n8n-nodes-base.notion",
-      "typeVersion": 2.2,
+      "typeVersion": 3,
       "position": [
         3200,
         300
@@ -485,15 +618,18 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
-        "options": {},
-        "notes": "Approved posts go to Buffer, Hootsuite or the platform APIs on the cadence in the calendar rules; the blog post to the CMS as a draft; the newsletter section to the ESP draft."
+        "resource": "post",
+        "operation": "create",
+        "title": "={{ $json.output?.title || $json.title }}",
+        "additionalFields": {
+          "content": "={{ $json.output?.body || $json.body }}",
+          "status": "draft"
+        }
       },
       "id": "content-repurposing-automation-07",
-      "name": "HTTP Request: Schedule approved assets",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "WordPress: Schedule approved assets",
+      "type": "n8n-nodes-base.wordpress",
+      "typeVersion": 1,
       "position": [
         3520,
         300
@@ -515,7 +651,7 @@
       "id": "content-repurposing-automation-08",
       "name": "Schedule Trigger: Report performance back",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         860
@@ -553,14 +689,14 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Transcribe",
+            "node": "Deepgram API: Transcribe",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Transcribe": {
+    "Deepgram API: Transcribe": {
       "main": [
         [
           {
@@ -706,14 +842,14 @@
         ],
         [
           {
-            "node": "Code: Clip list for the editor",
+            "node": "Clip list for the editor",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Clip list for the editor": {
+    "Clip list for the editor": {
       "main": [
         [
           {
@@ -728,7 +864,7 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Schedule approved assets",
+            "node": "WordPress: Schedule approved assets",
             "type": "main",
             "index": 0
           }

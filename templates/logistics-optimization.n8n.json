@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Pick the cheapest carrier for shipped orders with EasyPost and Claude\n\n**Who's it for**\nE-commerce operations teams that choose carriers by habit and answer 'where is my order' by hand.\n\n**How it works**\nTrigger: The WMS or e-commerce platform (Shopify, NetSuite, ShipStation) posts when a shipment is packed.\n1. Receive the shipment\n2. Rate across carriers\n3. Select the service\n4. Book and label\n5. Track in flight\n6. Detect and explain delays\n7. Notify and escalate\n8. Audit carrier invoices\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus EasyPost / Shippo / carrier APIs, Gmail / Zendesk, Google Sheets / Postgres (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nPut your carrier accounts and service rules in the Config node; connect the order webhook to Shopify, NetSuite or ShipStation. Keep the guardrail: Customer messages for orders above a value threshold are approved by a person before sending.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/logistics-optimization/",
+        "content": "## Pick the cheapest carrier for shipped orders with EasyPost and Claude\n\nE-commerce operations teams that choose carriers by habit and answer 'where is my order' by hand.\n\n### How it works\nTrigger: The WMS or e-commerce platform (Shopify, NetSuite, ShipStation) posts when a shipment is packed.\n1. Receive the shipment\n2. Rate across carriers\n3. Select the service\n4. Book and label\n5. Track in flight\n6. Detect and explain delays\n7. Notify and escalate\n8. Audit carrier invoices\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus EasyPost / Shippo / carrier APIs, Gmail / Zendesk, Google Sheets / Postgres.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nPut your carrier accounts and service rules in the Config node; connect the order webhook to Shopify, NetSuite or ShipStation.\nGuardrail to keep: Customer messages for orders above a value threshold are approved by a person before sending.\n\nFull blueprint: https://agentmelt.com/workflows/logistics-optimization/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "logistics-optimization-about",
@@ -13,40 +13,152 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        180
       ]
     },
     {
       "parameters": {
-        "content": "## Logistics Optimization Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: The WMS or e-commerce platform (Shopify, NetSuite, ShipStation) posts when a shipment is packed. A Schedule Trigger polls tracking every 30 minutes for in-flight shipments.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Customer messages for orders above a value threshold are approved by a person before sending.\n   - Carrier selection rules (customer or product overrides) always win over cost.\n   - Claims are drafted, not filed, until the logistics lead confirms.\n   - Every selection is logged with the alternatives and prices for later audit.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/logistics-optimization/\nWant it built and run for you? $247/month · custom $4,000–7,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## 1. Receive the shipment\nDestination, weight, dimensions, service promise (delivery date), declared value and any constraints (residential, hazmat, signature)",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "logistics-optimization-note",
-      "name": "Read me first",
+      "id": "logistics-optimization-section-1",
+      "name": "Section: 1. Receive the shipment",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Webhook: Receive the shipment\n2. HTTP Request: Rate across carriers\n3. Code: Select the service\n4. HTTP Request: Book and label\n5. Schedule Trigger: Track in flight\n6. AI Agent: Detect and explain delays\n7. Gmail: Notify and escalate\n8. Compare Datasets: Audit carrier invoices\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 2. Rate across carriers\nRequests rates from each contracted carrier (UPS, FedEx, DHL, USPS, regional) directly or via EasyPost/Shippo, applying your negotiated discounts and accessorials",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "logistics-optimization-steps",
-      "name": "Step outline",
+      "id": "logistics-optimization-section-2",
+      "name": "Section: 2. Rate across carriers",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Select the service\nFilters to services meeting the promise date with a buffer from measured on-time performance per lane, then picks the cheapest",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "logistics-optimization-section-3",
+      "name": "Section: 3. Select the service",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Book and label\nPurchases the label, writes the tracking number and chosen service back to the order, and prints to the pack station",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "logistics-optimization-section-4",
+      "name": "Section: 4. Book and label",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Track in flight\nPolls tracking for open shipments; each event is compared to the expected milestone times for that service and lane",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "logistics-optimization-section-5",
+      "name": "Section: 5. Track in flight",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        750
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Detect and explain delays\nWhen a milestone is late or an exception code appears, the agent reads the tracking history and drafts a plain-language customer update and, if the carrier's SLA was missed, a claim request with the evidence",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "logistics-optimization-section-6",
+      "name": "Section: 6. Detect and explain delays",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        280,
+        530
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Notify and escalate\nCustomer update sent from the support inbox (after a human click for high-value orders); internal alert to the logistics lead for exceptions",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "logistics-optimization-section-7",
+      "name": "Section: 7. Notify and escalate",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        750
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Audit carrier invoices\nWeekly: carrier invoice lines matched to booked shipments; differences above tolerance become dispute items with the quote attached",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "logistics-optimization-section-8",
+      "name": "Section: 8. Audit carrier invoices",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        750
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "logistics-optimization-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -59,7 +171,7 @@
       "id": "logistics-optimization-01",
       "name": "Webhook: Receive the shipment",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
+      "typeVersion": 2.1,
       "position": [
         0,
         300
@@ -133,7 +245,7 @@
       "id": "logistics-optimization-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -142,15 +254,20 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
+        "method": "POST",
+        "url": "https://api.easypost.com/v2/shipments",
         "options": {},
-        "notes": "Requests rates from each contracted carrier (UPS, FedEx, DHL, USPS, regional) directly or via EasyPost/Shippo, applying your negotiated discounts and accessorials."
+        "notes": "Requests rates from each contracted carrier (UPS, FedEx, DHL, USPS, regional) directly or via EasyPost/Shippo, applying your negotiated discounts and accessorials.",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"shipment\": ($json.shipment) } }}"
       },
       "id": "logistics-optimization-02",
-      "name": "HTTP Request: Rate across carriers",
+      "name": "EasyPost API: Rate across carriers",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.5,
       "position": [
         640,
         300
@@ -162,7 +279,7 @@
         "jsCode": "// Select the service\n// Filters to services meeting the promise date with a buffer from measured on-time performance per lane, then picks the cheapest. Rules can force a carrier for certain customers or products.\nreturn $input.all();"
       },
       "id": "logistics-optimization-03",
-      "name": "Code: Select the service",
+      "name": "Select the service",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -173,15 +290,20 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
+        "method": "POST",
+        "url": "=https://api.easypost.com/v2/shipments/{{ $json.shipment_id }}/buy",
         "options": {},
-        "notes": "Purchases the label, writes the tracking number and chosen service back to the order, and prints to the pack station."
+        "notes": "Purchases the label, writes the tracking number and chosen service back to the order, and prints to the pack station.",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"rate\": { \"id\": ($json.rate_id) } } }}"
       },
       "id": "logistics-optimization-04",
-      "name": "HTTP Request: Book and label",
+      "name": "EasyPost API: Book and label",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.5,
       "position": [
         1280,
         300
@@ -203,7 +325,7 @@
       "id": "logistics-optimization-05",
       "name": "Schedule Trigger: Track in flight",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         860
@@ -222,7 +344,7 @@
       "id": "logistics-optimization-06",
       "name": "AI Agent: Detect and explain delays",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         320,
         860
@@ -243,9 +365,9 @@
       "id": "logistics-optimization-06-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        640,
+        320,
         1080
       ]
     },
@@ -257,9 +379,9 @@
       "id": "logistics-optimization-06-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        840,
+        500,
         1080
       ]
     },
@@ -291,7 +413,7 @@
       "id": "logistics-optimization-06-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         640,
         860
@@ -323,7 +445,7 @@
       "id": "logistics-optimization-07",
       "name": "Gmail: Notify and escalate",
       "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.1,
+      "typeVersion": 2.2,
       "position": [
         960,
         860
@@ -343,7 +465,7 @@
         "options": {}
       },
       "id": "logistics-optimization-08",
-      "name": "Compare Datasets: Audit carrier invoices",
+      "name": "Audit carrier invoices",
       "type": "n8n-nodes-base.compareDatasets",
       "typeVersion": 2.3,
       "position": [
@@ -369,29 +491,29 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Rate across carriers",
+            "node": "EasyPost API: Rate across carriers",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Rate across carriers": {
+    "EasyPost API: Rate across carriers": {
       "main": [
         [
           {
-            "node": "Code: Select the service",
+            "node": "Select the service",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Select the service": {
+    "Select the service": {
       "main": [
         [
           {
-            "node": "HTTP Request: Book and label",
+            "node": "EasyPost API: Book and label",
             "type": "main",
             "index": 0
           }
@@ -464,7 +586,7 @@
       "main": [
         [
           {
-            "node": "Compare Datasets: Audit carrier invoices",
+            "node": "Audit carrier invoices",
             "type": "main",
             "index": 0
           }

@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Reply to new real estate leads in minutes with Claude, Follow Up Boss and Twilio\n\n**Who's it for**\nReal-estate agents and teams who lose portal leads to whoever answers first.\n\n**How it works**\nTrigger: A lead email from Zillow or Realtor.com, a website form submission, or a new-person webhook from Follow Up Boss or kvCORE starts the run.\n1. Receive the lead\n2. Look up the lead in the CRM\n3. Qualify\n4. Draft the first reply\n5. Check quiet hours and consent\n6. Send the reply\n7. Log and hand off\n8. Follow up on silence\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Follow Up Boss / kvCORE / HubSpot, Gmail / Outlook, Twilio (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nPut your first-reply rules and quiet hours in the Config node; swap Follow Up Boss for kvCORE or HubSpot and Twilio for your SMS provider. Keep the guardrail: Quiet hours: nothing sent 9 pm–8 am in the lead's time zone; messages queue until morning.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/speed-to-lead-automation/",
+        "content": "## Reply to new real estate leads in minutes with Claude, Follow Up Boss and Twilio\n\nReal-estate agents and teams who lose portal leads to whoever answers first.\n\n### How it works\nTrigger: A lead email from Zillow or Realtor.com, a website form submission, or a new-person webhook from Follow Up Boss or kvCORE starts the run.\n1. Receive the lead\n2. Look up the lead in the CRM\n3. Qualify\n4. Draft the first reply\n5. Check quiet hours and consent\n6. Send the reply\n7. Log and hand off\n8. Follow up on silence\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Follow Up Boss / kvCORE / HubSpot, Gmail / Outlook, Twilio.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nPut your first-reply rules and quiet hours in the Config node; swap Follow Up Boss for kvCORE or HubSpot and Twilio for your SMS provider.\nGuardrail to keep: Quiet hours: nothing sent 9 pm–8 am in the lead's time zone; messages queue until morning.\n\nFull blueprint: https://agentmelt.com/workflows/speed-to-lead-automation/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "speed-to-lead-automation-about",
@@ -13,40 +13,152 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Speed-to-Lead Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: A lead email from Zillow or Realtor.com, a website form submission, or a new-person webhook from Follow Up Boss or kvCORE starts the run.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Quiet hours: nothing sent 9 pm–8 am in the lead's time zone; messages queue until morning.\n   - One question per message; the second message asks the next question, never both at once.\n   - SMS only with a number the lead gave on a form; STOP honoured on the first word and written to the CRM.\n   - Fair-housing language check on every draft; flagged drafts cannot be sent.\n   - Approval mode for the first week: drafts go to the agent for a tap before sending.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/speed-to-lead-automation/\nWant it built and run for you? $197/month · custom $2,000–3,500 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## 1. Receive the lead\nName, email, phone, source, the property or page they enquired from, and their message",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "speed-to-lead-automation-note",
-      "name": "Read me first",
+      "id": "speed-to-lead-automation-section-1",
+      "name": "Section: 1. Receive the lead",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Webhook: Receive the lead\n2. HTTP Request: Look up the lead in the CRM\n3. AI Agent: Qualify\n4. AI Agent: Draft the first reply\n5. Code: Check quiet hours and consent\n6. Gmail: Send the reply\n7. HTTP Request: Log and hand off\n8. Wait: Follow up on silence\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 2. Look up the lead in the CRM\nExisting record, past conversations, stage, and any notes — so the reply does not treat a past client like a stranger",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "speed-to-lead-automation-steps",
-      "name": "Step outline",
+      "id": "speed-to-lead-automation-section-2",
+      "name": "Section: 2. Look up the lead in the CRM",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Qualify\nTimeline, pre-approval, price band and intent from the enquiry text; 'hot' only when the timeline is near and something specific is named",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "speed-to-lead-automation-section-3",
+      "name": "Section: 3. Qualify",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Draft the first reply\nTwo to four sentences in the agent's voice, referencing the property or page, with exactly one question",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "speed-to-lead-automation-section-4",
+      "name": "Section: 4. Draft the first reply",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Check quiet hours and consent\nHolds the message until quiet hours end in the lead's time zone; checks that a phone number came with consent before any SMS; skips leads who opted out",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "speed-to-lead-automation-section-5",
+      "name": "Section: 5. Check quiet hours and consent",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Send the reply\nFrom the agent's own address, threaded to the lead's email where there is one; SMS as an optional second channel",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "speed-to-lead-automation-section-6",
+      "name": "Section: 6. Send the reply",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Log and hand off\nNote and stage written to the CRM; hot leads text the agent a three-line summary with the number to call",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "speed-to-lead-automation-section-7",
+      "name": "Section: 7. Log and hand off",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2840,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Follow up on silence\nTwo days without a reply: one nudge that offers two showing slots or asks what they are after",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "speed-to-lead-automation-section-8",
+      "name": "Section: 8. Follow up on silence",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3160,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "speed-to-lead-automation-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -59,7 +171,7 @@
       "id": "speed-to-lead-automation-01",
       "name": "Webhook: Receive the lead",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
+      "typeVersion": 2.1,
       "position": [
         0,
         300
@@ -133,7 +245,7 @@
       "id": "speed-to-lead-automation-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -142,15 +254,17 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
         "method": "GET",
+        "url": "=https://api.followupboss.com/v1/people?email={{ encodeURIComponent($json.email) }}&includeTrash=false",
         "options": {},
-        "notes": "Existing record, past conversations, stage, and any notes — so the reply does not treat a past client like a stranger."
+        "notes": "Existing record, past conversations, stage, and any notes — so the reply does not treat a past client like a stranger.",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth"
       },
       "id": "speed-to-lead-automation-02",
-      "name": "HTTP Request: Look up the lead in the CRM",
+      "name": "Follow Up Boss API: Look up the lead in the CRM",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.5,
       "position": [
         640,
         300
@@ -169,7 +283,7 @@
       "id": "speed-to-lead-automation-03",
       "name": "AI Agent: Qualify",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         960,
         300
@@ -190,9 +304,9 @@
       "id": "speed-to-lead-automation-03-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1280,
+        960,
         520
       ]
     },
@@ -204,9 +318,9 @@
       "id": "speed-to-lead-automation-03-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        1480,
+        1140,
         520
       ]
     },
@@ -238,7 +352,7 @@
       "id": "speed-to-lead-automation-03-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1280,
         300
@@ -269,7 +383,7 @@
       "id": "speed-to-lead-automation-04",
       "name": "AI Agent: Draft the first reply",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         1600,
         300
@@ -290,9 +404,9 @@
       "id": "speed-to-lead-automation-04-llm",
       "name": "Claude (Anthropic Chat Model) 2",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1920,
+        1600,
         520
       ]
     },
@@ -304,9 +418,9 @@
       "id": "speed-to-lead-automation-04-parser",
       "name": "Structured Output Parser 2",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        2120,
+        1780,
         520
       ]
     },
@@ -338,7 +452,7 @@
       "id": "speed-to-lead-automation-04-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1920,
         300
@@ -362,7 +476,7 @@
         "jsCode": "// Check quiet hours and consent\n// Holds the message until quiet hours end in the lead's time zone; checks that a phone number came with consent before any SMS; skips leads who opted out.\nreturn $input.all();"
       },
       "id": "speed-to-lead-automation-05",
-      "name": "Code: Check quiet hours and consent",
+      "name": "Check quiet hours and consent",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -384,7 +498,7 @@
       "id": "speed-to-lead-automation-06",
       "name": "Gmail: Send the reply",
       "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.1,
+      "typeVersion": 2.2,
       "position": [
         2560,
         300
@@ -393,15 +507,20 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
+        "method": "POST",
+        "url": "https://api.followupboss.com/v1/events",
         "options": {},
-        "notes": "Note and stage written to the CRM; hot leads text the agent a three-line summary with the number to call."
+        "notes": "Note and stage written to the CRM; hot leads text the agent a three-line summary with the number to call.",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"source\": \"n8n\", \"type\": \"Note\", \"person\": { \"emails\": [{ \"value\": ($json.email) }] }, \"note\": ($json.output?.summary) } }}"
       },
       "id": "speed-to-lead-automation-07",
-      "name": "HTTP Request: Log and hand off",
+      "name": "Follow Up Boss API: Log and hand off",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.5,
       "position": [
         2880,
         300
@@ -414,7 +533,7 @@
         "options": {}
       },
       "id": "speed-to-lead-automation-08",
-      "name": "Wait: Follow up on silence",
+      "name": "Follow up on silence",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
@@ -440,14 +559,14 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Look up the lead in the CRM",
+            "node": "Follow Up Boss API: Look up the lead in the CRM",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Look up the lead in the CRM": {
+    "Follow Up Boss API: Look up the lead in the CRM": {
       "main": [
         [
           {
@@ -553,14 +672,14 @@
         ],
         [
           {
-            "node": "Code: Check quiet hours and consent",
+            "node": "Check quiet hours and consent",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Check quiet hours and consent": {
+    "Check quiet hours and consent": {
       "main": [
         [
           {
@@ -575,18 +694,18 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Log and hand off",
+            "node": "Follow Up Boss API: Log and hand off",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Log and hand off": {
+    "Follow Up Boss API: Log and hand off": {
       "main": [
         [
           {
-            "node": "Wait: Follow up on silence",
+            "node": "Follow up on silence",
             "type": "main",
             "index": 0
           }

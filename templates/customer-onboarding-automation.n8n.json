@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Guide new signups to activation with Claude using Segment and HubSpot\n\n**Who's it for**\nProduct and success teams whose new customers stall between signup and first value.\n\n**How it works**\nTrigger: The product or billing system posts new signups; a daily Schedule Trigger evaluates every account still in onboarding against milestone deadlines.\n1. Register the new account\n2. Track milestones from product events\n3. Detect stalls\n4. Send the right nudge\n5. Answer setup questions\n6. Escalate to a person\n7. Celebrate activation and hand over\n8. Report the funnel\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Segment / Mixpanel / PostHog, HubSpot / Intercom (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet the milestones and the nudge timing in the Config node; replace Segment with Mixpanel or PostHog. Keep the guardrail: Nudges are sent only on stalls, with a cap of one per milestone; no message for customers making progress.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/customer-onboarding-automation/",
+        "content": "## Guide new signups to activation with Claude using Segment and HubSpot\n\nProduct and success teams whose new customers stall between signup and first value.\n\n### How it works\nTrigger: The product or billing system posts new signups; a daily Schedule Trigger evaluates every account still in onboarding against milestone deadlines.\n1. Register the new account\n2. Track milestones from product events\n3. Detect stalls\n4. Send the right nudge\n5. Answer setup questions\n6. Escalate to a person\n7. Celebrate activation and hand over\n8. Report the funnel\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Segment / Mixpanel / PostHog, HubSpot / Intercom.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the milestones and the nudge timing in the Config node; replace Segment with Mixpanel or PostHog.\nGuardrail to keep: Nudges are sent only on stalls, with a cap of one per milestone; no message for customers making progress.\n\nFull blueprint: https://agentmelt.com/workflows/customer-onboarding-automation/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "customer-onboarding-automation-about",
@@ -13,40 +13,152 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Customer Onboarding Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: The product or billing system posts new signups; a daily Schedule Trigger evaluates every account still in onboarding against milestone deadlines.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Nudges are sent only on stalls, with a cap of one per milestone; no message for customers making progress.\n   - The setup-question agent answers from documentation with citations and escalates unknowns.\n   - High-value accounts get a person on the first stall, not the third.\n   - Every automated message is logged on the account so the CSM sees the full history.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/customer-onboarding-automation/\nWant it built and run for you? $247/month · custom $3,500–6,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## 1. Register the new account\nAccount, plan, segment, signup source and the milestone set that applies (self-serve vs sales-assisted have different milestones and deadlines)",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "customer-onboarding-automation-note",
-      "name": "Read me first",
+      "id": "customer-onboarding-automation-section-1",
+      "name": "Section: 1. Register the new account",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Webhook: Register the new account\n2. HTTP Request: Track milestones from product events\n3. IF: Detect stalls\n4. AI Agent: Send the right nudge\n5. AI Agent: Answer setup questions\n6. Slack: Escalate to a person\n7. HubSpot: Celebrate activation and hand over\n8. Schedule Trigger: Report the funnel\n9. Code: Report the funnel\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 2. Track milestones from product events\nReads the activation events from product analytics or the app's own API and marks milestones complete with timestamps",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "customer-onboarding-automation-steps",
-      "name": "Step outline",
+      "id": "customer-onboarding-automation-section-2",
+      "name": "Section: 2. Track milestones from product events",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Detect stalls\nA milestone past its expected day with no progress is a stall",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "customer-onboarding-automation-section-3",
+      "name": "Section: 3. Detect stalls",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Send the right nudge\nThe agent writes a short message for this stall — the specific next step, one link, an offer to help — using the customer's plan and what they have already done",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "customer-onboarding-automation-section-4",
+      "name": "Section: 4. Send the right nudge",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Answer setup questions\nReplies to onboarding emails and in-app chat from the documentation with citations; questions it cannot answer become a ticket with the account's milestone context attached",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "customer-onboarding-automation-section-5",
+      "name": "Section: 5. Answer setup questions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Escalate to a person\nTwo consecutive stalls, a negative reply, or a high-value account stalling on the first milestone alerts the CSM with the history and a suggested call agenda",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "customer-onboarding-automation-section-6",
+      "name": "Section: 6. Escalate to a person",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Celebrate activation and hand over\nOn the final milestone the account moves to 'activated', the CSM or the retention workflows take over, and the onboarding record is closed with its timeline",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "customer-onboarding-automation-section-7",
+      "name": "Section: 7. Celebrate activation and hand over",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2840,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Report the funnel\nWeekly milestone funnel by segment and signup source: where customers stall and how long each step takes, which is the product team's onboarding backlog",
+        "height": 240,
+        "width": 620,
+        "color": 7
+      },
+      "id": "customer-onboarding-automation-section-8",
+      "name": "Section: 8. Report the funnel",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        750
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "customer-onboarding-automation-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -59,7 +171,7 @@
       "id": "customer-onboarding-automation-01",
       "name": "Webhook: Register the new account",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
+      "typeVersion": 2.1,
       "position": [
         0,
         300
@@ -133,7 +245,7 @@
       "id": "customer-onboarding-automation-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -142,15 +254,20 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
+        "method": "POST",
+        "url": "=https://app.posthog.com/api/projects/{{ $json.project_id }}/query",
         "options": {},
-        "notes": "Reads the activation events from product analytics or the app's own API and marks milestones complete with timestamps."
+        "notes": "Reads the activation events from product analytics or the app's own API and marks milestones complete with timestamps.",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"query\": { \"kind\": \"HogQLQuery\", \"query\": \"SELECT event, timestamp FROM events WHERE distinct_id = {distinct_id} ORDER BY timestamp\" }, \"values\": { \"distinct_id\": ($json.user_id) } } }}"
       },
       "id": "customer-onboarding-automation-02",
-      "name": "HTTP Request: Track milestones from product events",
+      "name": "PostHog Query API: Track milestones from product events",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.5,
       "position": [
         640,
         300
@@ -181,9 +298,9 @@
         "options": {}
       },
       "id": "customer-onboarding-automation-03",
-      "name": "IF: Detect stalls",
+      "name": "Detect stalls",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         960,
         300
@@ -202,7 +319,7 @@
       "id": "customer-onboarding-automation-04",
       "name": "AI Agent: Send the right nudge",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         1280,
         300
@@ -223,9 +340,9 @@
       "id": "customer-onboarding-automation-04-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1600,
+        1280,
         520
       ]
     },
@@ -237,9 +354,9 @@
       "id": "customer-onboarding-automation-04-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        1800,
+        1460,
         520
       ]
     },
@@ -271,7 +388,7 @@
       "id": "customer-onboarding-automation-04-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1600,
         300
@@ -302,7 +419,7 @@
       "id": "customer-onboarding-automation-05",
       "name": "AI Agent: Answer setup questions",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         1920,
         300
@@ -323,9 +440,9 @@
       "id": "customer-onboarding-automation-05-llm",
       "name": "Claude (Anthropic Chat Model) 2",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        2240,
+        1920,
         520
       ]
     },
@@ -337,9 +454,9 @@
       "id": "customer-onboarding-automation-05-parser",
       "name": "Structured Output Parser 2",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        2440,
+        2100,
         520
       ]
     },
@@ -371,7 +488,7 @@
       "id": "customer-onboarding-automation-05-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         2240,
         300
@@ -406,7 +523,7 @@
       "id": "customer-onboarding-automation-06",
       "name": "Slack: Escalate to a person",
       "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "typeVersion": 2.7,
       "position": [
         2560,
         300
@@ -423,7 +540,7 @@
       "id": "customer-onboarding-automation-07",
       "name": "HubSpot: Celebrate activation and hand over",
       "type": "n8n-nodes-base.hubspot",
-      "typeVersion": 2.1,
+      "typeVersion": 2.2,
       "position": [
         2880,
         300
@@ -445,7 +562,7 @@
       "id": "customer-onboarding-automation-08",
       "name": "Schedule Trigger: Report the funnel",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         860
@@ -483,25 +600,25 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Track milestones from product events",
+            "node": "PostHog Query API: Track milestones from product events",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Track milestones from product events": {
+    "PostHog Query API: Track milestones from product events": {
       "main": [
         [
           {
-            "node": "IF: Detect stalls",
+            "node": "Detect stalls",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "IF: Detect stalls": {
+    "Detect stalls": {
       "main": [
         [
           {

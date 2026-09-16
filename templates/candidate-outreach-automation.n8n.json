@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Send personalized candidate outreach from Greenhouse projects with Claude and Gmail\n\n**Who's it for**\nRecruiters who source in the ATS and write every first message by hand.\n\n**How it works**\nTrigger: A candidate added to a sourcing project in the ATS or a row added to the outreach sheet starts a sequence for that person.\n1. Receive the candidate\n2. Research\n3. Pick the hook\n4. Draft the message\n5. Send from the recruiter\n6. Follow up twice\n7. Stop on reply\n8. Measure\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Greenhouse / Lever / Ashby, Gmail / Outlook, Google Sheets (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet the outreach voice and the follow-up cadence in the Config node; swap Gmail for Outlook and Greenhouse for Lever or Ashby. Keep the guardrail: Only public, professional information is used; nothing personal, nothing inferred about protected characteristics.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/candidate-outreach-automation/",
+        "content": "## Send personalized candidate outreach from Greenhouse projects with Claude and Gmail\n\nRecruiters who source in the ATS and write every first message by hand.\n\n### How it works\nTrigger: A candidate added to a sourcing project in the ATS or a row added to the outreach sheet starts a sequence for that person.\n1. Receive the candidate\n2. Research\n3. Pick the hook\n4. Draft the message\n5. Send from the recruiter\n6. Follow up twice\n7. Stop on reply\n8. Measure\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Greenhouse / Lever / Ashby, Gmail / Outlook, Google Sheets.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the outreach voice and the follow-up cadence in the Config node; swap Gmail for Outlook and Greenhouse for Lever or Ashby.\nGuardrail to keep: Only public, professional information is used; nothing personal, nothing inferred about protected characteristics.\n\nFull blueprint: https://agentmelt.com/workflows/candidate-outreach-automation/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "candidate-outreach-automation-about",
@@ -13,40 +13,152 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Candidate Outreach Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: A candidate added to a sourcing project in the ATS or a row added to the outreach sheet starts a sequence for that person.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Only public, professional information is used; nothing personal, nothing inferred about protected characteristics.\n   - Sending limits: 40 new messages a day per mailbox, spaced, so the recruiter's domain reputation is protected.\n   - Every message is sent from a person's address and signed by that person; replies go to them.\n   - Opt-out language in every message; an opt-out suppresses the candidate across all roles.\n   - Follow-ups stop on any reply, including 'not now', which is logged as a future-contact date.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/candidate-outreach-automation/\nWant it built and run for you? $197/month · custom $2,000–3,500 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## 1. Receive the candidate\nName, current title and company, profile URL, and the role they are being sourced for",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "candidate-outreach-automation-note",
-      "name": "Read me first",
+      "id": "candidate-outreach-automation-section-1",
+      "name": "Section: 1. Receive the candidate",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Webhook: Receive the candidate\n2. HTTP Request: Research\n3. AI Agent: Pick the hook\n4. AI Agent: Draft the message\n5. Gmail: Send from the recruiter\n6. Wait: Follow up twice\n7. Gmail Trigger: Stop on reply\n8. Google Sheets: Measure\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 2. Research\nPublic profile, company page, recent talks or posts, open-source or portfolio work — three to five facts, with sources",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "candidate-outreach-automation-steps",
-      "name": "Step outline",
+      "id": "candidate-outreach-automation-section-2",
+      "name": "Section: 2. Research",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Pick the hook\nOne specific, recent, professional thing the candidate did that relates to the role",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "candidate-outreach-automation-section-3",
+      "name": "Section: 3. Pick the hook",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Draft the message\nUnder 90 words: the hook, why the role is relevant to it, one question",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "candidate-outreach-automation-section-4",
+      "name": "Section: 4. Draft the message",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Send from the recruiter\nFrom the recruiter's own address, spaced to stay under daily limits; the ATS gets the message logged against the candidate",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "candidate-outreach-automation-section-5",
+      "name": "Section: 5. Send from the recruiter",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Follow up twice\nDay 4 and day 10, each a different angle (the team, the problem, the timing), each shorter than the last",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "candidate-outreach-automation-section-6",
+      "name": "Section: 6. Follow up twice",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Stop on reply\nAny reply ends the sequence and forwards the thread with the research to the recruiter; an out-of-office pauses it",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "candidate-outreach-automation-section-7",
+      "name": "Section: 7. Stop on reply",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        750
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Measure\nPer role: sent, replied, positive, interviews — by hook type, so the recruiter learns which angles work for which roles",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "candidate-outreach-automation-section-8",
+      "name": "Section: 8. Measure",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        280,
+        750
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "candidate-outreach-automation-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -59,7 +171,7 @@
       "id": "candidate-outreach-automation-01",
       "name": "Webhook: Receive the candidate",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
+      "typeVersion": 2.1,
       "position": [
         0,
         300
@@ -133,7 +245,7 @@
       "id": "candidate-outreach-automation-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -142,15 +254,15 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
-        "options": {},
-        "notes": "Public profile, company page, recent talks or posts, open-source or portfolio work — three to five facts, with sources."
+        "resource": "person",
+        "operation": "enrich",
+        "email": "={{ $json.email || $json.output?.email || '' }}",
+        "additionalFields": {}
       },
       "id": "candidate-outreach-automation-02",
-      "name": "HTTP Request: Research",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "Clearbit: Research",
+      "type": "n8n-nodes-base.clearbit",
+      "typeVersion": 1,
       "position": [
         640,
         300
@@ -169,7 +281,7 @@
       "id": "candidate-outreach-automation-03",
       "name": "AI Agent: Pick the hook",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         960,
         300
@@ -190,9 +302,9 @@
       "id": "candidate-outreach-automation-03-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1280,
+        960,
         520
       ]
     },
@@ -204,9 +316,9 @@
       "id": "candidate-outreach-automation-03-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        1480,
+        1140,
         520
       ]
     },
@@ -238,7 +350,7 @@
       "id": "candidate-outreach-automation-03-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1280,
         300
@@ -269,7 +381,7 @@
       "id": "candidate-outreach-automation-04",
       "name": "AI Agent: Draft the message",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         1600,
         300
@@ -290,9 +402,9 @@
       "id": "candidate-outreach-automation-04-llm",
       "name": "Claude (Anthropic Chat Model) 2",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1920,
+        1600,
         520
       ]
     },
@@ -304,9 +416,9 @@
       "id": "candidate-outreach-automation-04-parser",
       "name": "Structured Output Parser 2",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        2120,
+        1780,
         520
       ]
     },
@@ -338,7 +450,7 @@
       "id": "candidate-outreach-automation-04-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1920,
         300
@@ -370,7 +482,7 @@
       "id": "candidate-outreach-automation-05",
       "name": "Gmail: Send from the recruiter",
       "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.1,
+      "typeVersion": 2.2,
       "position": [
         2240,
         300
@@ -383,7 +495,7 @@
         "options": {}
       },
       "id": "candidate-outreach-automation-06",
-      "name": "Wait: Follow up twice",
+      "name": "Follow up twice",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
@@ -407,7 +519,7 @@
       "id": "candidate-outreach-automation-07",
       "name": "Gmail Trigger: Stop on reply",
       "type": "n8n-nodes-base.gmailTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         860
@@ -439,7 +551,7 @@
       "id": "candidate-outreach-automation-08",
       "name": "Google Sheets: Measure",
       "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "typeVersion": 4.7,
       "position": [
         320,
         860
@@ -463,14 +575,14 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Research",
+            "node": "Clearbit: Research",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Research": {
+    "Clearbit: Research": {
       "main": [
         [
           {
@@ -587,7 +699,7 @@
       "main": [
         [
           {
-            "node": "Wait: Follow up twice",
+            "node": "Follow up twice",
             "type": "main",
             "index": 0
           }

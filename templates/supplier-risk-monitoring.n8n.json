@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Score supplier risk from news and credit data with Claude and report in Slack\n\n**Who's it for**\nProcurement teams that learn about a supplier's trouble from a missed delivery.\n\n**How it works**\nTrigger: News and delivery data refresh daily; financial and ESG data refresh weekly; the composite score is recomputed weekly and on any high-severity signal.\n1. Load the supplier portfolio\n2. Pull financial signals\n3. Pull news and events\n4. Measure delivery performance\n5. Classify and weight signals\n6. Compute the composite score\n7. Draft the risk brief\n8. Alert and track\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus D&B / Creditsafe / Coface, News API / GDELT, Slack + Google Sheets (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nEdit the risk weights and the watchlist in the Config node; add D&B, Creditsafe or your own data provider as sources. Keep the guardrail: Scores are explainable: every alert lists the signals and weights that produced it.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/supplier-risk-monitoring/",
+        "content": "## Score supplier risk from news and credit data with Claude and report in Slack\n\nProcurement teams that learn about a supplier's trouble from a missed delivery.\n\n### How it works\nTrigger: News and delivery data refresh daily; financial and ESG data refresh weekly; the composite score is recomputed weekly and on any high-severity signal.\n1. Load the supplier portfolio\n2. Pull financial signals\n3. Pull news and events\n4. Measure delivery performance\n5. Classify and weight signals\n6. Compute the composite score\n7. Draft the risk brief\n8. Alert and track\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus D&B / Creditsafe / Coface, News API / GDELT, Slack + Google Sheets.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nEdit the risk weights and the watchlist in the Config node; add D&B, Creditsafe or your own data provider as sources.\nGuardrail to keep: Scores are explainable: every alert lists the signals and weights that produced it.\n\nFull blueprint: https://agentmelt.com/workflows/supplier-risk-monitoring/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "supplier-risk-monitoring-about",
@@ -13,40 +13,168 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Supplier Risk Monitoring Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: News and delivery data refresh daily; financial and ESG data refresh weekly; the composite score is recomputed weekly and on any high-severity signal.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Scores are explainable: every alert lists the signals and weights that produced it.\n   - News is classified for relevance and severity before it affects a score; a single article never triggers an alert on its own.\n   - The agent recommends; procurement decides and records the action.\n   - Tier-3 suppliers are scored on delivery data only, so monitoring cost stays proportional.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/supplier-risk-monitoring/\nWant it built and run for you? $297/month · custom $5,000–9,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "supplier-risk-monitoring-note",
-      "name": "Read me first",
+      "id": "supplier-risk-monitoring-section-0",
+      "name": "Section: Trigger and config",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Schedule Trigger (weekly)\n2. Google Sheets: Load the supplier portfolio\n3. HTTP Request: Pull financial signals\n4. HTTP Request: Pull news and events\n5. Postgres: Measure delivery performance\n6. Text Classifier: Classify and weight signals\n7. Code: Compute the composite score\n8. AI Agent: Draft the risk brief\n9. Slack: Alert and track\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 1. Load the supplier portfolio\nSuppliers with spend, criticality tier, category, country of manufacture, single-source flag and contract terms",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "supplier-risk-monitoring-steps",
-      "name": "Step outline",
+      "id": "supplier-risk-monitoring-section-1",
+      "name": "Section: 1. Load the supplier portfolio",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Pull financial signals\nCredit scores and payment behaviour from D&B, Creditsafe or Coface; public filings for listed suppliers",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "supplier-risk-monitoring-section-2",
+      "name": "Section: 2. Pull financial signals",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Pull news and events\nNews API queries per supplier and per manufacturing region; regulatory and sanctions list checks; weather and port-status feeds for logistics-critical regions",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "supplier-risk-monitoring-section-3",
+      "name": "Section: 3. Pull news and events",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Measure delivery performance\nOn-time-in-full rate, lead-time drift and quality rejections per supplier from your own receipts and QC records — the most predictive signal you already own",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "supplier-risk-monitoring-section-4",
+      "name": "Section: 4. Measure delivery performance",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Classify and weight signals\nNews items are classified (financial distress, labour action, quality recall, natural disaster, ownership change, irrelevant) with severity; irrelevant mentions are dropped",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "supplier-risk-monitoring-section-5",
+      "name": "Section: 5. Classify and weight signals",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Compute the composite score\nWeighted score per supplier from financial, operational, geographic and news components, with the weights per tier kept in the sheet so procurement can tune them",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "supplier-risk-monitoring-section-6",
+      "name": "Section: 6. Compute the composite score",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Draft the risk brief\nWhen a score crosses its threshold, the agent assembles the evidence, states the exposure (parts, spend, lead time to switch) and recommends actions: increase safety stock, qualify the backup, renegotiate terms, visit the site",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "supplier-risk-monitoring-section-7",
+      "name": "Section: 7. Draft the risk brief",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2840,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Alert and track\nBrief posted to the procurement channel and logged on the supplier record; actions get owners and due dates; scores and briefs feed the quarterly review",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "supplier-risk-monitoring-section-8",
+      "name": "Section: 8. Alert and track",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3480,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "supplier-risk-monitoring-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -67,7 +195,7 @@
       "id": "supplier-risk-monitoring-00",
       "name": "Schedule Trigger (weekly)",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         300
@@ -140,7 +268,7 @@
       "id": "supplier-risk-monitoring-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -172,7 +300,7 @@
       "id": "supplier-risk-monitoring-01",
       "name": "Google Sheets: Load the supplier portfolio",
       "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "typeVersion": 4.7,
       "position": [
         640,
         300
@@ -181,15 +309,17 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
         "method": "GET",
+        "url": "=https://connect.creditsafe.com/v1/companies/{{ $json.creditsafe_id }}",
         "options": {},
-        "notes": "Credit scores and payment behaviour from D&B, Creditsafe or Coface; public filings for listed suppliers."
+        "notes": "Credit scores and payment behaviour from D&B, Creditsafe or Coface; public filings for listed suppliers.",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
       },
       "id": "supplier-risk-monitoring-02",
-      "name": "HTTP Request: Pull financial signals",
+      "name": "Creditsafe Connect API: Pull financial signals",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.5,
       "position": [
         960,
         300
@@ -198,15 +328,17 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
         "method": "GET",
+        "url": "=https://newsapi.org/v2/everything?q={{ encodeURIComponent($json.supplier_name) }}&sortBy=publishedAt&pageSize=20",
         "options": {},
-        "notes": "News API queries per supplier and per manufacturing region; regulatory and sanctions list checks; weather and port-status feeds for logistics-critical regions."
+        "notes": "News API queries per supplier and per manufacturing region; regulatory and sanctions list checks; weather and port-status feeds for logistics-critical regions.",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
       },
       "id": "supplier-risk-monitoring-03",
-      "name": "HTTP Request: Pull news and events",
+      "name": "News API: Pull news and events",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.5,
       "position": [
         1280,
         300
@@ -222,7 +354,7 @@
       "id": "supplier-risk-monitoring-04",
       "name": "Postgres: Measure delivery performance",
       "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
+      "typeVersion": 2.7,
       "position": [
         1600,
         300
@@ -249,7 +381,7 @@
       "id": "supplier-risk-monitoring-05",
       "name": "Text Classifier: Classify and weight signals",
       "type": "@n8n/n8n-nodes-langchain.textClassifier",
-      "typeVersion": 1,
+      "typeVersion": 1.1,
       "position": [
         1920,
         300
@@ -270,9 +402,9 @@
       "id": "supplier-risk-monitoring-05-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        2240,
+        1920,
         520
       ]
     },
@@ -304,7 +436,7 @@
       "id": "supplier-risk-monitoring-05-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         2240,
         300
@@ -328,7 +460,7 @@
         "jsCode": "// Compute the composite score\n// Weighted score per supplier from financial, operational, geographic and news components, with the weights per tier kept in the sheet so procurement can tune them.\nreturn $input.all();"
       },
       "id": "supplier-risk-monitoring-06",
-      "name": "Code: Compute the composite score",
+      "name": "Compute the composite score",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -349,7 +481,7 @@
       "id": "supplier-risk-monitoring-07",
       "name": "AI Agent: Draft the risk brief",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         2880,
         300
@@ -370,9 +502,9 @@
       "id": "supplier-risk-monitoring-07-llm",
       "name": "Claude (Anthropic Chat Model) 2",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        3200,
+        2880,
         520
       ]
     },
@@ -384,9 +516,9 @@
       "id": "supplier-risk-monitoring-07-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        3400,
+        3060,
         520
       ]
     },
@@ -418,7 +550,7 @@
       "id": "supplier-risk-monitoring-07-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         3200,
         300
@@ -453,7 +585,7 @@
       "id": "supplier-risk-monitoring-08",
       "name": "Slack: Alert and track",
       "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "typeVersion": 2.7,
       "position": [
         3520,
         300
@@ -488,25 +620,25 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Pull financial signals",
+            "node": "Creditsafe Connect API: Pull financial signals",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Pull financial signals": {
+    "Creditsafe Connect API: Pull financial signals": {
       "main": [
         [
           {
-            "node": "HTTP Request: Pull news and events",
+            "node": "News API: Pull news and events",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Pull news and events": {
+    "News API: Pull news and events": {
       "main": [
         [
           {
@@ -561,14 +693,14 @@
         ],
         [
           {
-            "node": "Code: Compute the composite score",
+            "node": "Compute the composite score",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Compute the composite score": {
+    "Compute the composite score": {
       "main": [
         [
           {

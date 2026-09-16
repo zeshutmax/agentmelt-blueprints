@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Draft monthly client reports from Xero with Claude in Google Docs\n\n**Who's it for**\nAccountants and bookkeepers who write the same month-end commentary for every client.\n\n**How it works**\nTrigger: On the day you set after month-end close — or when an accountant asks for a client by name — the pack for that client is built.\n1. Pull the numbers\n2. Check the close\n3. Compute the comparisons\n4. Find the variances that matter\n5. Draft the narrative\n6. Assemble the pack\n7. Review and sign off\n8. Deliver and log\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Xero / QuickBooks / Sage, Google Docs / Word, Gmail / Outlook (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet the report sections and the thresholds that trigger commentary in the Config node; swap Xero for QuickBooks or Sage. Keep the guardrail: No pack is drafted on an unclean close; the workflow reports what is open instead.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/client-reporting-automation/",
+        "content": "## Draft monthly client reports from Xero with Claude in Google Docs\n\nAccountants and bookkeepers who write the same month-end commentary for every client.\n\n### How it works\nTrigger: On the day you set after month-end close — or when an accountant asks for a client by name — the pack for that client is built.\n1. Pull the numbers\n2. Check the close\n3. Compute the comparisons\n4. Find the variances that matter\n5. Draft the narrative\n6. Assemble the pack\n7. Review and sign off\n8. Deliver and log\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Xero / QuickBooks / Sage, Google Docs / Word, Gmail / Outlook.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the report sections and the thresholds that trigger commentary in the Config node; swap Xero for QuickBooks or Sage.\nGuardrail to keep: No pack is drafted on an unclean close; the workflow reports what is open instead.\n\nFull blueprint: https://agentmelt.com/workflows/client-reporting-automation/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "client-reporting-automation-about",
@@ -13,40 +13,168 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Client Reporting Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: On the day you set after month-end close — or when an accountant asks for a client by name — the pack for that client is built.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - No pack is drafted on an unclean close; the workflow reports what is open instead.\n   - The narrative can only cite movements present in the numbers; causes are stated as 'appears to be' unless the ledger shows them.\n   - Every pack is approved by the accountant before it reaches a client.\n   - Numbers in the narrative are checked against the tables before the draft is shown.\n   - Client data stays in the ledger and the client folder; model calls use an API with no data retention.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/client-reporting-automation/\nWant it built and run for you? $247/month · custom $3,500–6,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "client-reporting-automation-note",
-      "name": "Read me first",
+      "id": "client-reporting-automation-section-0",
+      "name": "Section: Trigger and config",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Schedule Trigger (monthly)\n2. HTTP Request: Pull the numbers\n3. Code: Check the close\n4. Code: Compute the comparisons\n5. AI Agent: Find the variances that matter\n6. AI Agent: Draft the narrative\n7. Google Docs: Assemble the pack\n8. Slack approval: Review and sign off\n9. Gmail: Deliver and log\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 1. Pull the numbers\nTrial balance, P&L, balance sheet, cash and aged receivables from Xero, QuickBooks or Sage for the period, prior period and prior year",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "client-reporting-automation-steps",
-      "name": "Step outline",
+      "id": "client-reporting-automation-section-1",
+      "name": "Section: 1. Pull the numbers",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Check the close\nUnreconciled bank lines, unposted drafts, suspense balances: if the close is not clean, the pack waits and the accountant is told what is open",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "client-reporting-automation-section-2",
+      "name": "Section: 2. Check the close",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Compute the comparisons\nAgainst budget, prior month and prior year; margins, cash runway, debtor days; the client's own KPIs from their settings",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "client-reporting-automation-section-3",
+      "name": "Section: 3. Compute the comparisons",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Find the variances that matter\nRanks movements by size and by whether they are one-off, timing or trend, and names the three a client should hear about — with the evidence lines",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "client-reporting-automation-section-4",
+      "name": "Section: 4. Find the variances that matter",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Draft the narrative\nIn the practice's style from past packs: what happened, why, what to watch — two to four paragraphs and the partner's questions, never invented causes",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "client-reporting-automation-section-5",
+      "name": "Section: 5. Draft the narrative",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Assemble the pack\nThe practice's template filled: tables, charts, narrative, KPIs, with the client's branding where used; PDF and editable versions",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "client-reporting-automation-section-6",
+      "name": "Section: 6. Assemble the pack",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2840,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Review and sign off\nThe accountant gets the draft with the flagged variances and the open questions; edit, approve or send back with a note",
+        "height": 460,
+        "width": 620,
+        "color": 7
+      },
+      "id": "client-reporting-automation-section-7",
+      "name": "Section: 7. Review and sign off",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3160,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Deliver and log\nSent to the client from the accountant's address on approval, with a short cover note; the pack is filed in the client's folder and logged",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "client-reporting-automation-section-8",
+      "name": "Section: 8. Deliver and log",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3800,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "client-reporting-automation-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -65,7 +193,7 @@
       "id": "client-reporting-automation-00",
       "name": "Schedule Trigger (monthly)",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         300
@@ -138,7 +266,7 @@
       "id": "client-reporting-automation-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -147,15 +275,17 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
         "method": "GET",
+        "url": "=https://api.xero.com/api.xro/2.0/Reports/ProfitAndLoss?fromDate={{ $json.from }}&toDate={{ $json.to }}",
         "options": {},
-        "notes": "Trial balance, P&L, balance sheet, cash and aged receivables from Xero, QuickBooks or Sage for the period, prior period and prior year."
+        "notes": "Trial balance, P&L, balance sheet, cash and aged receivables from Xero, QuickBooks or Sage for the period, prior period and prior year.",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "xeroOAuth2Api"
       },
       "id": "client-reporting-automation-01",
-      "name": "HTTP Request: Pull the numbers",
+      "name": "Xero API: Pull the numbers",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.5,
       "position": [
         640,
         300
@@ -167,7 +297,7 @@
         "jsCode": "// Check the close\n// Unreconciled bank lines, unposted drafts, suspense balances: if the close is not clean, the pack waits and the accountant is told what is open.\nreturn $input.all();"
       },
       "id": "client-reporting-automation-02",
-      "name": "Code: Check the close",
+      "name": "Check the close",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -181,7 +311,7 @@
         "jsCode": "// Compute the comparisons\n// Against budget, prior month and prior year; margins, cash runway, debtor days; the client's own KPIs from their settings.\nreturn $input.all();"
       },
       "id": "client-reporting-automation-03",
-      "name": "Code: Compute the comparisons",
+      "name": "Compute the comparisons",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -202,7 +332,7 @@
       "id": "client-reporting-automation-04",
       "name": "AI Agent: Find the variances that matter",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         1600,
         300
@@ -223,9 +353,9 @@
       "id": "client-reporting-automation-04-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1920,
+        1600,
         520
       ]
     },
@@ -237,9 +367,9 @@
       "id": "client-reporting-automation-04-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        2120,
+        1780,
         520
       ]
     },
@@ -271,7 +401,7 @@
       "id": "client-reporting-automation-04-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1920,
         300
@@ -302,7 +432,7 @@
       "id": "client-reporting-automation-05",
       "name": "AI Agent: Draft the narrative",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         2240,
         300
@@ -323,9 +453,9 @@
       "id": "client-reporting-automation-05-llm",
       "name": "Claude (Anthropic Chat Model) 2",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        2560,
+        2240,
         520
       ]
     },
@@ -337,9 +467,9 @@
       "id": "client-reporting-automation-05-parser",
       "name": "Structured Output Parser 2",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        2760,
+        2420,
         520
       ]
     },
@@ -371,7 +501,7 @@
       "id": "client-reporting-automation-05-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         2560,
         300
@@ -432,7 +562,7 @@
       "id": "client-reporting-automation-07",
       "name": "Slack approval: Review and sign off",
       "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "typeVersion": 2.7,
       "position": [
         3200,
         300
@@ -467,7 +597,7 @@
       "id": "client-reporting-automation-07-approved",
       "name": "Approved?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         3520,
         300
@@ -499,7 +629,7 @@
       "id": "client-reporting-automation-08",
       "name": "Gmail: Deliver and log",
       "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.1,
+      "typeVersion": 2.2,
       "position": [
         3840,
         300
@@ -523,36 +653,36 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Pull the numbers",
+            "node": "Xero API: Pull the numbers",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Pull the numbers": {
+    "Xero API: Pull the numbers": {
       "main": [
         [
           {
-            "node": "Code: Check the close",
+            "node": "Check the close",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Check the close": {
+    "Check the close": {
       "main": [
         [
           {
-            "node": "Code: Compute the comparisons",
+            "node": "Compute the comparisons",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Compute the comparisons": {
+    "Compute the comparisons": {
       "main": [
         [
           {

@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Classify AP and PO lines with Claude and build a spend cube in Postgres\n\n**Who's it for**\nProcurement and finance teams that want category-level spend visibility without a six-figure spend-analytics suite.\n\n**How it works**\nTrigger: Runs after accounts payable closes the month.\n1. Extract AP and PO lines\n2. Normalise suppliers\n3. Classify each line\n4. Learn from corrections\n5. Build the spend cube\n6. Detect opportunities\n7. Write the opportunity briefs\n8. Publish and track\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Postgres / BigQuery, Looker / Power BI / Metabase, Google Sheets (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSwap the category taxonomy in the Config node for your own (UNSPSC or in-house), and point the reporting node at Looker, Power BI or a Google Sheet. Keep the guardrail: Classification below the confidence threshold is reviewed by a person before it enters the cube.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/spend-analysis/",
+        "content": "## Classify AP and PO lines with Claude and build a spend cube in Postgres\n\nProcurement and finance teams that want category-level spend visibility without a six-figure spend-analytics suite.\n\n### How it works\nTrigger: Runs after accounts payable closes the month.\n1. Extract AP and PO lines\n2. Normalise suppliers\n3. Classify each line\n4. Learn from corrections\n5. Build the spend cube\n6. Detect opportunities\n7. Write the opportunity briefs\n8. Publish and track\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Postgres / BigQuery, Looker / Power BI / Metabase, Google Sheets.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSwap the category taxonomy in the Config node for your own (UNSPSC or in-house), and point the reporting node at Looker, Power BI or a Google Sheet.\nGuardrail to keep: Classification below the confidence threshold is reviewed by a person before it enters the cube.\n\nFull blueprint: https://agentmelt.com/workflows/spend-analysis/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "spend-analysis-about",
@@ -13,40 +13,168 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## AI Spend Analysis Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Runs after accounts payable closes the month. A weekly incremental run classifies new invoices so the cube is never more than a week behind.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Classification below the confidence threshold is reviewed by a person before it enters the cube.\n   - Supplier merges are logged and reversible; tax-ID matches are the only automatic merges.\n   - The AI agent drafts briefs; savings are only reported as realised when finance confirms them.\n   - Source lines are never altered — the cube is a derived table with a run id.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/spend-analysis/\nWant it built and run for you? $297/month · custom $6,000–12,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "spend-analysis-note",
-      "name": "Read me first",
+      "id": "spend-analysis-section-0",
+      "name": "Section: Trigger and config",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Schedule Trigger (monthly)\n2. Postgres: Extract AP and PO lines\n3. Code: Normalise suppliers\n4. Information Extractor: Classify each line\n5. Google Sheets: Learn from corrections\n6. Postgres: Build the spend cube\n7. Code: Detect opportunities\n8. AI Agent: Write the opportunity briefs\n9. Slack: Publish and track\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 1. Extract AP and PO lines\nInvoice lines and PO lines from the ERP (SAP, Oracle, NetSuite, Dynamics) and the card or expense platform: supplier, description, GL account, cost centre, amount, currency, date",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "spend-analysis-steps",
-      "name": "Step outline",
+      "id": "spend-analysis-section-1",
+      "name": "Section: 1. Extract AP and PO lines",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Normalise suppliers\nCleans legal suffixes and punctuation, then matches to a master supplier list using fuzzy matching plus tax IDs where available",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "spend-analysis-section-2",
+      "name": "Section: 2. Normalise suppliers",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Classify each line\nAn LLM classification step assigns each line a level-1/2/3 category from your taxonomy (UNSPSC or a custom tree) using the description, supplier, GL account and cost centre, and returns a confidence score",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "spend-analysis-section-3",
+      "name": "Section: 3. Classify each line",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Learn from corrections\nReviewers correct low-confidence lines in a sheet",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "spend-analysis-section-4",
+      "name": "Section: 4. Learn from corrections",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Build the spend cube\nAggregates classified lines by supplier, category, business unit, cost centre and month into the table your BI tool reads (Looker, Power BI, Metabase)",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "spend-analysis-section-5",
+      "name": "Section: 5. Build the spend cube",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Detect opportunities\nDeterministic checks: same item bought from several suppliers at different prices, categories with many small suppliers, spend outside contracted suppliers (maverick spend), spend without a PO, contract expiries in the next 90 days",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "spend-analysis-section-6",
+      "name": "Section: 6. Detect opportunities",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Write the opportunity briefs\nFor each flagged opportunity the agent drafts a half-page brief with the numbers, the suppliers involved and a suggested action (consolidate, renegotiate, enforce PO policy)",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "spend-analysis-section-7",
+      "name": "Section: 7. Write the opportunity briefs",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2840,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Publish and track\nPosts the monthly summary and briefs",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "spend-analysis-section-8",
+      "name": "Section: 8. Publish and track",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3480,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "spend-analysis-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -65,7 +193,7 @@
       "id": "spend-analysis-00",
       "name": "Schedule Trigger (monthly)",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         300
@@ -138,7 +266,7 @@
       "id": "spend-analysis-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -154,7 +282,7 @@
       "id": "spend-analysis-01",
       "name": "Postgres: Extract AP and PO lines",
       "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
+      "typeVersion": 2.7,
       "position": [
         640,
         300
@@ -166,7 +294,7 @@
         "jsCode": "// Normalise suppliers\n// Cleans legal suffixes and punctuation, then matches to a master supplier list using fuzzy matching plus tax IDs where available. Unmatched names go to a review queue; matches above the threshold are applied automatically.\nreturn $input.all();"
       },
       "id": "spend-analysis-02",
-      "name": "Code: Normalise suppliers",
+      "name": "Normalise suppliers",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -187,7 +315,7 @@
       "id": "spend-analysis-03",
       "name": "Information Extractor: Classify each line",
       "type": "@n8n/n8n-nodes-langchain.informationExtractor",
-      "typeVersion": 1,
+      "typeVersion": 1.2,
       "position": [
         1280,
         300
@@ -208,9 +336,9 @@
       "id": "spend-analysis-03-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1600,
+        1280,
         520
       ]
     },
@@ -242,7 +370,7 @@
       "id": "spend-analysis-03-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1600,
         300
@@ -286,7 +414,7 @@
       "id": "spend-analysis-04",
       "name": "Google Sheets: Learn from corrections",
       "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "typeVersion": 4.7,
       "position": [
         1920,
         300
@@ -302,7 +430,7 @@
       "id": "spend-analysis-05",
       "name": "Postgres: Build the spend cube",
       "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
+      "typeVersion": 2.7,
       "position": [
         2240,
         300
@@ -314,7 +442,7 @@
         "jsCode": "// Detect opportunities\n// Deterministic checks: same item bought from several suppliers at different prices, categories with many small suppliers, spend outside contracted suppliers (maverick spend), spend without a PO, contract expiries in the next 90 days.\nreturn $input.all();"
       },
       "id": "spend-analysis-06",
-      "name": "Code: Detect opportunities",
+      "name": "Detect opportunities",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -335,7 +463,7 @@
       "id": "spend-analysis-07",
       "name": "AI Agent: Write the opportunity briefs",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         2880,
         300
@@ -356,9 +484,9 @@
       "id": "spend-analysis-07-llm",
       "name": "Claude (Anthropic Chat Model) 2",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        3200,
+        2880,
         520
       ]
     },
@@ -370,9 +498,9 @@
       "id": "spend-analysis-07-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        3400,
+        3060,
         520
       ]
     },
@@ -404,7 +532,7 @@
       "id": "spend-analysis-07-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         3200,
         300
@@ -439,7 +567,7 @@
       "id": "spend-analysis-08",
       "name": "Slack: Publish and track",
       "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "typeVersion": 2.7,
       "position": [
         3520,
         300
@@ -474,14 +602,14 @@
       "main": [
         [
           {
-            "node": "Code: Normalise suppliers",
+            "node": "Normalise suppliers",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Normalise suppliers": {
+    "Normalise suppliers": {
       "main": [
         [
           {
@@ -547,14 +675,14 @@
       "main": [
         [
           {
-            "node": "Code: Detect opportunities",
+            "node": "Detect opportunities",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Detect opportunities": {
+    "Detect opportunities": {
       "main": [
         [
           {

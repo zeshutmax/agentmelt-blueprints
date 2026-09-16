@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Qualify inbound leads from HubSpot forms with Clay and Claude and book meetings\n\n**Who's it for**\nSales teams that reply to demo requests hours later and qualify by hand.\n\n**How it works**\nTrigger: Any form submission or demo request posts to the workflow; chat-widget conversations and inbound emails to sales@ use the same path.\n1. Receive the submission\n2. Enrich\n3. Score against the ICP\n4. Read the message\n5. Route\n6. Notify the rep with context\n7. Update the CRM\n8. Follow up on silence\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Clay / Apollo / Clearbit, HubSpot / Salesforce, Slack + Calendly (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nEdit the qualification criteria and the routing rules in the Config node; swap Clay for Apollo or Clearbit. Keep the guardrail: The first reply commits to nothing: no pricing, no availability, no promises — it acknowledges and asks.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/inbound-lead-qualification/",
+        "content": "## Qualify inbound leads from HubSpot forms with Clay and Claude and book meetings\n\nSales teams that reply to demo requests hours later and qualify by hand.\n\n### How it works\nTrigger: Any form submission or demo request posts to the workflow; chat-widget conversations and inbound emails to sales@ use the same path.\n1. Receive the submission\n2. Enrich\n3. Score against the ICP\n4. Read the message\n5. Route\n6. Notify the rep with context\n7. Update the CRM\n8. Follow up on silence\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Clay / Apollo / Clearbit, HubSpot / Salesforce, Slack + Calendly.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nEdit the qualification criteria and the routing rules in the Config node; swap Clay for Apollo or Clearbit.\nGuardrail to keep: The first reply commits to nothing: no pricing, no availability, no promises — it acknowledges and asks.\n\nFull blueprint: https://agentmelt.com/workflows/inbound-lead-qualification/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "inbound-lead-qualification-about",
@@ -13,40 +13,152 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Inbound Lead Qualification Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Any form submission or demo request posts to the workflow; chat-widget conversations and inbound emails to sales@ use the same path.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - The first reply commits to nothing: no pricing, no availability, no promises — it acknowledges and asks.\n   - Free-mail and suspicious submissions are never enriched with paid credits.\n   - Reps can override routing; overrides are logged and feed the threshold review.\n   - Response-time and meeting-rate by score band are reported monthly to check the ICP model.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/inbound-lead-qualification/\nWant it built and run for you? $247/month · custom $3,000–5,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## 1. Receive the submission\nName, email, company, message, source page and UTM parameters",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "inbound-lead-qualification-note",
-      "name": "Read me first",
+      "id": "inbound-lead-qualification-section-1",
+      "name": "Section: 1. Receive the submission",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Webhook: Receive the submission\n2. HTTP Request: Enrich\n3. Code: Score against the ICP\n4. AI Agent: Read the message\n5. Switch: Route\n6. Slack: Notify the rep with context\n7. HubSpot: Update the CRM\n8. Wait: Follow up on silence\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 2. Enrich\nCompany size, industry, tech stack, funding and the contact's role from Clearbit, Apollo or Clay",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "inbound-lead-qualification-steps",
-      "name": "Step outline",
+      "id": "inbound-lead-qualification-section-2",
+      "name": "Section: 2. Enrich",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Score against the ICP\nDeterministic ICP score from firmographics and role, plus intent points for the source page, message content and repeat visits",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "inbound-lead-qualification-section-3",
+      "name": "Section: 3. Score against the ICP",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Read the message\nExtracts the use case, urgency and any objections from the free-text message and drafts the first reply: acknowledges what they asked, asks the one qualifying question you always ask, offers a booking link for hot leads",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "inbound-lead-qualification-section-4",
+      "name": "Section: 4. Read the message",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Route\nHot: rep notified in Slack and the reply goes out immediately",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "inbound-lead-qualification-section-5",
+      "name": "Section: 5. Route",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Notify the rep with context\nCompany snapshot, role, score and why, the message, the draft reply and a suggested opener for the call",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "inbound-lead-qualification-section-6",
+      "name": "Section: 6. Notify the rep with context",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Update the CRM\nContact and company created or updated with enrichment, score, source and the qualification answer when it arrives; the lead is stamped with response time",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "inbound-lead-qualification-section-7",
+      "name": "Section: 7. Update the CRM",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Follow up on silence\nIf a hot lead has not replied or booked in 24 hours, a second short message goes out; after 72 hours the rep is prompted to call",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "inbound-lead-qualification-section-8",
+      "name": "Section: 8. Follow up on silence",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2840,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "inbound-lead-qualification-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -59,7 +171,7 @@
       "id": "inbound-lead-qualification-01",
       "name": "Webhook: Receive the submission",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
+      "typeVersion": 2.1,
       "position": [
         0,
         300
@@ -133,7 +245,7 @@
       "id": "inbound-lead-qualification-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -142,15 +254,15 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
-        "options": {},
-        "notes": "Company size, industry, tech stack, funding and the contact's role from Clearbit, Apollo or Clay. Missing data is noted, not guessed."
+        "resource": "person",
+        "operation": "enrich",
+        "email": "={{ $json.email || $json.output?.email || '' }}",
+        "additionalFields": {}
       },
       "id": "inbound-lead-qualification-02",
-      "name": "HTTP Request: Enrich",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "Clearbit: Enrich",
+      "type": "n8n-nodes-base.clearbit",
+      "typeVersion": 1,
       "position": [
         640,
         300
@@ -162,7 +274,7 @@
         "jsCode": "// Score against the ICP\n// Deterministic ICP score from firmographics and role, plus intent points for the source page, message content and repeat visits. Thresholds are in a sheet sales ops owns.\nreturn $input.all();"
       },
       "id": "inbound-lead-qualification-03",
-      "name": "Code: Score against the ICP",
+      "name": "Score against the ICP",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -183,7 +295,7 @@
       "id": "inbound-lead-qualification-04",
       "name": "AI Agent: Read the message",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         1280,
         300
@@ -204,9 +316,9 @@
       "id": "inbound-lead-qualification-04-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1600,
+        1280,
         520
       ]
     },
@@ -218,9 +330,9 @@
       "id": "inbound-lead-qualification-04-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        1800,
+        1460,
         520
       ]
     },
@@ -252,7 +364,7 @@
       "id": "inbound-lead-qualification-04-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1600,
         300
@@ -302,9 +414,9 @@
         "options": {}
       },
       "id": "inbound-lead-qualification-05",
-      "name": "Switch: Route",
+      "name": "Route",
       "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.2,
+      "typeVersion": 3.4,
       "position": [
         1920,
         300
@@ -327,7 +439,7 @@
       "id": "inbound-lead-qualification-06",
       "name": "Slack: Notify the rep with context",
       "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "typeVersion": 2.7,
       "position": [
         2240,
         300
@@ -344,7 +456,7 @@
       "id": "inbound-lead-qualification-07",
       "name": "HubSpot: Update the CRM",
       "type": "n8n-nodes-base.hubspot",
-      "typeVersion": 2.1,
+      "typeVersion": 2.2,
       "position": [
         2560,
         300
@@ -357,7 +469,7 @@
         "options": {}
       },
       "id": "inbound-lead-qualification-08",
-      "name": "Wait: Follow up on silence",
+      "name": "Follow up on silence",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
@@ -383,25 +495,25 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Enrich",
+            "node": "Clearbit: Enrich",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Enrich": {
+    "Clearbit: Enrich": {
       "main": [
         [
           {
-            "node": "Code: Score against the ICP",
+            "node": "Score against the ICP",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Score against the ICP": {
+    "Score against the ICP": {
       "main": [
         [
           {
@@ -456,14 +568,14 @@
         ],
         [
           {
-            "node": "Switch: Route",
+            "node": "Route",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Switch: Route": {
+    "Route": {
       "main": [
         [
           {
@@ -489,7 +601,7 @@
       "main": [
         [
           {
-            "node": "Wait: Follow up on silence",
+            "node": "Follow up on silence",
             "type": "main",
             "index": 0
           }

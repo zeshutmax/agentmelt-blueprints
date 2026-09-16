@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Generate unit tests for GitHub pull requests with Claude and run them in CI\n\n**Who's it for**\nEngineering teams with thin test coverage who want tests proposed automatically on every change.\n\n**How it works**\nTrigger: PR events on the main repositories; a label can request generation on demand.\n1. Receive the PR and diff\n2. Find untested changed functions\n3. Assemble context\n4. Generate tests\n5. Run in CI\n6. Keep what passes and adds coverage\n7. Open the companion PR\n8. Learn from reviews\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus GitHub Actions / GitLab CI, Jest / pytest / Go test / JUnit (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet the test framework and directories in the Config node; swap the GitHub nodes for GitLab if that is where the code lives. Keep the guardrail: Generated tests are proposed in a separate PR; nothing merges without an engineer's review.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/unit-test-generation/",
+        "content": "## Generate unit tests for GitHub pull requests with Claude and run them in CI\n\nEngineering teams with thin test coverage who want tests proposed automatically on every change.\n\n### How it works\nTrigger: PR events on the main repositories; a label can request generation on demand.\n1. Receive the PR and diff\n2. Find untested changed functions\n3. Assemble context\n4. Generate tests\n5. Run in CI\n6. Keep what passes and adds coverage\n7. Open the companion PR\n8. Learn from reviews\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus GitHub Actions / GitLab CI, Jest / pytest / Go test / JUnit.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the test framework and directories in the Config node; swap the GitHub nodes for GitLab if that is where the code lives.\nGuardrail to keep: Generated tests are proposed in a separate PR; nothing merges without an engineer's review.\n\nFull blueprint: https://agentmelt.com/workflows/unit-test-generation/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "unit-test-generation-about",
@@ -13,40 +13,152 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Unit Test Generation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: PR events on the main repositories; a label can request generation on demand.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Generated tests are proposed in a separate PR; nothing merges without an engineer's review.\n   - Only tests that pass, are not flaky, and add coverage are proposed — the run is the filter.\n   - The agent cannot modify source code, only add test files.\n   - Repositories can be excluded, and a self-hosted model is available for sensitive code.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/unit-test-generation/\nWant it built and run for you? $247/month · custom $3,500–6,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## 1. Receive the PR and diff\nChanged files and hunks; PRs from bots or with a skip label are ignored",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "unit-test-generation-note",
-      "name": "Read me first",
+      "id": "unit-test-generation-section-1",
+      "name": "Section: 1. Receive the PR and diff",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Webhook: Receive the PR and diff\n2. Code: Find untested changed functions\n3. HTTP Request: Assemble context\n4. AI Agent: Generate tests\n5. HTTP Request: Run in CI\n6. IF: Keep what passes and adds coverage\n7. HTTP Request: Open the companion PR\n8. Schedule Trigger: Learn from reviews\n9. Code: Learn from reviews\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 2. Find untested changed functions\nCoverage report from CI mapped to the diff: functions and branches that changed and have no covering test",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "unit-test-generation-steps",
-      "name": "Step outline",
+      "id": "unit-test-generation-section-2",
+      "name": "Section: 2. Find untested changed functions",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Assemble context\nThe changed file, its imports, existing test files for the module (for conventions and fixtures), and the test framework config",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "unit-test-generation-section-3",
+      "name": "Section: 3. Assemble context",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Generate tests\nTests per function in the repo's framework and style, covering the happy path, edge cases visible in the code, and error paths; structured output with one test file per source file",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "unit-test-generation-section-4",
+      "name": "Section: 4. Generate tests",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Run in CI\nGenerated tests pushed to a branch and run with the existing suite; results and the coverage delta collected",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "unit-test-generation-section-5",
+      "name": "Section: 5. Run in CI",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Keep what passes and adds coverage\nTests that fail are discarded (or retried once with the failure output); tests that pass but add no coverage are dropped; flaky tests (pass/fail on rerun) are dropped",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "unit-test-generation-section-6",
+      "name": "Section: 6. Keep what passes and adds coverage",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Open the companion PR\nA PR against the original branch with the surviving tests, a summary of what they cover and the coverage delta, assigned to the original author",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "unit-test-generation-section-7",
+      "name": "Section: 7. Open the companion PR",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Learn from reviews\nWeekly: acceptance rate of generated tests, common edits reviewers make, and coverage trend on changed code; prompts adjusted from the edits",
+        "height": 240,
+        "width": 620,
+        "color": 7
+      },
+      "id": "unit-test-generation-section-8",
+      "name": "Section: 8. Learn from reviews",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        750
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "unit-test-generation-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -59,7 +171,7 @@
       "id": "unit-test-generation-01",
       "name": "Webhook: Receive the PR and diff",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
+      "typeVersion": 2.1,
       "position": [
         0,
         300
@@ -133,7 +245,7 @@
       "id": "unit-test-generation-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -145,7 +257,7 @@
         "jsCode": "// Find untested changed functions\n// Coverage report from CI mapped to the diff: functions and branches that changed and have no covering test.\nreturn $input.all();"
       },
       "id": "unit-test-generation-02",
-      "name": "Code: Find untested changed functions",
+      "name": "Find untested changed functions",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -156,15 +268,27 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
-        "options": {},
-        "notes": "The changed file, its imports, existing test files for the module (for conventions and fixtures), and the test framework config."
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.owner }}"
+        },
+        "repository": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.repo }}"
+        },
+        "issueNumber": "={{ $json.number }}",
+        "filePath": "={{ $json.path }}",
+        "asBinaryProperty": false,
+        "additionalParameters": {}
       },
       "id": "unit-test-generation-03",
-      "name": "HTTP Request: Assemble context",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "GitHub: Assemble context",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
       "position": [
         960,
         300
@@ -183,7 +307,7 @@
       "id": "unit-test-generation-04",
       "name": "AI Agent: Generate tests",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         1280,
         300
@@ -204,9 +328,9 @@
       "id": "unit-test-generation-04-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1600,
+        1280,
         520
       ]
     },
@@ -218,9 +342,9 @@
       "id": "unit-test-generation-04-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        1800,
+        1460,
         520
       ]
     },
@@ -252,7 +376,7 @@
       "id": "unit-test-generation-04-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1600,
         300
@@ -273,15 +397,35 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
-        "options": {},
-        "notes": "Generated tests pushed to a branch and run with the existing suite; results and the coverage delta collected."
+        "resource": "workflow",
+        "operation": "dispatch",
+        "owner": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.owner }}"
+        },
+        "repository": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.repo }}"
+        },
+        "issueNumber": "={{ $json.number }}",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ 'replace-with-your-workflow-file-or-id' }}"
+        },
+        "ref": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.branch || 'main' }}"
+        },
+        "inputs": "{}"
       },
       "id": "unit-test-generation-05",
-      "name": "HTTP Request: Run in CI",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "GitHub: Run in CI",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
       "position": [
         1920,
         300
@@ -312,9 +456,9 @@
         "options": {}
       },
       "id": "unit-test-generation-06",
-      "name": "IF: Keep what passes and adds coverage",
+      "name": "Keep what passes and adds coverage",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         2240,
         300
@@ -323,15 +467,30 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
-        "options": {},
-        "notes": "A PR against the original branch with the surviving tests, a summary of what they cover and the coverage delta, assigned to the original author."
+        "resource": "pullRequest",
+        "operation": "create",
+        "owner": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.owner }}"
+        },
+        "repository": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.repo }}"
+        },
+        "issueNumber": "={{ $json.number }}",
+        "title": "={{ $json.output?.title || 'Tests for ' + $json.branch }}",
+        "head": "={{ $json.tests_branch }}",
+        "base": "={{ $json.branch }}",
+        "additionalFields": {
+          "body": "={{ $json.output?.summary || '' }}"
+        }
       },
       "id": "unit-test-generation-07",
-      "name": "HTTP Request: Open the companion PR",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "GitHub: Open the companion PR",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
       "position": [
         2560,
         300
@@ -353,7 +512,7 @@
       "id": "unit-test-generation-08",
       "name": "Schedule Trigger: Learn from reviews",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         860
@@ -391,25 +550,25 @@
       "main": [
         [
           {
-            "node": "Code: Find untested changed functions",
+            "node": "Find untested changed functions",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Find untested changed functions": {
+    "Find untested changed functions": {
       "main": [
         [
           {
-            "node": "HTTP Request: Assemble context",
+            "node": "GitHub: Assemble context",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Assemble context": {
+    "GitHub: Assemble context": {
       "main": [
         [
           {
@@ -464,29 +623,29 @@
         ],
         [
           {
-            "node": "HTTP Request: Run in CI",
+            "node": "GitHub: Run in CI",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Run in CI": {
+    "GitHub: Run in CI": {
       "main": [
         [
           {
-            "node": "IF: Keep what passes and adds coverage",
+            "node": "Keep what passes and adds coverage",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "IF: Keep what passes and adds coverage": {
+    "Keep what passes and adds coverage": {
       "main": [
         [
           {
-            "node": "HTTP Request: Open the companion PR",
+            "node": "GitHub: Open the companion PR",
             "type": "main",
             "index": 0
           }

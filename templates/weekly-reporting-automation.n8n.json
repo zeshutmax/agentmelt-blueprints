@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Compile a weekly report from BigQuery with Claude into Google Docs and Slack\n\n**Who's it for**\nOperations leads who spend Monday morning assembling the same report from five dashboards.\n\n**How it works**\nTrigger: Weekly run after data sources have closed the week; on-demand run for ad-hoc periods.\n1. Run the metric queries\n2. Assemble the metrics table\n3. Pull context\n4. Draft the narrative\n5. Render the report\n6. Approve\n7. Distribute\n8. Maintain the catalogue\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus BigQuery / Snowflake / Postgres, Google Docs + Slack (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nList the metrics and their queries in the Config node; replace BigQuery with Snowflake or Postgres. Keep the guardrail: Every number in the narrative must appear in the metrics table; the agent cannot introduce figures.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/weekly-reporting-automation/",
+        "content": "## Compile a weekly report from BigQuery with Claude into Google Docs and Slack\n\nOperations leads who spend Monday morning assembling the same report from five dashboards.\n\n### How it works\nTrigger: Weekly run after data sources have closed the week; on-demand run for ad-hoc periods.\n1. Run the metric queries\n2. Assemble the metrics table\n3. Pull context\n4. Draft the narrative\n5. Render the report\n6. Approve\n7. Distribute\n8. Maintain the catalogue\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus BigQuery / Snowflake / Postgres, Google Docs + Slack.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nList the metrics and their queries in the Config node; replace BigQuery with Snowflake or Postgres.\nGuardrail to keep: Every number in the narrative must appear in the metrics table; the agent cannot introduce figures.\n\nFull blueprint: https://agentmelt.com/workflows/weekly-reporting-automation/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "weekly-reporting-automation-about",
@@ -13,40 +13,168 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Weekly Reporting Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Weekly run after data sources have closed the week; on-demand run for ad-hoc periods.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Every number in the narrative must appear in the metrics table; the agent cannot introduce figures.\n   - Causal claims are phrased as likely and tied to a context event; where no event exists the narrative says the cause is unknown.\n   - The report is approved by its owner before distribution.\n   - Broken or missing metrics are flagged in the report, never silently omitted.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/weekly-reporting-automation/\nWant it built and run for you? $197/month · custom $2,000–4,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "weekly-reporting-automation-note",
-      "name": "Read me first",
+      "id": "weekly-reporting-automation-section-0",
+      "name": "Section: Trigger and config",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Schedule Trigger (daily)\n2. Postgres: Run the metric queries\n3. Code: Assemble the metrics table\n4. HTTP Request: Pull context\n5. AI Agent: Draft the narrative\n6. Google Docs: Render the report\n7. Wait: Approve\n8. Slack: Distribute\n9. Google Sheets: Maintain the catalogue\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 1. Run the metric queries\nEach metric defined once in a query catalogue (SQL, API call or sheet range) with owner and target; the run executes all of them for the period and the comparison periods",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "weekly-reporting-automation-steps",
-      "name": "Step outline",
+      "id": "weekly-reporting-automation-section-1",
+      "name": "Section: 1. Run the metric queries",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Assemble the metrics table\nCurrent, previous week, same week last year and target per metric; deltas and flags for metrics outside their tolerance band",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "weekly-reporting-automation-section-2",
+      "name": "Section: 2. Assemble the metrics table",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Pull context\nNotable events from the week — releases, campaigns, incidents, holidays — from the calendar, changelog and incident tracker, so the narrative can explain moves",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "weekly-reporting-automation-section-3",
+      "name": "Section: 3. Pull context",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Draft the narrative\nFrom the table, the context and last week's approved report, the agent writes the summary: the three biggest moves with likely causes from the context, metrics off target, and what to watch",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "weekly-reporting-automation-section-4",
+      "name": "Section: 4. Draft the narrative",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Render the report\nTemplate filled with the table, charts generated from the numbers, and the narrative; also a Slack-ready short version",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "weekly-reporting-automation-section-5",
+      "name": "Section: 5. Render the report",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Approve\nOwner reviews in Slack — approve, or edit the doc and approve; edits are kept for next week's prompt context",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "weekly-reporting-automation-section-6",
+      "name": "Section: 6. Approve",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Distribute\nPosted to the leadership channel and emailed to the list; the doc archived by week",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "weekly-reporting-automation-section-7",
+      "name": "Section: 7. Distribute",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2840,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Maintain the catalogue\nMetric definitions, owners and targets live in a sheet; adding a metric is a row, and broken queries alert their owner rather than silently dropping out",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "weekly-reporting-automation-section-8",
+      "name": "Section: 8. Maintain the catalogue",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3160,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "weekly-reporting-automation-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -64,7 +192,7 @@
       "id": "weekly-reporting-automation-00",
       "name": "Schedule Trigger (daily)",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         300
@@ -137,7 +265,7 @@
       "id": "weekly-reporting-automation-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -153,7 +281,7 @@
       "id": "weekly-reporting-automation-01",
       "name": "Postgres: Run the metric queries",
       "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
+      "typeVersion": 2.7,
       "position": [
         640,
         300
@@ -165,7 +293,7 @@
         "jsCode": "// Assemble the metrics table\n// Current, previous week, same week last year and target per metric; deltas and flags for metrics outside their tolerance band.\nreturn $input.all();"
       },
       "id": "weekly-reporting-automation-02",
-      "name": "Code: Assemble the metrics table",
+      "name": "Assemble the metrics table",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -176,15 +304,29 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
-        "options": {},
-        "notes": "Notable events from the week — releases, campaigns, incidents, holidays — from the calendar, changelog and incident tracker, so the narrative can explain moves."
+        "resource": "event",
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Config (edit me)').item.json.config.your_email }}"
+        },
+        "start": "={{ $json.start || $now }}",
+        "end": "={{ $json.end || $now.plus(1, 'hour') }}",
+        "additionalFields": {},
+        "returnAll": false,
+        "limit": 50,
+        "timeMin": "={{ $now }}",
+        "timeMax": "={{ $now.plus(1, 'day') }}",
+        "options": {
+          "singleEvents": true,
+          "orderBy": "startTime"
+        }
       },
       "id": "weekly-reporting-automation-03",
-      "name": "HTTP Request: Pull context",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "Google Calendar: Pull context",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
       "position": [
         1280,
         300
@@ -203,7 +345,7 @@
       "id": "weekly-reporting-automation-04",
       "name": "AI Agent: Draft the narrative",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         1600,
         300
@@ -224,9 +366,9 @@
       "id": "weekly-reporting-automation-04-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1920,
+        1600,
         520
       ]
     },
@@ -238,9 +380,9 @@
       "id": "weekly-reporting-automation-04-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        2120,
+        1780,
         520
       ]
     },
@@ -272,7 +414,7 @@
       "id": "weekly-reporting-automation-04-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1920,
         300
@@ -315,7 +457,7 @@
         "options": {}
       },
       "id": "weekly-reporting-automation-06",
-      "name": "Wait: Approve",
+      "name": "Approve",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
@@ -340,7 +482,7 @@
       "id": "weekly-reporting-automation-07",
       "name": "Slack: Distribute",
       "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "typeVersion": 2.7,
       "position": [
         2880,
         300
@@ -372,7 +514,7 @@
       "id": "weekly-reporting-automation-08",
       "name": "Google Sheets: Maintain the catalogue",
       "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "typeVersion": 4.7,
       "position": [
         3200,
         300
@@ -407,25 +549,25 @@
       "main": [
         [
           {
-            "node": "Code: Assemble the metrics table",
+            "node": "Assemble the metrics table",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Assemble the metrics table": {
+    "Assemble the metrics table": {
       "main": [
         [
           {
-            "node": "HTTP Request: Pull context",
+            "node": "Google Calendar: Pull context",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Pull context": {
+    "Google Calendar: Pull context": {
       "main": [
         [
           {
@@ -491,14 +633,14 @@
       "main": [
         [
           {
-            "node": "Wait: Approve",
+            "node": "Approve",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Wait: Approve": {
+    "Approve": {
       "main": [
         [
           {

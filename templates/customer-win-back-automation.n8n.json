@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Win back churned customers from Stripe and HubSpot with Claude-written emails\n\n**Who's it for**\nSaaS growth teams that never contact churned accounts again, even when the reason they left is fixed.\n\n**How it works**\nTrigger: Weekly scan of churned accounts against triggers; release-notes webhook or a manual trigger when a feature ships; seasonal calendar for seasonal businesses.\n1. Build the churned segment\n2. Classify the reason\n3. Match triggers to segments\n4. Draft the message\n5. Approve high-value sends\n6. Send and route replies\n7. Track reactivation\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Stripe / Chargebee + HubSpot, Gmail / Customer.io (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nDefine the win-back triggers and the offer rules in the Config node; send through Customer.io or Gmail. Keep the guardrail: Excluded segments (business closed, requested no contact, poor fit) never receive win-back messages.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/customer-win-back-automation/",
+        "content": "## Win back churned customers from Stripe and HubSpot with Claude-written emails\n\nSaaS growth teams that never contact churned accounts again, even when the reason they left is fixed.\n\n### How it works\nTrigger: Weekly scan of churned accounts against triggers; release-notes webhook or a manual trigger when a feature ships; seasonal calendar for seasonal businesses.\n1. Build the churned segment\n2. Classify the reason\n3. Match triggers to segments\n4. Draft the message\n5. Approve high-value sends\n6. Send and route replies\n7. Track reactivation\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Stripe / Chargebee + HubSpot, Gmail / Customer.io.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nDefine the win-back triggers and the offer rules in the Config node; send through Customer.io or Gmail.\nGuardrail to keep: Excluded segments (business closed, requested no contact, poor fit) never receive win-back messages.\n\nFull blueprint: https://agentmelt.com/workflows/customer-win-back-automation/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "customer-win-back-automation-about",
@@ -13,40 +13,152 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Customer Win-Back Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Weekly scan of churned accounts against triggers; release-notes webhook or a manual trigger when a feature ships; seasonal calendar for seasonal businesses.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Excluded segments (business closed, requested no contact, poor fit) never receive win-back messages.\n   - One win-back message per account per quarter unless they reply.\n   - Offers come only from the approved set; the agent picks, it never invents a discount.\n   - High-value accounts require owner approval before sending.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/customer-win-back-automation/\nWant it built and run for you? $197/month · custom $2,000–3,500 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "customer-win-back-automation-note",
-      "name": "Read me first",
+      "id": "customer-win-back-automation-section-0",
+      "name": "Section: Trigger and config",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Schedule Trigger (weekly)\n2. HTTP Request: Build the churned segment\n3. Text Classifier: Classify the reason\n4. Code: Match triggers to segments\n5. AI Agent: Draft the message\n6. Wait: Approve high-value sends\n7. Gmail: Send and route replies\n8. HubSpot: Track reactivation\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 1. Build the churned segment\nCancelled and lapsed accounts from billing and CRM with tenure, last plan, revenue, cancellation reason and any exit-survey text",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "customer-win-back-automation-steps",
-      "name": "Step outline",
+      "id": "customer-win-back-automation-section-1",
+      "name": "Section: 1. Build the churned segment",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Classify the reason\nExit reasons normalised into categories — price, missing feature, poor fit, switched to competitor, business closed, unresponsive — from the survey text and support history",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "customer-win-back-automation-section-2",
+      "name": "Section: 2. Classify the reason",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Match triggers to segments\nRules: missing-feature churn waits for that feature to ship; price churn waits for a plan change or an annual-discount window; seasonal churn waits for the season; poor-fit and closed-business are excluded",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "customer-win-back-automation-section-3",
+      "name": "Section: 3. Match triggers to segments",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Draft the message\nA short, specific message referencing the reason they gave and the thing that changed, with one approved offer from the finance-owned set, in the account owner's voice",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "customer-win-back-automation-section-4",
+      "name": "Section: 4. Draft the message",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Approve high-value sends\nAccounts above a revenue threshold pause for the owner's approval; the rest send automatically within the frequency cap",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "customer-win-back-automation-section-5",
+      "name": "Section: 5. Approve high-value sends",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Send and route replies\nSent from the account owner; replies create a task for them with the account history; unsubscribes are honoured across all lists",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "customer-win-back-automation-section-6",
+      "name": "Section: 6. Send and route replies",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2840,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Track reactivation\nReactivations matched to the message, segment, trigger and offer, so the rules and offers can be tuned quarterly",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "customer-win-back-automation-section-7",
+      "name": "Section: 7. Track reactivation",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3160,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "customer-win-back-automation-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -67,7 +179,7 @@
       "id": "customer-win-back-automation-00",
       "name": "Schedule Trigger (weekly)",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         300
@@ -140,7 +252,7 @@
       "id": "customer-win-back-automation-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -149,15 +261,16 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
-        "options": {},
-        "notes": "Cancelled and lapsed accounts from billing and CRM with tenure, last plan, revenue, cancellation reason and any exit-survey text."
+        "resource": "customer",
+        "operation": "getAll",
+        "returnAll": false,
+        "limit": 100,
+        "filters": {}
       },
       "id": "customer-win-back-automation-01",
-      "name": "HTTP Request: Build the churned segment",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "Stripe: Build the churned segment",
+      "type": "n8n-nodes-base.stripe",
+      "typeVersion": 1,
       "position": [
         640,
         300
@@ -184,7 +297,7 @@
       "id": "customer-win-back-automation-02",
       "name": "Text Classifier: Classify the reason",
       "type": "@n8n/n8n-nodes-langchain.textClassifier",
-      "typeVersion": 1,
+      "typeVersion": 1.1,
       "position": [
         960,
         300
@@ -205,9 +318,9 @@
       "id": "customer-win-back-automation-02-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1280,
+        960,
         520
       ]
     },
@@ -239,7 +352,7 @@
       "id": "customer-win-back-automation-02-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1280,
         300
@@ -263,7 +376,7 @@
         "jsCode": "// Match triggers to segments\n// Rules: missing-feature churn waits for that feature to ship; price churn waits for a plan change or an annual-discount window; seasonal churn waits for the season; poor-fit and closed-business are excluded.\nreturn $input.all();"
       },
       "id": "customer-win-back-automation-03",
-      "name": "Code: Match triggers to segments",
+      "name": "Match triggers to segments",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -284,7 +397,7 @@
       "id": "customer-win-back-automation-04",
       "name": "AI Agent: Draft the message",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         1920,
         300
@@ -305,9 +418,9 @@
       "id": "customer-win-back-automation-04-llm",
       "name": "Claude (Anthropic Chat Model) 2",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        2240,
+        1920,
         520
       ]
     },
@@ -319,9 +432,9 @@
       "id": "customer-win-back-automation-04-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        2440,
+        2100,
         520
       ]
     },
@@ -353,7 +466,7 @@
       "id": "customer-win-back-automation-04-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         2240,
         300
@@ -378,7 +491,7 @@
         "options": {}
       },
       "id": "customer-win-back-automation-05",
-      "name": "Wait: Approve high-value sends",
+      "name": "Approve high-value sends",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
@@ -400,7 +513,7 @@
       "id": "customer-win-back-automation-06",
       "name": "Gmail: Send and route replies",
       "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.1,
+      "typeVersion": 2.2,
       "position": [
         2880,
         300
@@ -417,7 +530,7 @@
       "id": "customer-win-back-automation-07",
       "name": "HubSpot: Track reactivation",
       "type": "n8n-nodes-base.hubspot",
-      "typeVersion": 2.1,
+      "typeVersion": 2.2,
       "position": [
         3200,
         300
@@ -441,14 +554,14 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Build the churned segment",
+            "node": "Stripe: Build the churned segment",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Build the churned segment": {
+    "Stripe: Build the churned segment": {
       "main": [
         [
           {
@@ -492,14 +605,14 @@
         ],
         [
           {
-            "node": "Code: Match triggers to segments",
+            "node": "Match triggers to segments",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Match triggers to segments": {
+    "Match triggers to segments": {
       "main": [
         [
           {
@@ -554,14 +667,14 @@
         ],
         [
           {
-            "node": "Wait: Approve high-value sends",
+            "node": "Approve high-value sends",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Wait: Approve high-value sends": {
+    "Approve high-value sends": {
       "main": [
         [
           {

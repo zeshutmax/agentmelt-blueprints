@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Reconcile Stripe payouts against NetSuite with Claude and flag exceptions in Slack\n\n**Who's it for**\nFinance teams that match bank feeds, processor payouts and the ledger in spreadsheets every morning.\n\n**How it works**\nTrigger: Daily run at 6am after bank and processor feeds update; on-demand run before close.\n1. Pull the three sides\n2. Match deterministically\n3. Classify the breaks\n4. Explain the unknowns\n5. Route for approval\n6. Post approved entries\n7. Maintain the reconciliation file\n8. Close-readiness report\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus NetSuite / Xero / QuickBooks, Stripe / Adyen + Plaid (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet the matching tolerances and the exception owners in the Config node; swap NetSuite for Xero or QuickBooks. Keep the guardrail: Nothing posts to the ledger without an accountant's approval; auto-matching only marks, it does not create entries.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/financial-reconciliation-automation/",
+        "content": "## Reconcile Stripe payouts against NetSuite with Claude and flag exceptions in Slack\n\nFinance teams that match bank feeds, processor payouts and the ledger in spreadsheets every morning.\n\n### How it works\nTrigger: Daily run at 6am after bank and processor feeds update; on-demand run before close.\n1. Pull the three sides\n2. Match deterministically\n3. Classify the breaks\n4. Explain the unknowns\n5. Route for approval\n6. Post approved entries\n7. Maintain the reconciliation file\n8. Close-readiness report\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus NetSuite / Xero / QuickBooks, Stripe / Adyen + Plaid.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the matching tolerances and the exception owners in the Config node; swap NetSuite for Xero or QuickBooks.\nGuardrail to keep: Nothing posts to the ledger without an accountant's approval; auto-matching only marks, it does not create entries.\n\nFull blueprint: https://agentmelt.com/workflows/financial-reconciliation-automation/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "financial-reconciliation-automation-about",
@@ -13,40 +13,168 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Financial Reconciliation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Daily run at 6am after bank and processor feeds update; on-demand run before close.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Nothing posts to the ledger without an accountant's approval; auto-matching only marks, it does not create entries.\n   - The agent explains; it never proposes an amount that is not derivable from the data.\n   - Every posted entry carries the match evidence and approver for audit.\n   - Aged open items escalate automatically so nothing hides until close.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/financial-reconciliation-automation/\nWant it built and run for you? $297/month · custom $5,000–9,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "financial-reconciliation-automation-note",
-      "name": "Read me first",
+      "id": "financial-reconciliation-automation-section-0",
+      "name": "Section: Trigger and config",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Schedule Trigger (daily)\n2. HTTP Request: Pull the three sides\n3. Code: Match deterministically\n4. Code: Classify the breaks\n5. AI Agent: Explain the unknowns\n6. Slack approval: Route for approval\n7. HTTP Request: Post approved entries\n8. Google Sheets: Maintain the reconciliation file\n9. Schedule Trigger: Close-readiness report\n10. Code: Close-readiness report\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 1. Pull the three sides\nBank transactions (Plaid or bank API), processor payouts and transaction detail (Stripe, Adyen, PayPal), and ledger entries (NetSuite, Xero, QuickBooks, Sage) for the period",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "financial-reconciliation-automation-steps",
-      "name": "Step outline",
+      "id": "financial-reconciliation-automation-section-1",
+      "name": "Section: 1. Pull the three sides",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Match deterministically\nExact matches on amount and reference; one-to-many for processor payouts (payout = sum of transactions − fees − refunds); tolerance matching for FX; each match tagged with the rule that made it",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "financial-reconciliation-automation-section-2",
+      "name": "Section: 2. Match deterministically",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Classify the breaks\nUnmatched items grouped: timing (in transit), fees, refunds, chargebacks, duplicates, unknown",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "financial-reconciliation-automation-section-3",
+      "name": "Section: 3. Classify the breaks",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Explain the unknowns\nFor remaining breaks the agent reads the descriptions, amounts, dates and nearby transactions and writes the most likely explanation with the evidence — never posting anything",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "financial-reconciliation-automation-section-4",
+      "name": "Section: 4. Explain the unknowns",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Route for approval\nProposed entries and explanations to the accountant with approve / edit / investigate buttons; anything above a threshold goes to the controller",
+        "height": 460,
+        "width": 620,
+        "color": 7
+      },
+      "id": "financial-reconciliation-automation-section-5",
+      "name": "Section: 5. Route for approval",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Post approved entries\nApproved journal entries posted to the ledger with the match evidence attached; the reconciliation report updated",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "financial-reconciliation-automation-section-6",
+      "name": "Section: 6. Post approved entries",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2840,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Maintain the reconciliation file\nA living reconciliation per account: matched, proposed, open, aged — the file auditors ask for, always current",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "financial-reconciliation-automation-section-7",
+      "name": "Section: 7. Maintain the reconciliation file",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3160,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Close-readiness report\nDaily count and value of open breaks by age and type; a red flag when an item passes 5 days unexplained",
+        "height": 240,
+        "width": 620,
+        "color": 7
+      },
+      "id": "financial-reconciliation-automation-section-8",
+      "name": "Section: 8. Close-readiness report",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        750
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "financial-reconciliation-automation-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -64,7 +192,7 @@
       "id": "financial-reconciliation-automation-00",
       "name": "Schedule Trigger (daily)",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         300
@@ -137,7 +265,7 @@
       "id": "financial-reconciliation-automation-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -146,15 +274,16 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
-        "options": {},
-        "notes": "Bank transactions (Plaid or bank API), processor payouts and transaction detail (Stripe, Adyen, PayPal), and ledger entries (NetSuite, Xero, QuickBooks, Sage) for the period."
+        "resource": "charge",
+        "operation": "getAll",
+        "returnAll": false,
+        "limit": 100,
+        "filters": {}
       },
       "id": "financial-reconciliation-automation-01",
-      "name": "HTTP Request: Pull the three sides",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "Stripe: Pull the three sides",
+      "type": "n8n-nodes-base.stripe",
+      "typeVersion": 1,
       "position": [
         640,
         300
@@ -166,7 +295,7 @@
         "jsCode": "// Match deterministically\n// Exact matches on amount and reference; one-to-many for processor payouts (payout = sum of transactions − fees − refunds); tolerance matching for FX; each match tagged with the rule that made it.\nreturn $input.all();"
       },
       "id": "financial-reconciliation-automation-02",
-      "name": "Code: Match deterministically",
+      "name": "Match deterministically",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -180,7 +309,7 @@
         "jsCode": "// Classify the breaks\n// Unmatched items grouped: timing (in transit), fees, refunds, chargebacks, duplicates, unknown. Known patterns get a proposed journal entry from the rules sheet.\nreturn $input.all();"
       },
       "id": "financial-reconciliation-automation-03",
-      "name": "Code: Classify the breaks",
+      "name": "Classify the breaks",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -201,7 +330,7 @@
       "id": "financial-reconciliation-automation-04",
       "name": "AI Agent: Explain the unknowns",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         1600,
         300
@@ -222,9 +351,9 @@
       "id": "financial-reconciliation-automation-04-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1920,
+        1600,
         520
       ]
     },
@@ -236,9 +365,9 @@
       "id": "financial-reconciliation-automation-04-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        2120,
+        1780,
         520
       ]
     },
@@ -270,7 +399,7 @@
       "id": "financial-reconciliation-automation-04-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1920,
         300
@@ -313,7 +442,7 @@
       "id": "financial-reconciliation-automation-05",
       "name": "Slack approval: Route for approval",
       "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "typeVersion": 2.7,
       "position": [
         2240,
         300
@@ -348,7 +477,7 @@
       "id": "financial-reconciliation-automation-05-approved",
       "name": "Approved?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         2560,
         300
@@ -369,15 +498,20 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
+        "method": "PUT",
+        "url": "https://api.xero.com/api.xro/2.0/ManualJournals",
         "options": {},
-        "notes": "Approved journal entries posted to the ledger with the match evidence attached; the reconciliation report updated."
+        "notes": "Approved journal entries posted to the ledger with the match evidence attached; the reconciliation report updated.",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "xeroOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"Narration\": ($json.narration), \"JournalLines\": ($json.lines) } }}"
       },
       "id": "financial-reconciliation-automation-06",
-      "name": "HTTP Request: Post approved entries",
+      "name": "Xero API: Post approved entries",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.5,
       "position": [
         2880,
         300
@@ -409,7 +543,7 @@
       "id": "financial-reconciliation-automation-07",
       "name": "Google Sheets: Maintain the reconciliation file",
       "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "typeVersion": 4.7,
       "position": [
         3200,
         300
@@ -431,7 +565,7 @@
       "id": "financial-reconciliation-automation-08",
       "name": "Schedule Trigger: Close-readiness report",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         860
@@ -469,36 +603,36 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Pull the three sides",
+            "node": "Stripe: Pull the three sides",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Pull the three sides": {
+    "Stripe: Pull the three sides": {
       "main": [
         [
           {
-            "node": "Code: Match deterministically",
+            "node": "Match deterministically",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Match deterministically": {
+    "Match deterministically": {
       "main": [
         [
           {
-            "node": "Code: Classify the breaks",
+            "node": "Classify the breaks",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Classify the breaks": {
+    "Classify the breaks": {
       "main": [
         [
           {
@@ -575,7 +709,7 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Post approved entries",
+            "node": "Xero API: Post approved entries",
             "type": "main",
             "index": 0
           }
@@ -589,7 +723,7 @@
         ]
       ]
     },
-    "HTTP Request: Post approved entries": {
+    "Xero API: Post approved entries": {
       "main": [
         [
           {

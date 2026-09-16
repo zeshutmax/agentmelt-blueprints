@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Route purchase requests from Slack to approval and create POs in NetSuite with Claude\n\n**Who's it for**\nFinance and operations teams that approve purchases in email threads and lose track of them.\n\n**How it works**\nTrigger: A purchase-request form (or a Slack slash command) starts the workflow; email requests to procurement@ are parsed the same way.\n1. Receive the request\n2. Normalise and complete\n3. Check budget and policy\n4. Route approvals\n5. Create the PO\n6. Send to the supplier\n7. Track receipt\n8. Report committed spend\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus NetSuite / Dynamics / Xero, Slack (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet the approval thresholds and the approver map in the Config node; swap NetSuite for Dynamics or Xero. Keep the guardrail: No PO is created without the approvals the policy matrix requires; the workflow enforces, it does not decide.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/purchase-order-automation/",
+        "content": "## Route purchase requests from Slack to approval and create POs in NetSuite with Claude\n\nFinance and operations teams that approve purchases in email threads and lose track of them.\n\n### How it works\nTrigger: A purchase-request form (or a Slack slash command) starts the workflow; email requests to procurement@ are parsed the same way.\n1. Receive the request\n2. Normalise and complete\n3. Check budget and policy\n4. Route approvals\n5. Create the PO\n6. Send to the supplier\n7. Track receipt\n8. Report committed spend\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus NetSuite / Dynamics / Xero, Slack.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the approval thresholds and the approver map in the Config node; swap NetSuite for Dynamics or Xero.\nGuardrail to keep: No PO is created without the approvals the policy matrix requires; the workflow enforces, it does not decide.\n\nFull blueprint: https://agentmelt.com/workflows/purchase-order-automation/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "purchase-order-automation-about",
@@ -13,40 +13,152 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Purchase Order Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: A purchase-request form (or a Slack slash command) starts the workflow; email requests to procurement@ are parsed the same way.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - No PO is created without the approvals the policy matrix requires; the workflow enforces, it does not decide.\n   - Supplier suggestions come from the approved catalogue; new suppliers go through onboarding first.\n   - Budget checks use live data; over-budget requests are flagged, not blocked silently.\n   - Every step is logged with actor and timestamp for audit.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/purchase-order-automation/\nWant it built and run for you? $247/month · custom $4,000–7,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## 1. Receive the request\nWhat, why, quantity, estimated cost, needed-by date, requester and cost centre — from a form or a Slack message",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "purchase-order-automation-note",
-      "name": "Read me first",
+      "id": "purchase-order-automation-section-1",
+      "name": "Section: 1. Receive the request",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Webhook: Receive the request\n2. AI Agent: Normalise and complete\n3. HTTP Request: Check budget and policy\n4. Switch: Route approvals\n5. HTTP Request: Create the PO\n6. Gmail: Send to the supplier\n7. Schedule Trigger: Track receipt\n8. Google Sheets: Report committed spend\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 2. Normalise and complete\nMaps the free-text item to a category, suggests the preferred supplier from the catalogue, fills the budget line from the cost centre, and asks the requester for anything missing",
+        "height": 680,
+        "width": 620,
         "color": 7
       },
-      "id": "purchase-order-automation-steps",
-      "name": "Step outline",
+      "id": "purchase-order-automation-section-2",
+      "name": "Section: 2. Normalise and complete",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Check budget and policy\nRemaining budget for the line from the finance system; policy rules (three quotes above a threshold, contracted supplier required for a category, blocked categories)",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "purchase-order-automation-section-3",
+      "name": "Section: 3. Check budget and policy",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Route approvals\nApproval chain by amount and category: manager, budget owner, procurement, finance — each in Slack with the request summary; reminders and escalation after the SLA",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "purchase-order-automation-section-4",
+      "name": "Section: 4. Route approvals",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Create the PO\nApproved request becomes a PO in the ERP (NetSuite, Dynamics, SAP B1, Xero) with the approvals attached",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "purchase-order-automation-section-5",
+      "name": "Section: 5. Create the PO",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Send to the supplier\nPO emailed from procurement with terms and delivery details; supplier acknowledgement tracked",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "purchase-order-automation-section-6",
+      "name": "Section: 6. Send to the supplier",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Track receipt\nExpected delivery dates monitored; the requester confirms receipt (or partial receipt) from a Slack prompt, which closes the PO for invoice matching",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "purchase-order-automation-section-7",
+      "name": "Section: 7. Track receipt",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        750
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Report committed spend\nLive view of requested, approved, ordered and received spend by cost centre and category; approval cycle time by step",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "purchase-order-automation-section-8",
+      "name": "Section: 8. Report committed spend",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        280,
+        750
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "purchase-order-automation-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -59,7 +171,7 @@
       "id": "purchase-order-automation-01",
       "name": "Webhook: Receive the request",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
+      "typeVersion": 2.1,
       "position": [
         0,
         300
@@ -133,7 +245,7 @@
       "id": "purchase-order-automation-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -152,7 +264,7 @@
       "id": "purchase-order-automation-02",
       "name": "AI Agent: Normalise and complete",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         640,
         300
@@ -173,9 +285,9 @@
       "id": "purchase-order-automation-02-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        960,
+        640,
         520
       ]
     },
@@ -187,9 +299,9 @@
       "id": "purchase-order-automation-02-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        1160,
+        820,
         520
       ]
     },
@@ -221,7 +333,7 @@
       "id": "purchase-order-automation-02-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         960,
         300
@@ -242,15 +354,17 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
         "method": "GET",
+        "url": "https://api.xero.com/api.xro/2.0/Reports/BudgetSummary",
         "options": {},
-        "notes": "Remaining budget for the line from the finance system; policy rules (three quotes above a threshold, contracted supplier required for a category, blocked categories)."
+        "notes": "Remaining budget for the line from the finance system; policy rules (three quotes above a threshold, contracted supplier required for a category, blocked categories).",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "xeroOAuth2Api"
       },
       "id": "purchase-order-automation-03",
-      "name": "HTTP Request: Check budget and policy",
+      "name": "Xero API: Check budget and policy",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.5,
       "position": [
         1280,
         300
@@ -288,9 +402,9 @@
         "options": {}
       },
       "id": "purchase-order-automation-04",
-      "name": "Switch: Route approvals",
+      "name": "Route approvals",
       "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.2,
+      "typeVersion": 3.4,
       "position": [
         1600,
         300
@@ -299,15 +413,20 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
+        "method": "PUT",
+        "url": "https://api.xero.com/api.xro/2.0/PurchaseOrders",
         "options": {},
-        "notes": "Approved request becomes a PO in the ERP (NetSuite, Dynamics, SAP B1, Xero) with the approvals attached."
+        "notes": "Approved request becomes a PO in the ERP (NetSuite, Dynamics, SAP B1, Xero) with the approvals attached.",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "xeroOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"Contact\": { \"ContactID\": ($json.supplier_contact_id) }, \"LineItems\": ($json.lines), \"Status\": \"AUTHORISED\" } }}"
       },
       "id": "purchase-order-automation-05",
-      "name": "HTTP Request: Create the PO",
+      "name": "Xero API: Create the PO",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.5,
       "position": [
         1920,
         300
@@ -327,7 +446,7 @@
       "id": "purchase-order-automation-06",
       "name": "Gmail: Send to the supplier",
       "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.1,
+      "typeVersion": 2.2,
       "position": [
         2240,
         300
@@ -349,7 +468,7 @@
       "id": "purchase-order-automation-07",
       "name": "Schedule Trigger: Track receipt",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         860
@@ -381,7 +500,7 @@
       "id": "purchase-order-automation-08",
       "name": "Google Sheets: Report committed spend",
       "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "typeVersion": 4.7,
       "position": [
         320,
         860
@@ -456,36 +575,36 @@
         ],
         [
           {
-            "node": "HTTP Request: Check budget and policy",
+            "node": "Xero API: Check budget and policy",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Check budget and policy": {
+    "Xero API: Check budget and policy": {
       "main": [
         [
           {
-            "node": "Switch: Route approvals",
+            "node": "Route approvals",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Switch: Route approvals": {
+    "Route approvals": {
       "main": [
         [
           {
-            "node": "HTTP Request: Create the PO",
+            "node": "Xero API: Create the PO",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Create the PO": {
+    "Xero API: Create the PO": {
       "main": [
         [
           {

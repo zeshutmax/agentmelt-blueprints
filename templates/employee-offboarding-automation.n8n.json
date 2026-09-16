@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Offboard leavers from the HRIS to Okta, Jira and Google Workspace with Claude\n\n**Who's it for**\nIT and HR teams that revoke access and collect equipment from a checklist that is never quite complete.\n\n**How it works**\nTrigger: The HRIS fires when an employment end date is set.\n1. Receive the termination record\n2. Assemble the leaver's access map\n3. Open revocation tickets with deadlines\n4. Schedule equipment return\n5. Generate the knowledge-transfer checklist\n6. Hand off to finance and payroll\n7. Send the exit survey\n8. Confirm closure\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Okta / Entra ID / Google Workspace, Jira Service Management / ServiceNow, Typeform / Google Forms (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nEdit the access-revocation order and the exit-survey questions in the Config node; add your own SaaS admin APIs as extra revocation nodes. Keep the guardrail: The workflow requests revocation; IT executes it.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/employee-offboarding-automation/",
+        "content": "## Offboard leavers from the HRIS to Okta, Jira and Google Workspace with Claude\n\nIT and HR teams that revoke access and collect equipment from a checklist that is never quite complete.\n\n### How it works\nTrigger: The HRIS fires when an employment end date is set.\n1. Receive the termination record\n2. Assemble the leaver's access map\n3. Open revocation tickets with deadlines\n4. Schedule equipment return\n5. Generate the knowledge-transfer checklist\n6. Hand off to finance and payroll\n7. Send the exit survey\n8. Confirm closure\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Okta / Entra ID / Google Workspace, Jira Service Management / ServiceNow, Typeform / Google Forms.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nEdit the access-revocation order and the exit-survey questions in the Config node; add your own SaaS admin APIs as extra revocation nodes.\nGuardrail to keep: The workflow requests revocation; IT executes it.\n\nFull blueprint: https://agentmelt.com/workflows/employee-offboarding-automation/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "employee-offboarding-automation-about",
@@ -13,40 +13,152 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Employee Offboarding Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: The HRIS fires when an employment end date is set. A daily Schedule Trigger also scans for end dates within 14 days as a safety net.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - The workflow requests revocation; IT executes it. Nothing is deleted automatically.\n   - Involuntary exits skip the welcome-style messaging and trigger same-day revocation tickets.\n   - The knowledge-transfer draft never includes compensation or performance data.\n   - Closure is verified, not assumed: open tickets escalate until an IT lead closes them.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/employee-offboarding-automation/\nWant it built and run for you? $197/month · custom $2,000–3,500 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## 1. Receive the termination record\nEmployee, role, last working day, reason category (voluntary/involuntary), manager and location",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "employee-offboarding-automation-note",
-      "name": "Read me first",
+      "id": "employee-offboarding-automation-section-1",
+      "name": "Section: 1. Receive the termination record",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Webhook: Receive the termination record\n2. HTTP Request: Assemble the leaver's access map\n3. Jira: Open revocation tickets with deadlines\n4. Gmail: Schedule equipment return\n5. AI Agent: Generate the knowledge-transfer checklist\n6. Set: Hand off to finance and payroll\n7. HTTP Request: Send the exit survey\n8. Schedule Trigger: Confirm closure\n9. Code: Confirm closure\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 2. Assemble the leaver's access map\nQueries the identity provider and the tracking board from onboarding for every system this person was granted, so nothing is guessed",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "employee-offboarding-automation-steps",
-      "name": "Step outline",
+      "id": "employee-offboarding-automation-section-2",
+      "name": "Section: 2. Assemble the leaver's access map",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Open revocation tickets with deadlines\nOne ticket per system, due at the agreed time on the last day (or immediately for involuntary exits), assigned to IT with the account identifiers pre-filled",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "employee-offboarding-automation-section-3",
+      "name": "Section: 3. Open revocation tickets with deadlines",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Schedule equipment return\nSends the return instructions or courier label, records the asset tags, and adds a follow-up task if the equipment is not back within 7 days",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "employee-offboarding-automation-section-4",
+      "name": "Section: 4. Schedule equipment return",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Generate the knowledge-transfer checklist\nDrafts a handover document for the manager from the role description and recent project data (Jira, Notion, Drive): open items, recurring responsibilities, systems owned, people to introduce",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "employee-offboarding-automation-section-5",
+      "name": "Section: 5. Generate the knowledge-transfer checklist",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Hand off to finance and payroll\nCreates the final-pay task with last day, accrued leave and pending expenses, and notifies payroll with a deadline that respects local rules",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "employee-offboarding-automation-section-6",
+      "name": "Section: 6. Hand off to finance and payroll",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Send the exit survey\nTypeform or Google Form sent on the last day, results stored on the board and summarised quarterly by department",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "employee-offboarding-automation-section-7",
+      "name": "Section: 7. Send the exit survey",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Confirm closure\nDaily run checks every revocation ticket is closed and every asset is back; escalates open items to the IT lead and HR after the deadline",
+        "height": 240,
+        "width": 620,
+        "color": 7
+      },
+      "id": "employee-offboarding-automation-section-8",
+      "name": "Section: 8. Confirm closure",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        750
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "employee-offboarding-automation-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -59,7 +171,7 @@
       "id": "employee-offboarding-automation-01",
       "name": "Webhook: Receive the termination record",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
+      "typeVersion": 2.1,
       "position": [
         0,
         300
@@ -133,7 +245,7 @@
       "id": "employee-offboarding-automation-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -142,15 +254,21 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
-        "options": {},
-        "notes": "Queries the identity provider and the tracking board from onboarding for every system this person was granted, so nothing is guessed."
+        "resource": "user",
+        "operation": "get",
+        "returnAll": false,
+        "limit": 50,
+        "simplify": true,
+        "userId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.email || $json.login }}"
+        }
       },
       "id": "employee-offboarding-automation-02",
-      "name": "HTTP Request: Assemble the leaver's access map",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "Okta: Assemble the leaver's access map",
+      "type": "n8n-nodes-base.okta",
+      "typeVersion": 1,
       "position": [
         640,
         300
@@ -197,7 +315,7 @@
       "id": "employee-offboarding-automation-04",
       "name": "Gmail: Schedule equipment return",
       "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.1,
+      "typeVersion": 2.2,
       "position": [
         1280,
         300
@@ -216,7 +334,7 @@
       "id": "employee-offboarding-automation-05",
       "name": "AI Agent: Generate the knowledge-transfer checklist",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         1600,
         300
@@ -237,9 +355,9 @@
       "id": "employee-offboarding-automation-05-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1920,
+        1600,
         520
       ]
     },
@@ -251,9 +369,9 @@
       "id": "employee-offboarding-automation-05-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        2120,
+        1780,
         520
       ]
     },
@@ -285,7 +403,7 @@
       "id": "employee-offboarding-automation-05-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1920,
         300
@@ -312,9 +430,9 @@
         "options": {}
       },
       "id": "employee-offboarding-automation-06",
-      "name": "Set: Hand off to finance and payroll",
+      "name": "Hand off to finance and payroll",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         2240,
         300
@@ -323,15 +441,18 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
-        "options": {},
-        "notes": "Typeform or Google Form sent on the last day, results stored on the board and summarised quarterly by department."
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $json.email || $json.output?.email || '' }}",
+        "subject": "={{ $json.output?.subject || $json.subject || 'Re: your enquiry' }}",
+        "emailType": "text",
+        "message": "={{ $json.output?.draft || $json.draft || $json.summary || '' }}",
+        "options": {}
       },
       "id": "employee-offboarding-automation-07",
-      "name": "HTTP Request: Send the exit survey",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "Gmail: Send the exit survey",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
       "position": [
         2560,
         300
@@ -353,7 +474,7 @@
       "id": "employee-offboarding-automation-08",
       "name": "Schedule Trigger: Confirm closure",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         860
@@ -391,14 +512,14 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Assemble the leaver's access map",
+            "node": "Okta: Assemble the leaver's access map",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Assemble the leaver's access map": {
+    "Okta: Assemble the leaver's access map": {
       "main": [
         [
           {
@@ -475,18 +596,18 @@
         ],
         [
           {
-            "node": "Set: Hand off to finance and payroll",
+            "node": "Hand off to finance and payroll",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Set: Hand off to finance and payroll": {
+    "Hand off to finance and payroll": {
       "main": [
         [
           {
-            "node": "HTTP Request: Send the exit survey",
+            "node": "Gmail: Send the exit survey",
             "type": "main",
             "index": 0
           }

@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Review GitHub pull requests with Claude and post findings as PR comments\n\n**Who's it for**\nEngineering teams that want a consistent first-pass review on every pull request before a human looks.\n\n**How it works**\nTrigger: pull_request opened, synchronize and ready_for_review events; draft PRs are skipped unless labelled.\n1. Receive the PR event\n2. Fetch the diff and context\n3. Run static checks\n4. Analyse the change\n5. Filter to what matters\n6. Post inline comments and summary\n7. Label and route\n8. Learn from resolutions\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus GitHub / GitLab, CI (GitHub Actions, GitLab CI), Linear / Jira (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nTune the severity threshold and the file globs in the Config node; add a Linear or Jira node to open tickets for blocking findings. Keep the guardrail: The workflow never approves or merges; it reviews and labels.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/automated-code-review/",
+        "content": "## Review GitHub pull requests with Claude and post findings as PR comments\n\nEngineering teams that want a consistent first-pass review on every pull request before a human looks.\n\n### How it works\nTrigger: pull_request opened, synchronize and ready_for_review events; draft PRs are skipped unless labelled.\n1. Receive the PR event\n2. Fetch the diff and context\n3. Run static checks\n4. Analyse the change\n5. Filter to what matters\n6. Post inline comments and summary\n7. Label and route\n8. Learn from resolutions\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus GitHub / GitLab, CI (GitHub Actions, GitLab CI), Linear / Jira.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nTune the severity threshold and the file globs in the Config node; add a Linear or Jira node to open tickets for blocking findings.\nGuardrail to keep: The workflow never approves or merges; it reviews and labels.\n\nFull blueprint: https://agentmelt.com/workflows/automated-code-review/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "automated-code-review-about",
@@ -13,40 +13,152 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Automated Code Review Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: pull_request opened, synchronize and ready_for_review events; draft PRs are skipped unless labelled.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - The workflow never approves or merges; it reviews and labels. A human approval remains required.\n   - Comments are posted only for concrete findings with reasoning; style nits go to the summary or nowhere.\n   - Code is sent to the model provider under your data-processing terms; repositories can be excluded, and self-hosted models are an option for sensitive code.\n   - High-risk areas require a named human reviewer regardless of the automated verdict.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/automated-code-review/\nWant it built and run for you? $247/month · custom $3,500–6,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## 1. Receive the PR event\nRepository, PR number, author, base and head, changed files, linked issue",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "automated-code-review-note",
-      "name": "Read me first",
+      "id": "automated-code-review-section-1",
+      "name": "Section: 1. Receive the PR event",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Webhook: Receive the PR event\n2. HTTP Request: Fetch the diff and context\n3. Code: Run static checks\n4. AI Agent: Analyse the change\n5. IF: Filter to what matters\n6. HTTP Request: Post inline comments and summary\n7. HTTP Request: Label and route\n8. Schedule Trigger: Learn from resolutions\n9. Code: Learn from resolutions\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 2. Fetch the diff and context\nThe unified diff plus the full content of changed files and the definitions they reference, the linked issue or ticket text, and the repo's CONTRIBUTING and standards docs",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "automated-code-review-steps",
-      "name": "Step outline",
+      "id": "automated-code-review-section-2",
+      "name": "Section: 2. Fetch the diff and context",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Run static checks\nLinters, type checks and secret scanning results from CI are collected so the model does not repeat what tooling already reported",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "automated-code-review-section-3",
+      "name": "Section: 3. Run static checks",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Analyse the change\nWith the diff, context, standards and issue: does the change do what the issue asks; concrete bugs or edge cases; security issues (injection, auth, secrets, unsafe deserialisation); breaking API or schema changes; missing or weak tests; deviations from the written standards",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "automated-code-review-section-4",
+      "name": "Section: 4. Analyse the change",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Filter to what matters\nFindings below a confidence threshold or classed as style-only are dropped or folded into the summary; only concrete, explained issues become inline comments",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "automated-code-review-section-5",
+      "name": "Section: 5. Filter to what matters",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Post inline comments and summary\nReview comments on the exact lines via the GitHub/GitLab API, plus a summary comment: what the PR does, risk level, test coverage of the change, and the two or three things a human should look at",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "automated-code-review-section-6",
+      "name": "Section: 6. Post inline comments and summary",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Label and route\nRisk label (low/medium/high), area labels, and — for high-risk changes touching auth, payments or data — a required reviewer from the CODEOWNERS group",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "automated-code-review-section-7",
+      "name": "Section: 7. Label and route",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Learn from resolutions\nWeekly: which comments were resolved, dismissed or replied 'not an issue'; precision per finding type is reported and thresholds adjusted; recurring findings become proposals for a lint rule",
+        "height": 240,
+        "width": 620,
+        "color": 7
+      },
+      "id": "automated-code-review-section-8",
+      "name": "Section: 8. Learn from resolutions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        750
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "automated-code-review-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -59,7 +171,7 @@
       "id": "automated-code-review-01",
       "name": "Webhook: Receive the PR event",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
+      "typeVersion": 2.1,
       "position": [
         0,
         300
@@ -133,7 +245,7 @@
       "id": "automated-code-review-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -142,15 +254,17 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
         "method": "GET",
+        "url": "=https://api.github.com/repos/{{ $json.owner }}/{{ $json.repo }}/pulls/{{ $json.number }}/files",
         "options": {},
-        "notes": "The unified diff plus the full content of changed files and the definitions they reference, the linked issue or ticket text, and the repo's CONTRIBUTING and standards docs."
+        "notes": "The unified diff plus the full content of changed files and the definitions they reference, the linked issue or ticket text, and the repo's CONTRIBUTING and standards docs.",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi"
       },
       "id": "automated-code-review-02",
-      "name": "HTTP Request: Fetch the diff and context",
+      "name": "GitHub API: Fetch the diff and context",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.5,
       "position": [
         640,
         300
@@ -162,7 +276,7 @@
         "jsCode": "// Run static checks\n// Linters, type checks and secret scanning results from CI are collected so the model does not repeat what tooling already reported.\nreturn $input.all();"
       },
       "id": "automated-code-review-03",
-      "name": "Code: Run static checks",
+      "name": "Run static checks",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -183,7 +297,7 @@
       "id": "automated-code-review-04",
       "name": "AI Agent: Analyse the change",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         1280,
         300
@@ -204,9 +318,9 @@
       "id": "automated-code-review-04-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1600,
+        1280,
         520
       ]
     },
@@ -218,9 +332,9 @@
       "id": "automated-code-review-04-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        1800,
+        1460,
         520
       ]
     },
@@ -252,7 +366,7 @@
       "id": "automated-code-review-04-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1600,
         300
@@ -295,9 +409,9 @@
         "options": {}
       },
       "id": "automated-code-review-05",
-      "name": "IF: Filter to what matters",
+      "name": "Filter to what matters",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1920,
         300
@@ -306,15 +420,28 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
-        "options": {},
-        "notes": "Review comments on the exact lines via the GitHub/GitLab API, plus a summary comment: what the PR does, risk level, test coverage of the change, and the two or three things a human should look at."
+        "resource": "review",
+        "operation": "create",
+        "owner": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.owner }}"
+        },
+        "repository": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.repo }}"
+        },
+        "issueNumber": "={{ $json.number }}",
+        "pullRequestNumber": "={{ $json.number }}",
+        "event": "comment",
+        "body": "={{ $json.output?.summary || $json.summary }}",
+        "additionalFields": {}
       },
       "id": "automated-code-review-06",
-      "name": "HTTP Request: Post inline comments and summary",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "GitHub: Post inline comments and summary",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
       "position": [
         2240,
         300
@@ -323,15 +450,33 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
-        "options": {},
-        "notes": "Risk label (low/medium/high), area labels, and — for high-risk changes touching auth, payments or data — a required reviewer from the CODEOWNERS group."
+        "resource": "issue",
+        "operation": "edit",
+        "owner": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.owner }}"
+        },
+        "repository": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.repo }}"
+        },
+        "issueNumber": "={{ $json.number }}",
+        "editFields": {
+          "labels": {
+            "label": [
+              {
+                "label": "={{ $json.output?.risk || 'risk:medium' }}"
+              }
+            ]
+          }
+        }
       },
       "id": "automated-code-review-07",
-      "name": "HTTP Request: Label and route",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "GitHub: Label and route",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
       "position": [
         2560,
         300
@@ -353,7 +498,7 @@
       "id": "automated-code-review-08",
       "name": "Schedule Trigger: Learn from resolutions",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         860
@@ -391,25 +536,25 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Fetch the diff and context",
+            "node": "GitHub API: Fetch the diff and context",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Fetch the diff and context": {
+    "GitHub API: Fetch the diff and context": {
       "main": [
         [
           {
-            "node": "Code: Run static checks",
+            "node": "Run static checks",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Run static checks": {
+    "Run static checks": {
       "main": [
         [
           {
@@ -464,29 +609,29 @@
         ],
         [
           {
-            "node": "IF: Filter to what matters",
+            "node": "Filter to what matters",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "IF: Filter to what matters": {
+    "Filter to what matters": {
       "main": [
         [
           {
-            "node": "HTTP Request: Post inline comments and summary",
+            "node": "GitHub: Post inline comments and summary",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Post inline comments and summary": {
+    "GitHub: Post inline comments and summary": {
       "main": [
         [
           {
-            "node": "HTTP Request: Label and route",
+            "node": "GitHub: Label and route",
             "type": "main",
             "index": 0
           }

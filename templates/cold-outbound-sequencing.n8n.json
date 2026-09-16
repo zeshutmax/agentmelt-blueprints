@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Personalize cold outbound from Apollo lists with Claude and send via Instantly\n\n**Who's it for**\nSales teams that send templated sequences and get templated results.\n\n**How it works**\nTrigger: A daily run selects the next batch from the list; the sending tool's webhooks report replies, bounces and unsubscribes in real time.\n1. Build the batch\n2. Research each account\n3. Write the first line and email\n4. Quality gate\n5. Load into the sequencer\n6. Detect replies and classify\n7. Hand to a rep\n8. Report by angle and segment\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Apollo / Clay, Instantly / Smartlead / Lemlist, HubSpot / Salesforce (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet the daily batch size and the personalization rules in the Config node; swap Instantly for Smartlead or Lemlist. Keep the guardrail: Daily volume per mailbox is capped and warm-up is respected; the workflow never sends outside the sequencer's limits.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/cold-outbound-sequencing/",
+        "content": "## Personalize cold outbound from Apollo lists with Claude and send via Instantly\n\nSales teams that send templated sequences and get templated results.\n\n### How it works\nTrigger: A daily run selects the next batch from the list; the sending tool's webhooks report replies, bounces and unsubscribes in real time.\n1. Build the batch\n2. Research each account\n3. Write the first line and email\n4. Quality gate\n5. Load into the sequencer\n6. Detect replies and classify\n7. Hand to a rep\n8. Report by angle and segment\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Apollo / Clay, Instantly / Smartlead / Lemlist, HubSpot / Salesforce.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the daily batch size and the personalization rules in the Config node; swap Instantly for Smartlead or Lemlist.\nGuardrail to keep: Daily volume per mailbox is capped and warm-up is respected; the workflow never sends outside the sequencer's limits.\n\nFull blueprint: https://agentmelt.com/workflows/cold-outbound-sequencing/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "cold-outbound-sequencing-about",
@@ -13,40 +13,168 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Cold Outbound Automation\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: A daily run selects the next batch from the list; the sending tool's webhooks report replies, bounces and unsubscribes in real time.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Daily volume per mailbox is capped and warm-up is respected; the workflow never sends outside the sequencer's limits.\n   - Emails that fail the specificity check are not sent; generic filler is worse than silence.\n   - Any human reply stops the sequence immediately; unsubscribes are honoured across all lists.\n   - Suppression lists (customers, open deals, competitors, opt-outs) are applied before research spends any credits.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/cold-outbound-sequencing/\nWant it built and run for you? $297/month · custom $4,000–7,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "cold-outbound-sequencing-note",
-      "name": "Read me first",
+      "id": "cold-outbound-sequencing-section-0",
+      "name": "Section: Trigger and config",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Schedule Trigger (daily)\n2. HTTP Request: Build the batch\n3. AI Agent: Research each account\n4. AI Agent: Write the first line and email\n5. IF: Quality gate\n6. HTTP Request: Load into the sequencer\n7. Webhook: Detect replies and classify\n8. Slack: Hand to a rep\n9. Schedule Trigger: Report by angle and segment\n10. Code: Report by angle and segment\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 1. Build the batch\nPulls prospects matching the ICP from Apollo or Clay that are not in the CRM, not suppressed, and not contacted in 90 days",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "cold-outbound-sequencing-steps",
-      "name": "Step outline",
+      "id": "cold-outbound-sequencing-section-1",
+      "name": "Section: 1. Build the batch",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Research each account\nReads the company site, recent news, job postings and tech stack (via enrichment and a web-fetch tool) and writes a five-line research note: what they do, what changed recently, a plausible trigger for your offer",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "cold-outbound-sequencing-section-2",
+      "name": "Section: 2. Research each account",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Write the first line and email\nFrom the research note and your messaging playbook, writes the opening line and a sub-80-word email for the chosen angle",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "cold-outbound-sequencing-section-3",
+      "name": "Section: 3. Write the first line and email",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Quality gate\nEmails are checked for specificity (must reference the research note), banned phrases, and length",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "cold-outbound-sequencing-section-4",
+      "name": "Section: 4. Quality gate",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Load into the sequencer\nPushes the prospect and the personalised steps into Instantly, Smartlead, Lemlist or Outreach, which handle sending, warm-up and inbox rotation",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "cold-outbound-sequencing-section-5",
+      "name": "Section: 5. Load into the sequencer",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Detect replies and classify\nEvery reply is classified: interested, question, not now, wrong person (with a referral), unsubscribe, out of office",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "cold-outbound-sequencing-section-6",
+      "name": "Section: 6. Detect replies and classify",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        750
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Hand to a rep\nInterested and question replies go to the rep with the thread, the research note and a suggested response; 'not now' is scheduled for a follow-up; referrals create a new prospect",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "cold-outbound-sequencing-section-7",
+      "name": "Section: 7. Hand to a rep",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        280,
+        750
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Report by angle and segment\nWeekly: sent, replies, positive replies, meetings by segment, angle and mailbox; deliverability metrics from the sequencer; the losing angle is retired",
+        "height": 240,
+        "width": 620,
+        "color": 7
+      },
+      "id": "cold-outbound-sequencing-section-8",
+      "name": "Section: 8. Report by angle and segment",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        1310
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "cold-outbound-sequencing-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -64,7 +192,7 @@
       "id": "cold-outbound-sequencing-00",
       "name": "Schedule Trigger (daily)",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         300
@@ -137,7 +265,7 @@
       "id": "cold-outbound-sequencing-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -146,15 +274,20 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
+        "method": "POST",
+        "url": "https://api.apollo.io/api/v1/mixed_people/search",
         "options": {},
-        "notes": "Pulls prospects matching the ICP from Apollo or Clay that are not in the CRM, not suppressed, and not contacted in 90 days. Daily batch size is capped per sending mailbox."
+        "notes": "Pulls prospects matching the ICP from Apollo or Clay that are not in the CRM, not suppressed, and not contacted in 90 days. Daily batch size is capped per sending mailbox.",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"person_titles\": ($json.titles), \"organization_num_employees_ranges\": ($json.size_ranges), \"page\": 1, \"per_page\": 25 } }}"
       },
       "id": "cold-outbound-sequencing-01",
-      "name": "HTTP Request: Build the batch",
+      "name": "Apollo API: Build the batch",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.5,
       "position": [
         640,
         300
@@ -173,7 +306,7 @@
       "id": "cold-outbound-sequencing-02",
       "name": "AI Agent: Research each account",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         960,
         300
@@ -194,9 +327,9 @@
       "id": "cold-outbound-sequencing-02-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1280,
+        960,
         520
       ]
     },
@@ -208,9 +341,9 @@
       "id": "cold-outbound-sequencing-02-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        1480,
+        1140,
         520
       ]
     },
@@ -242,7 +375,7 @@
       "id": "cold-outbound-sequencing-02-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1280,
         300
@@ -273,7 +406,7 @@
       "id": "cold-outbound-sequencing-03",
       "name": "AI Agent: Write the first line and email",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         1600,
         300
@@ -294,9 +427,9 @@
       "id": "cold-outbound-sequencing-03-llm",
       "name": "Claude (Anthropic Chat Model) 2",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1920,
+        1600,
         520
       ]
     },
@@ -308,9 +441,9 @@
       "id": "cold-outbound-sequencing-03-parser",
       "name": "Structured Output Parser 2",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        2120,
+        1780,
         520
       ]
     },
@@ -342,7 +475,7 @@
       "id": "cold-outbound-sequencing-03-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1920,
         300
@@ -385,9 +518,9 @@
         "options": {}
       },
       "id": "cold-outbound-sequencing-04",
-      "name": "IF: Quality gate",
+      "name": "Quality gate",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         2240,
         300
@@ -396,15 +529,21 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
-        "options": {},
-        "notes": "Pushes the prospect and the personalised steps into Instantly, Smartlead, Lemlist or Outreach, which handle sending, warm-up and inbox rotation."
+        "resource": "lead",
+        "operation": "create",
+        "campaignId": "={{ 'replace-with-your-campaign-id' }}",
+        "email": "={{ $json.email }}",
+        "additionalFields": {
+          "firstName": "={{ $json.first_name }}",
+          "lastName": "={{ $json.last_name }}",
+          "companyName": "={{ $json.company }}",
+          "icebreaker": "={{ $json.output?.opener || '' }}"
+        }
       },
       "id": "cold-outbound-sequencing-05",
-      "name": "HTTP Request: Load into the sequencer",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "Lemlist: Load into the sequencer",
+      "type": "n8n-nodes-base.lemlist",
+      "typeVersion": 2,
       "position": [
         2560,
         300
@@ -421,7 +560,7 @@
       "id": "cold-outbound-sequencing-06",
       "name": "Webhook: Detect replies and classify",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
+      "typeVersion": 2.1,
       "position": [
         0,
         860
@@ -445,7 +584,7 @@
       "id": "cold-outbound-sequencing-07",
       "name": "Slack: Hand to a rep",
       "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "typeVersion": 2.7,
       "position": [
         320,
         860
@@ -467,7 +606,7 @@
       "id": "cold-outbound-sequencing-08",
       "name": "Schedule Trigger: Report by angle and segment",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         1420
@@ -505,14 +644,14 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Build the batch",
+            "node": "Apollo API: Build the batch",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Build the batch": {
+    "Apollo API: Build the batch": {
       "main": [
         [
           {
@@ -618,18 +757,18 @@
         ],
         [
           {
-            "node": "IF: Quality gate",
+            "node": "Quality gate",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "IF: Quality gate": {
+    "Quality gate": {
       "main": [
         [
           {
-            "node": "HTTP Request: Load into the sequencer",
+            "node": "Lemlist: Load into the sequencer",
             "type": "main",
             "index": 0
           }

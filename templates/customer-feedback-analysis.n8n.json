@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Analyze customer feedback from Zendesk and Gong with Claude and report in Notion\n\n**Who's it for**\nProduct and success teams that read tickets one at a time and miss the pattern.\n\n**How it works**\nTrigger: Daily pulls from each source; the weekly report compiles Monday morning.\n1. Collect feedback\n2. Classify by theme and sentiment\n3. Extract the quotable line\n4. Aggregate\n5. Write the weekly report\n6. Route urgent items\n7. Deliver and store\n8. Maintain the taxonomy\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Zendesk / Intercom / Gong, Notion + Google Sheets (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet the theme taxonomy and the report cadence in the Config node; add Intercom or survey tools as sources. Keep the guardrail: Personal data is stripped from quotes; sources are linked, not reproduced.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/customer-feedback-analysis/",
+        "content": "## Analyze customer feedback from Zendesk and Gong with Claude and report in Notion\n\nProduct and success teams that read tickets one at a time and miss the pattern.\n\n### How it works\nTrigger: Daily pulls from each source; the weekly report compiles Monday morning.\n1. Collect feedback\n2. Classify by theme and sentiment\n3. Extract the quotable line\n4. Aggregate\n5. Write the weekly report\n6. Route urgent items\n7. Deliver and store\n8. Maintain the taxonomy\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Zendesk / Intercom / Gong, Notion + Google Sheets.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the theme taxonomy and the report cadence in the Config node; add Intercom or survey tools as sources.\nGuardrail to keep: Personal data is stripped from quotes; sources are linked, not reproduced.\n\nFull blueprint: https://agentmelt.com/workflows/customer-feedback-analysis/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "customer-feedback-analysis-about",
@@ -13,40 +13,168 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Customer Feedback Analysis Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Daily pulls from each source; the weekly report compiles Monday morning.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Personal data is stripped from quotes; sources are linked, not reproduced.\n   - The taxonomy is owned by product; the agent proposes new themes, it does not create them.\n   - Inference is labelled as inference and separated from counts and quotes.\n   - Spike alerts require a minimum volume to avoid false alarms from single items.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/customer-feedback-analysis/\nWant it built and run for you? $247/month · custom $3,500–6,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "customer-feedback-analysis-note",
-      "name": "Read me first",
+      "id": "customer-feedback-analysis-section-0",
+      "name": "Section: Trigger and config",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Schedule Trigger (weekly)\n2. HTTP Request: Collect feedback\n3. Text Classifier: Classify by theme and sentiment\n4. Information Extractor: Extract the quotable line\n5. Code: Aggregate\n6. AI Agent: Write the weekly report\n7. IF: Route urgent items\n8. Notion: Deliver and store\n9. Google Sheets: Maintain the taxonomy\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 1. Collect feedback\nSurvey responses (Typeform, Delighted, Qualtrics), reviews (G2, app stores, Trustpilot), support tickets (Zendesk, Intercom), call notes (Gong, Fireflies), and social mentions, each with source, customer segment and date",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "customer-feedback-analysis-steps",
-      "name": "Step outline",
+      "id": "customer-feedback-analysis-section-1",
+      "name": "Section: 1. Collect feedback",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Classify by theme and sentiment\nEach item tagged with one or more themes from your taxonomy (pricing, onboarding, reliability, feature X…) and a sentiment; items that fit no theme are collected as candidates for a new one",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "customer-feedback-analysis-section-2",
+      "name": "Section: 2. Classify by theme and sentiment",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Extract the quotable line\nThe sentence that carries the feedback, cleaned of personal data, kept with a link to the source record",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "customer-feedback-analysis-section-3",
+      "name": "Section: 3. Extract the quotable line",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Aggregate\nVolume and sentiment per theme per week, by segment and plan; trend versus the previous eight weeks; new-theme candidates ranked by frequency",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "customer-feedback-analysis-section-4",
+      "name": "Section: 4. Aggregate",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Write the weekly report\nTop themes with numbers and quotes, rising and falling themes, new themes to review, and — clearly separated as inference — what the pattern suggests",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "customer-feedback-analysis-section-5",
+      "name": "Section: 5. Write the weekly report",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Route urgent items\nSpikes in a negative theme (e.g",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "customer-feedback-analysis-section-6",
+      "name": "Section: 6. Route urgent items",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3160,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Deliver and store\nReport posted to Slack and stored in the wiki; the classified dataset available for product to query",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "customer-feedback-analysis-section-7",
+      "name": "Section: 7. Deliver and store",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3480,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Maintain the taxonomy\nThemes and definitions live in a sheet product owns; new-theme candidates are approved there and the classifier picks them up next run",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "customer-feedback-analysis-section-8",
+      "name": "Section: 8. Maintain the taxonomy",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3800,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "customer-feedback-analysis-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -67,7 +195,7 @@
       "id": "customer-feedback-analysis-00",
       "name": "Schedule Trigger (weekly)",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         300
@@ -140,7 +268,7 @@
       "id": "customer-feedback-analysis-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -149,15 +277,21 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
-        "options": {},
-        "notes": "Survey responses (Typeform, Delighted, Qualtrics), reviews (G2, app stores, Trustpilot), support tickets (Zendesk, Intercom), call notes (Gong, Fireflies), and social mentions, each with source, customer segment and date."
+        "resource": "ticket",
+        "operation": "getAll",
+        "ticketType": "regular",
+        "returnAll": false,
+        "limit": 100,
+        "options": {
+          "status": "open",
+          "sortBy": "updated_at",
+          "sortOrder": "desc"
+        }
       },
       "id": "customer-feedback-analysis-01",
-      "name": "HTTP Request: Collect feedback",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "Zendesk: Collect feedback",
+      "type": "n8n-nodes-base.zendesk",
+      "typeVersion": 1,
       "position": [
         640,
         300
@@ -184,7 +318,7 @@
       "id": "customer-feedback-analysis-02",
       "name": "Text Classifier: Classify by theme and sentiment",
       "type": "@n8n/n8n-nodes-langchain.textClassifier",
-      "typeVersion": 1,
+      "typeVersion": 1.1,
       "position": [
         960,
         300
@@ -205,9 +339,9 @@
       "id": "customer-feedback-analysis-02-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1280,
+        960,
         520
       ]
     },
@@ -239,7 +373,7 @@
       "id": "customer-feedback-analysis-02-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1280,
         300
@@ -270,7 +404,7 @@
       "id": "customer-feedback-analysis-03",
       "name": "Information Extractor: Extract the quotable line",
       "type": "@n8n/n8n-nodes-langchain.informationExtractor",
-      "typeVersion": 1,
+      "typeVersion": 1.2,
       "position": [
         1600,
         300
@@ -291,9 +425,9 @@
       "id": "customer-feedback-analysis-03-llm",
       "name": "Claude (Anthropic Chat Model) 2",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1920,
+        1600,
         520
       ]
     },
@@ -325,7 +459,7 @@
       "id": "customer-feedback-analysis-03-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1920,
         300
@@ -349,7 +483,7 @@
         "jsCode": "// Aggregate\n// Volume and sentiment per theme per week, by segment and plan; trend versus the previous eight weeks; new-theme candidates ranked by frequency.\nreturn $input.all();"
       },
       "id": "customer-feedback-analysis-04",
-      "name": "Code: Aggregate",
+      "name": "Aggregate",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -370,7 +504,7 @@
       "id": "customer-feedback-analysis-05",
       "name": "AI Agent: Write the weekly report",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         2560,
         300
@@ -391,9 +525,9 @@
       "id": "customer-feedback-analysis-05-llm",
       "name": "Claude (Anthropic Chat Model) 3",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        2880,
+        2560,
         520
       ]
     },
@@ -405,9 +539,9 @@
       "id": "customer-feedback-analysis-05-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        3080,
+        2740,
         520
       ]
     },
@@ -439,7 +573,7 @@
       "id": "customer-feedback-analysis-05-gate",
       "name": "Needs a person? 3",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         2880,
         300
@@ -482,9 +616,9 @@
         "options": {}
       },
       "id": "customer-feedback-analysis-06",
-      "name": "IF: Route urgent items",
+      "name": "Route urgent items",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         3200,
         300
@@ -495,10 +629,10 @@
       "parameters": {
         "resource": "databasePage",
         "operation": "create",
-        "databaseId": {
+        "dataSourceId": {
           "__rl": true,
           "mode": "id",
-          "value": "={{ 'replace-with-your-notion-database-id' }}"
+          "value": "={{ 'replace-with-your-notion-data-source-id' }}"
         },
         "title": "={{ $json.output?.subject || $json.title || $json.summary || 'Untitled' }}",
         "options": {}
@@ -506,7 +640,7 @@
       "id": "customer-feedback-analysis-07",
       "name": "Notion: Deliver and store",
       "type": "n8n-nodes-base.notion",
-      "typeVersion": 2.2,
+      "typeVersion": 3,
       "position": [
         3520,
         300
@@ -538,7 +672,7 @@
       "id": "customer-feedback-analysis-08",
       "name": "Google Sheets: Maintain the taxonomy",
       "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "typeVersion": 4.7,
       "position": [
         3840,
         300
@@ -562,14 +696,14 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Collect feedback",
+            "node": "Zendesk: Collect feedback",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Collect feedback": {
+    "Zendesk: Collect feedback": {
       "main": [
         [
           {
@@ -653,14 +787,14 @@
         ],
         [
           {
-            "node": "Code: Aggregate",
+            "node": "Aggregate",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Aggregate": {
+    "Aggregate": {
       "main": [
         [
           {
@@ -715,14 +849,14 @@
         ],
         [
           {
-            "node": "IF: Route urgent items",
+            "node": "Route urgent items",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "IF: Route urgent items": {
+    "Route urgent items": {
       "main": [
         [
           {

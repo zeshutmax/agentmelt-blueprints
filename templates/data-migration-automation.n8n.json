@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Migrate records between systems with Claude-assisted mapping and validation\n\n**Who's it for**\nOps and engineering teams moving data from one CRM, help desk or database to another without a migration vendor.\n\n**How it works**\nTrigger: Each phase — profile, map, validate, dry-run, cutover — starts on an explicit click; no phase runs unattended.\n1. Profile the source\n2. Propose the mapping\n3. Confirm the mapping\n4. Apply transformations\n5. Validate\n6. Dry run\n7. Cut over in batches\n8. Reconcile and hand over\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Postgres / BigQuery, Target APIs (HubSpot, Salesforce, Zendesk…) (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nPut the source and target schemas in the Config node; run each phase (profile, map, validate, dry-run, cutover) by hand from the manual trigger. Keep the guardrail: No phase runs without an explicit trigger; cutover requires a dry run that passed.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/data-migration-automation/",
+        "content": "## Migrate records between systems with Claude-assisted mapping and validation\n\nOps and engineering teams moving data from one CRM, help desk or database to another without a migration vendor.\n\n### How it works\nTrigger: Each phase — profile, map, validate, dry-run, cutover — starts on an explicit click; no phase runs unattended.\n1. Profile the source\n2. Propose the mapping\n3. Confirm the mapping\n4. Apply transformations\n5. Validate\n6. Dry run\n7. Cut over in batches\n8. Reconcile and hand over\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Postgres / BigQuery, Target APIs (HubSpot, Salesforce, Zendesk…).\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nPut the source and target schemas in the Config node; run each phase (profile, map, validate, dry-run, cutover) by hand from the manual trigger.\nGuardrail to keep: No phase runs without an explicit trigger; cutover requires a dry run that passed.\n\nFull blueprint: https://agentmelt.com/workflows/data-migration-automation/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "data-migration-automation-about",
@@ -13,40 +13,168 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Data Migration Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Each phase — profile, map, validate, dry-run, cutover — starts on an explicit click; no phase runs unattended.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - No phase runs without an explicit trigger; cutover requires a dry run that passed.\n   - The mapping is confirmed by a person; the agent proposes with confidence, it does not decide.\n   - The source is read-only during cutover and a tested rollback exists before the first production batch.\n   - Every transformed record carries its source id for traceability.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/data-migration-automation/\nWant it built and run for you? $297/month · custom $5,000–12,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "data-migration-automation-note",
-      "name": "Read me first",
+      "id": "data-migration-automation-section-0",
+      "name": "Section: Trigger and config",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Manual Trigger\n2. Postgres: Profile the source\n3. AI Agent: Propose the mapping\n4. Google Sheets: Confirm the mapping\n5. Code: Apply transformations\n6. Compare Datasets: Validate\n7. HTTP Request: Dry run\n8. Loop Over Items: Cut over in batches\n9. Google Docs: Reconcile and hand over\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 1. Profile the source\nTables, fields, types, null rates, distinct values and sample rows from the source system (database, CRM export, API)",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "data-migration-automation-steps",
-      "name": "Step outline",
+      "id": "data-migration-automation-section-1",
+      "name": "Section: 1. Profile the source",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Propose the mapping\nReads source and target schemas with sample values and proposes field-by-field mappings with transformation notes (date formats, picklist translation, splits/merges) and a confidence per field",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "data-migration-automation-section-2",
+      "name": "Section: 2. Propose the mapping",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Confirm the mapping\nThe mapping sheet is reviewed and edited by the migration owner; it becomes the versioned source of truth for every later step",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "data-migration-automation-section-3",
+      "name": "Section: 3. Confirm the mapping",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Apply transformations\nTransformations generated from the mapping sheet — type conversions, lookups, deduplication rules — applied to a sample batch",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "data-migration-automation-section-4",
+      "name": "Section: 4. Apply transformations",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Validate\nRecord counts, sums of numeric fields, referential integrity and picklist coverage compared between source and transformed target sample; failures listed per rule",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "data-migration-automation-section-5",
+      "name": "Section: 5. Validate",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Dry run\nFull transformed dataset loaded into a target sandbox; reconciliation report produced; errors per batch",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "data-migration-automation-section-6",
+      "name": "Section: 6. Dry run",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Cut over in batches\nProduction load in batches with progress, per-record error capture and retry; the source stays read-only during cutover",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "data-migration-automation-section-7",
+      "name": "Section: 7. Cut over in batches",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2840,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Reconcile and hand over\nFinal reconciliation report, error log, the mapping sheet and the rollback procedure archived; the workflow can re-run deltas for late data",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "data-migration-automation-section-8",
+      "name": "Section: 8. Reconcile and hand over",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3160,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "data-migration-automation-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -127,7 +255,7 @@
       "id": "data-migration-automation-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -143,7 +271,7 @@
       "id": "data-migration-automation-01",
       "name": "Postgres: Profile the source",
       "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
+      "typeVersion": 2.7,
       "position": [
         640,
         300
@@ -162,7 +290,7 @@
       "id": "data-migration-automation-02",
       "name": "AI Agent: Propose the mapping",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         960,
         300
@@ -183,9 +311,9 @@
       "id": "data-migration-automation-02-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1280,
+        960,
         520
       ]
     },
@@ -197,9 +325,9 @@
       "id": "data-migration-automation-02-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        1480,
+        1140,
         520
       ]
     },
@@ -231,7 +359,7 @@
       "id": "data-migration-automation-02-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1280,
         300
@@ -275,7 +403,7 @@
       "id": "data-migration-automation-03",
       "name": "Google Sheets: Confirm the mapping",
       "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "typeVersion": 4.7,
       "position": [
         1600,
         300
@@ -287,7 +415,7 @@
         "jsCode": "// Apply transformations\n// Transformations generated from the mapping sheet — type conversions, lookups, deduplication rules — applied to a sample batch.\nreturn $input.all();"
       },
       "id": "data-migration-automation-04",
-      "name": "Code: Apply transformations",
+      "name": "Apply transformations",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -309,7 +437,7 @@
         "options": {}
       },
       "id": "data-migration-automation-05",
-      "name": "Compare Datasets: Validate",
+      "name": "Validate",
       "type": "n8n-nodes-base.compareDatasets",
       "typeVersion": 2.3,
       "position": [
@@ -320,15 +448,15 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
-        "options": {},
-        "notes": "Full transformed dataset loaded into a target sandbox; reconciliation report produced; errors per batch."
+        "resource": "contact",
+        "operation": "upsert",
+        "email": "={{ $json.email || $json.output?.email || '' }}",
+        "additionalFields": {}
       },
       "id": "data-migration-automation-06",
-      "name": "HTTP Request: Dry run",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "HubSpot (sandbox): Dry run",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
       "position": [
         2560,
         300
@@ -340,7 +468,7 @@
         "options": {}
       },
       "id": "data-migration-automation-07",
-      "name": "Loop Over Items: Cut over in batches",
+      "name": "Cut over in batches",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
@@ -457,47 +585,47 @@
       "main": [
         [
           {
-            "node": "Code: Apply transformations",
+            "node": "Apply transformations",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Apply transformations": {
+    "Apply transformations": {
       "main": [
         [
           {
-            "node": "Compare Datasets: Validate",
+            "node": "Validate",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Compare Datasets: Validate": {
+    "Validate": {
       "main": [
         [
           {
-            "node": "HTTP Request: Dry run",
+            "node": "HubSpot (sandbox): Dry run",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Dry run": {
+    "HubSpot (sandbox): Dry run": {
       "main": [
         [
           {
-            "node": "Loop Over Items: Cut over in batches",
+            "node": "Cut over in batches",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Loop Over Items: Cut over in batches": {
+    "Cut over in batches": {
       "main": [
         [
           {

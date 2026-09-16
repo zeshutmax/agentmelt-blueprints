@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Screen applications from Greenhouse with Claude and score them in Google Sheets\n\n**Who's it for**\nRecruiters and hiring teams that read every application by hand and still miss good candidates.\n\n**How it works**\nTrigger: Greenhouse, Lever, Ashby, Workable or Teamtailor post each new application; a daily run catches any missed.\n1. Receive the application\n2. Load the role criteria\n3. Parse the resume\n4. Score against criteria with evidence\n5. Flag verification items\n6. Build the ranked shortlist\n7. Present to the recruiter\n8. Audit and bias monitoring\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Greenhouse / Lever / Ashby, Google Sheets (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nPut the role's criteria and knock-out questions in the Config node; swap Greenhouse for Lever or Ashby. Keep the guardrail: No candidate is rejected automatically; the workflow ranks and explains, recruiters decide.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/resume-screening-automation/",
+        "content": "## Screen applications from Greenhouse with Claude and score them in Google Sheets\n\nRecruiters and hiring teams that read every application by hand and still miss good candidates.\n\n### How it works\nTrigger: Greenhouse, Lever, Ashby, Workable or Teamtailor post each new application; a daily run catches any missed.\n1. Receive the application\n2. Load the role criteria\n3. Parse the resume\n4. Score against criteria with evidence\n5. Flag verification items\n6. Build the ranked shortlist\n7. Present to the recruiter\n8. Audit and bias monitoring\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Greenhouse / Lever / Ashby, Google Sheets.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nPut the role's criteria and knock-out questions in the Config node; swap Greenhouse for Lever or Ashby.\nGuardrail to keep: No candidate is rejected automatically; the workflow ranks and explains, recruiters decide.\n\nFull blueprint: https://agentmelt.com/workflows/resume-screening-automation/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "resume-screening-automation-about",
@@ -13,40 +13,152 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Resume Screening Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Greenhouse, Lever, Ashby, Workable or Teamtailor post each new application; a daily run catches any missed.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - No candidate is rejected automatically; the workflow ranks and explains, recruiters decide.\n   - Protected characteristics are excluded from scoring by instruction and by stripping fields before the model sees them.\n   - Every score carries an evidence quote; unexplained scores are not shown.\n   - Pass-through rates by group are monitored where lawful, and criteria that skew are reviewed.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/resume-screening-automation/\nWant it built and run for you? $247/month · custom $3,500–6,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## 1. Receive the application\nResume, cover letter, application answers and the job requisition id from the ATS",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "resume-screening-automation-note",
-      "name": "Read me first",
+      "id": "resume-screening-automation-section-1",
+      "name": "Section: 1. Receive the application",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Webhook: Receive the application\n2. Google Sheets: Load the role criteria\n3. Information Extractor: Parse the resume\n4. AI Agent: Score against criteria with evidence\n5. Code: Flag verification items\n6. Code: Build the ranked shortlist\n7. HTTP Request: Present to the recruiter\n8. Schedule Trigger: Audit and bias monitoring\n9. Code: Audit and bias monitoring\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 2. Load the role criteria\nMust-haves, nice-to-haves and disqualifiers for the role, written by the hiring manager in plain language and approved by HR; weights per criterion",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "resume-screening-automation-steps",
-      "name": "Step outline",
+      "id": "resume-screening-automation-section-2",
+      "name": "Section: 2. Load the role criteria",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Parse the resume\nRoles, dates, employers, skills, education, certifications and locations into structured fields, with the source text kept for quoting",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "resume-screening-automation-section-3",
+      "name": "Section: 3. Parse the resume",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Score against criteria with evidence\nEach criterion scored met / partially / not met with a quote from the application as evidence; the agent is instructed to ignore name, photo, age, gender, nationality and school prestige unless a certification is a legal requirement",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "resume-screening-automation-section-4",
+      "name": "Section: 4. Score against criteria with evidence",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Flag verification items\nGaps, overlapping dates, claims that need checking (certifications, seniority) listed for the interview",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "resume-screening-automation-section-5",
+      "name": "Section: 5. Flag verification items",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Build the ranked shortlist\nWeighted score and band (strong / possible / unlikely); disqualifier matches are listed separately with the rule, never silently dropped",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "resume-screening-automation-section-6",
+      "name": "Section: 6. Build the ranked shortlist",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Present to the recruiter\nScores, bands and explanations written back to the ATS as a scorecard; the recruiter reviews the strong band plus a random sample from the others and moves candidates forward",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "resume-screening-automation-section-7",
+      "name": "Section: 7. Present to the recruiter",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2840,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Audit and bias monitoring\nWeekly: score distributions and pass-through rates by self-reported demographic group where legally collected; anomalies flagged to HR",
+        "height": 240,
+        "width": 620,
+        "color": 7
+      },
+      "id": "resume-screening-automation-section-8",
+      "name": "Section: 8. Audit and bias monitoring",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        750
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "resume-screening-automation-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -59,7 +171,7 @@
       "id": "resume-screening-automation-01",
       "name": "Webhook: Receive the application",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
+      "typeVersion": 2.1,
       "position": [
         0,
         300
@@ -133,7 +245,7 @@
       "id": "resume-screening-automation-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -165,7 +277,7 @@
       "id": "resume-screening-automation-02",
       "name": "Google Sheets: Load the role criteria",
       "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "typeVersion": 4.7,
       "position": [
         640,
         300
@@ -184,7 +296,7 @@
       "id": "resume-screening-automation-03",
       "name": "Information Extractor: Parse the resume",
       "type": "@n8n/n8n-nodes-langchain.informationExtractor",
-      "typeVersion": 1,
+      "typeVersion": 1.2,
       "position": [
         960,
         300
@@ -205,9 +317,9 @@
       "id": "resume-screening-automation-03-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1280,
+        960,
         520
       ]
     },
@@ -239,7 +351,7 @@
       "id": "resume-screening-automation-03-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1280,
         300
@@ -270,7 +382,7 @@
       "id": "resume-screening-automation-04",
       "name": "AI Agent: Score against criteria with evidence",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         1600,
         300
@@ -291,9 +403,9 @@
       "id": "resume-screening-automation-04-llm",
       "name": "Claude (Anthropic Chat Model) 2",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1920,
+        1600,
         520
       ]
     },
@@ -305,9 +417,9 @@
       "id": "resume-screening-automation-04-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        2120,
+        1780,
         520
       ]
     },
@@ -339,7 +451,7 @@
       "id": "resume-screening-automation-04-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1920,
         300
@@ -363,7 +475,7 @@
         "jsCode": "// Flag verification items\n// Gaps, overlapping dates, claims that need checking (certifications, seniority) listed for the interview.\nreturn $input.all();"
       },
       "id": "resume-screening-automation-05",
-      "name": "Code: Flag verification items",
+      "name": "Flag verification items",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -377,7 +489,7 @@
         "jsCode": "// Build the ranked shortlist\n// Weighted score and band (strong / possible / unlikely); disqualifier matches are listed separately with the rule, never silently dropped.\nreturn $input.all();"
       },
       "id": "resume-screening-automation-06",
-      "name": "Code: Build the ranked shortlist",
+      "name": "Build the ranked shortlist",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -388,15 +500,20 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
+        "method": "POST",
+        "url": "=https://harvest.greenhouse.io/v1/candidates/{{ $json.candidate_id }}/activity_feed/notes",
         "options": {},
-        "notes": "Scores, bands and explanations written back to the ATS as a scorecard; the recruiter reviews the strong band plus a random sample from the others and moves candidates forward."
+        "notes": "Scores, bands and explanations written back to the ATS as a scorecard; the recruiter reviews the strong band plus a random sample from the others and moves candidates forward.",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"user_id\": ($json.recruiter_id), \"body\": ($json.output?.explanation), \"visibility\": \"admin_only\" } }}"
       },
       "id": "resume-screening-automation-07",
-      "name": "HTTP Request: Present to the recruiter",
+      "name": "Greenhouse Harvest API: Present to the recruiter",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.5,
       "position": [
         2880,
         300
@@ -418,7 +535,7 @@
       "id": "resume-screening-automation-08",
       "name": "Schedule Trigger: Audit and bias monitoring",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         860
@@ -558,29 +675,29 @@
         ],
         [
           {
-            "node": "Code: Flag verification items",
+            "node": "Flag verification items",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Flag verification items": {
+    "Flag verification items": {
       "main": [
         [
           {
-            "node": "Code: Build the ranked shortlist",
+            "node": "Build the ranked shortlist",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Build the ranked shortlist": {
+    "Build the ranked shortlist": {
       "main": [
         [
           {
-            "node": "HTTP Request: Present to the recruiter",
+            "node": "Greenhouse Harvest API: Present to the recruiter",
             "type": "main",
             "index": 0
           }

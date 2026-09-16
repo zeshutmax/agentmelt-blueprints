@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Monitor brand mentions with Claude and draft replies for approval in Slack\n\n**Who's it for**\nMarketing and support teams that answer social mentions by hand and miss the ones that matter.\n\n**How it works**\nTrigger: Hourly pulls from each source's API or a listening provider; high-severity classifications trigger immediate alerts.\n1. Collect mentions\n2. De-duplicate and filter\n3. Classify intent and sentiment\n4. Draft the response\n5. Route by category\n6. Approve and post\n7. Log everything\n8. Weekly listening report\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Brand24 / Mention / platform APIs, Slack, HubSpot + Zendesk (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nChange the sources and the severity rules in the Config node; add a HubSpot or Zendesk node to open a ticket for complaints. Keep the guardrail: Nothing is posted publicly without human approval; the agent drafts.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/social-listening-response/",
+        "content": "## Monitor brand mentions with Claude and draft replies for approval in Slack\n\nMarketing and support teams that answer social mentions by hand and miss the ones that matter.\n\n### How it works\nTrigger: Hourly pulls from each source's API or a listening provider; high-severity classifications trigger immediate alerts.\n1. Collect mentions\n2. De-duplicate and filter\n3. Classify intent and sentiment\n4. Draft the response\n5. Route by category\n6. Approve and post\n7. Log everything\n8. Weekly listening report\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Brand24 / Mention / platform APIs, Slack, HubSpot + Zendesk.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nChange the sources and the severity rules in the Config node; add a HubSpot or Zendesk node to open a ticket for complaints.\nGuardrail to keep: Nothing is posted publicly without human approval; the agent drafts.\n\nFull blueprint: https://agentmelt.com/workflows/social-listening-response/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "social-listening-response-about",
@@ -13,40 +13,168 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Social Listening & Response Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Hourly pulls from each source's API or a listening provider; high-severity classifications trigger immediate alerts.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Nothing is posted publicly without human approval; the agent drafts.\n   - Complaints are acknowledged publicly and resolved privately — the agent never debates in public.\n   - PR-risk classifications bypass drafting and go straight to a person.\n   - Author reach and account age feed urgency so a journalist's question is not treated like a bot's.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/social-listening-response/\nWant it built and run for you? $247/month · custom $3,500–6,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "social-listening-response-note",
-      "name": "Read me first",
+      "id": "social-listening-response-section-0",
+      "name": "Section: Trigger and config",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Schedule Trigger (hourly)\n2. HTTP Request: Collect mentions\n3. Code: De-duplicate and filter\n4. Text Classifier: Classify intent and sentiment\n5. AI Agent: Draft the response\n6. Switch: Route by category\n7. Wait: Approve and post\n8. Google Sheets: Log everything\n9. AI Agent: Weekly listening report\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 1. Collect mentions\nBrand, product, executive, competitor and category keywords across X, LinkedIn, Reddit, G2/Capterra/Trustpilot, YouTube comments, Hacker News and news APIs — directly or via Brand24/Mention",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "social-listening-response-steps",
-      "name": "Step outline",
+      "id": "social-listening-response-section-1",
+      "name": "Section: 1. Collect mentions",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. De-duplicate and filter\nRemoves reposts, bots and irrelevant homonyms (a keyword that is also a common word) using rules learned from prior corrections",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "social-listening-response-section-2",
+      "name": "Section: 2. De-duplicate and filter",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Classify intent and sentiment\nBuying question, complaint, support request, praise, competitor comparison, PR risk, irrelevant — plus sentiment and an urgency score based on author reach and tone",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "social-listening-response-section-3",
+      "name": "Section: 3. Classify intent and sentiment",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Draft the response\nFor replyable categories, a short response in your brand voice that answers the actual question, references the right resource, and never argues",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "social-listening-response-section-4",
+      "name": "Section: 4. Draft the response",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Route by category\nBuying questions and comparisons → sales with a CRM lead; complaints and support → help desk ticket; PR risk → comms lead alert; praise → approved reply and a testimonial candidate list",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "social-listening-response-section-5",
+      "name": "Section: 5. Route by category",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Approve and post\nDrafts wait in Slack for one-click approval by the social manager; approved replies post through the platform API or are handed to the community manager where APIs restrict posting",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "social-listening-response-section-6",
+      "name": "Section: 6. Approve and post",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2840,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Log everything\nEvery mention, classification, action and response time is logged for the report and the classifier's feedback loop",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "social-listening-response-section-7",
+      "name": "Section: 7. Log everything",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3160,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Weekly listening report\nShare of voice vs competitors, sentiment trend, top themes with example mentions, unanswered buying questions, and three content ideas drawn from recurring questions",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "social-listening-response-section-8",
+      "name": "Section: 8. Weekly listening report",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3480,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "social-listening-response-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -63,7 +191,7 @@
       "id": "social-listening-response-00",
       "name": "Schedule Trigger (hourly)",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         300
@@ -136,7 +264,7 @@
       "id": "social-listening-response-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -145,15 +273,17 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
         "method": "GET",
+        "url": "=https://api.mention.net/api/accounts/{{ $json.account_id }}/alerts/{{ $json.alert_id }}/mentions?since_id={{ $json.since_id }}",
         "options": {},
-        "notes": "Brand, product, executive, competitor and category keywords across X, LinkedIn, Reddit, G2/Capterra/Trustpilot, YouTube comments, Hacker News and news APIs — directly or via Brand24/Mention."
+        "notes": "Brand, product, executive, competitor and category keywords across X, LinkedIn, Reddit, G2/Capterra/Trustpilot, YouTube comments, Hacker News and news APIs — directly or via Brand24/Mention.",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
       },
       "id": "social-listening-response-01",
-      "name": "HTTP Request: Collect mentions",
+      "name": "Mention API: Collect mentions",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.5,
       "position": [
         640,
         300
@@ -165,7 +295,7 @@
         "jsCode": "// De-duplicate and filter\n// Removes reposts, bots and irrelevant homonyms (a keyword that is also a common word) using rules learned from prior corrections.\nreturn $input.all();"
       },
       "id": "social-listening-response-02",
-      "name": "Code: De-duplicate and filter",
+      "name": "De-duplicate and filter",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -194,7 +324,7 @@
       "id": "social-listening-response-03",
       "name": "Text Classifier: Classify intent and sentiment",
       "type": "@n8n/n8n-nodes-langchain.textClassifier",
-      "typeVersion": 1,
+      "typeVersion": 1.1,
       "position": [
         1280,
         300
@@ -215,9 +345,9 @@
       "id": "social-listening-response-03-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1600,
+        1280,
         520
       ]
     },
@@ -249,7 +379,7 @@
       "id": "social-listening-response-03-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1600,
         300
@@ -280,7 +410,7 @@
       "id": "social-listening-response-04",
       "name": "AI Agent: Draft the response",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         1920,
         300
@@ -301,9 +431,9 @@
       "id": "social-listening-response-04-llm",
       "name": "Claude (Anthropic Chat Model) 2",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        2240,
+        1920,
         520
       ]
     },
@@ -315,9 +445,9 @@
       "id": "social-listening-response-04-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        2440,
+        2100,
         520
       ]
     },
@@ -349,7 +479,7 @@
       "id": "social-listening-response-04-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         2240,
         300
@@ -399,9 +529,9 @@
         "options": {}
       },
       "id": "social-listening-response-05",
-      "name": "Switch: Route by category",
+      "name": "Route by category",
       "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.2,
+      "typeVersion": 3.4,
       "position": [
         2560,
         300
@@ -414,7 +544,7 @@
         "options": {}
       },
       "id": "social-listening-response-06",
-      "name": "Wait: Approve and post",
+      "name": "Approve and post",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
@@ -448,7 +578,7 @@
       "id": "social-listening-response-07",
       "name": "Google Sheets: Log everything",
       "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "typeVersion": 4.7,
       "position": [
         3200,
         300
@@ -467,7 +597,7 @@
       "id": "social-listening-response-08",
       "name": "AI Agent: Weekly listening report",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         3520,
         300
@@ -488,9 +618,9 @@
       "id": "social-listening-response-08-llm",
       "name": "Claude (Anthropic Chat Model) 3",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        3840,
+        3520,
         520
       ]
     },
@@ -502,9 +632,9 @@
       "id": "social-listening-response-08-parser",
       "name": "Structured Output Parser 2",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        4040,
+        3700,
         520
       ]
     },
@@ -536,7 +666,7 @@
       "id": "social-listening-response-08-gate",
       "name": "Needs a person? 3",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         3840,
         300
@@ -572,25 +702,25 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Collect mentions",
+            "node": "Mention API: Collect mentions",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Collect mentions": {
+    "Mention API: Collect mentions": {
       "main": [
         [
           {
-            "node": "Code: De-duplicate and filter",
+            "node": "De-duplicate and filter",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: De-duplicate and filter": {
+    "De-duplicate and filter": {
       "main": [
         [
           {
@@ -685,25 +815,25 @@
         ],
         [
           {
-            "node": "Switch: Route by category",
+            "node": "Route by category",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Switch: Route by category": {
+    "Route by category": {
       "main": [
         [
           {
-            "node": "Wait: Approve and post",
+            "node": "Approve and post",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Wait: Approve and post": {
+    "Approve and post": {
       "main": [
         [
           {

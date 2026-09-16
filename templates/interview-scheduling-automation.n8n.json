@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Schedule interviews from Greenhouse stage changes with Google Calendar, Claude and Twilio\n\n**Who's it for**\nRecruiters and coordinators who spend their week on calendar tennis.\n\n**How it works**\nTrigger: Moving a candidate to an interview stage in Greenhouse, Lever or Ashby — or a row change in the tracking sheet — starts scheduling for that stage's panel.\n1. Read the stage\n2. Find common slots\n3. Offer the slots\n4. Book\n5. Remind\n6. Handle changes\n7. Sync the ATS\n8. Report\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Greenhouse / Lever / Ashby, Google Calendar / Outlook, Twilio (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet the interviewer pools and the working hours in the Config node; swap Google Calendar for Outlook. Keep the guardrail: Panel working hours and blocked times are respected; the workflow never books over a 'focus' block or outside hours.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/interview-scheduling-automation/",
+        "content": "## Schedule interviews from Greenhouse stage changes with Google Calendar, Claude and Twilio\n\nRecruiters and coordinators who spend their week on calendar tennis.\n\n### How it works\nTrigger: Moving a candidate to an interview stage in Greenhouse, Lever or Ashby — or a row change in the tracking sheet — starts scheduling for that stage's panel.\n1. Read the stage\n2. Find common slots\n3. Offer the slots\n4. Book\n5. Remind\n6. Handle changes\n7. Sync the ATS\n8. Report\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Greenhouse / Lever / Ashby, Google Calendar / Outlook, Twilio.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the interviewer pools and the working hours in the Config node; swap Google Calendar for Outlook.\nGuardrail to keep: Panel working hours and blocked times are respected; the workflow never books over a 'focus' block or outside hours.\n\nFull blueprint: https://agentmelt.com/workflows/interview-scheduling-automation/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "interview-scheduling-automation-about",
@@ -13,40 +13,152 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Interview Scheduling Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Moving a candidate to an interview stage in Greenhouse, Lever or Ashby — or a row change in the tracking sheet — starts scheduling for that stage's panel.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Panel working hours and blocked times are respected; the workflow never books over a 'focus' block or outside hours.\n   - Candidates are never offered a slot less than 24 hours away unless the recruiter allows it for the stage.\n   - Every change is written to the same email thread, so the candidate has one conversation, not five.\n   - SMS only with a number the candidate gave; opt-out honoured.\n   - The recruiter is copied on every candidate-facing message and can take over any thread by replying.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/interview-scheduling-automation/\nWant it built and run for you? $197/month · custom $2,000–3,500 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## 1. Read the stage\nCandidate, role, interview stage, the panel for that stage, duration, and whether it is video or on-site",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "interview-scheduling-automation-note",
-      "name": "Read me first",
+      "id": "interview-scheduling-automation-section-1",
+      "name": "Section: 1. Read the stage",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Webhook: Read the stage\n2. Google Calendar: Find common slots\n3. Gmail: Offer the slots\n4. Google Calendar: Book\n5. Set: Remind\n6. AI Agent: Handle changes\n7. HTTP Request: Sync the ATS\n8. Google Sheets: Report\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 2. Find common slots\nFree/busy across every panel member for the next ten working days, inside their working hours, avoiding lunch and back-to-back blocks; three options, spread across days",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "interview-scheduling-automation-steps",
-      "name": "Step outline",
+      "id": "interview-scheduling-automation-section-2",
+      "name": "Section: 2. Find common slots",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Offer the slots\nOne email from the recruiter with three buttons or links, the format, who they will meet, and what to prepare — written for the stage, not a template dump",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "interview-scheduling-automation-section-3",
+      "name": "Section: 3. Offer the slots",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Book\nThe chosen slot becomes an event on every calendar with the video link or room, the candidate's CV attached for the panel, and the interview kit",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "interview-scheduling-automation-section-4",
+      "name": "Section: 4. Book",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Remind\nCandidate: 24 hours and 2 hours before, by email and SMS if they gave a number",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "interview-scheduling-automation-section-5",
+      "name": "Section: 5. Remind",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Handle changes\nA reply asking to move, cancel or ask a question is understood and acted on in the same thread; new slots are offered without the recruiter",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "interview-scheduling-automation-section-6",
+      "name": "Section: 6. Handle changes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Sync the ATS\nInterview scheduled, rescheduled, completed or no-show is written back to the candidate's record; the scorecard is opened for the panel",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "interview-scheduling-automation-section-7",
+      "name": "Section: 7. Sync the ATS",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Report\nTime from stage change to booked, reschedule rate, no-show rate by role and stage, so the recruiter sees where the process drags",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "interview-scheduling-automation-section-8",
+      "name": "Section: 8. Report",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2840,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "interview-scheduling-automation-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -59,7 +171,7 @@
       "id": "interview-scheduling-automation-01",
       "name": "Webhook: Read the stage",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
+      "typeVersion": 2.1,
       "position": [
         0,
         300
@@ -133,7 +245,7 @@
       "id": "interview-scheduling-automation-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -176,7 +288,7 @@
       "id": "interview-scheduling-automation-03",
       "name": "Gmail: Offer the slots",
       "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.1,
+      "typeVersion": 2.2,
       "position": [
         960,
         300
@@ -208,15 +320,18 @@
     },
     {
       "parameters": {
-        "assignments": {
-          "assignments": []
-        },
+        "resource": "sms",
+        "operation": "send",
+        "from": "={{ $('Config (edit me)').item.json.config.sms_from || '' }}",
+        "to": "={{ $json.phone || $json.output?.phone || '' }}",
+        "toWhatsapp": false,
+        "message": "={{ $json.output?.draft || $json.draft || $json.summary || '' }}",
         "options": {}
       },
       "id": "interview-scheduling-automation-05",
-      "name": "Set: Remind",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "name": "Twilio: Remind",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
       "position": [
         1600,
         300
@@ -235,7 +350,7 @@
       "id": "interview-scheduling-automation-06",
       "name": "AI Agent: Handle changes",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         1920,
         300
@@ -256,9 +371,9 @@
       "id": "interview-scheduling-automation-06-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        2240,
+        1920,
         520
       ]
     },
@@ -270,9 +385,9 @@
       "id": "interview-scheduling-automation-06-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        2440,
+        2100,
         520
       ]
     },
@@ -304,7 +419,7 @@
       "id": "interview-scheduling-automation-06-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         2240,
         300
@@ -325,15 +440,20 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
+        "method": "POST",
+        "url": "=https://harvest.greenhouse.io/v1/applications/{{ $json.application_id }}/move",
         "options": {},
-        "notes": "Interview scheduled, rescheduled, completed or no-show is written back to the candidate's record; the scorecard is opened for the panel."
+        "notes": "Interview scheduled, rescheduled, completed or no-show is written back to the candidate's record; the scorecard is opened for the panel.",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"from_stage_id\": ($json.from_stage_id), \"to_stage_id\": ($json.to_stage_id) } }}"
       },
       "id": "interview-scheduling-automation-07",
-      "name": "HTTP Request: Sync the ATS",
+      "name": "Greenhouse Harvest API: Sync the ATS",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.5,
       "position": [
         2560,
         300
@@ -365,7 +485,7 @@
       "id": "interview-scheduling-automation-08",
       "name": "Google Sheets: Report",
       "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "typeVersion": 4.7,
       "position": [
         2880,
         300
@@ -422,14 +542,14 @@
       "main": [
         [
           {
-            "node": "Set: Remind",
+            "node": "Twilio: Remind",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Set: Remind": {
+    "Twilio: Remind": {
       "main": [
         [
           {
@@ -484,14 +604,14 @@
         ],
         [
           {
-            "node": "HTTP Request: Sync the ATS",
+            "node": "Greenhouse Harvest API: Sync the ATS",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Sync the ATS": {
+    "Greenhouse Harvest API: Sync the ATS": {
       "main": [
         [
           {

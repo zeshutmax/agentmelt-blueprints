@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Intake insurance claims from email and portal submissions with Claude\n\n**Who's it for**\nClaims teams that re-key first notice of loss from emails, forms and call notes.\n\n**How it works**\nTrigger: Emails to claims@, portal and app submissions via webhook, and call-centre transcripts from the telephony platform.\n1. Capture the notice\n2. Extract the facts\n3. Verify policy and coverage\n4. Triage severity and complexity\n5. Screen fraud indicators\n6. Route\n7. Acknowledge the claimant\n8. Create the file and assign\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Claims system (Guidewire ClaimCenter, Duck Creek, Snapsheet, in-house), Policy admin, Telephony (Five9, Talkdesk) (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nDefine the claim types and the required documents in the Config node; point the write-back at your claims system. Keep the guardrail: Coverage determinations and claim decisions are made by adjusters; the workflow verifies and summarises.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/insurance-claims-intake/",
+        "content": "## Intake insurance claims from email and portal submissions with Claude\n\nClaims teams that re-key first notice of loss from emails, forms and call notes.\n\n### How it works\nTrigger: Emails to claims@, portal and app submissions via webhook, and call-centre transcripts from the telephony platform.\n1. Capture the notice\n2. Extract the facts\n3. Verify policy and coverage\n4. Triage severity and complexity\n5. Screen fraud indicators\n6. Route\n7. Acknowledge the claimant\n8. Create the file and assign\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Claims system (Guidewire ClaimCenter, Duck Creek, Snapsheet, in-house), Policy admin, Telephony (Five9, Talkdesk).\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nDefine the claim types and the required documents in the Config node; point the write-back at your claims system.\nGuardrail to keep: Coverage determinations and claim decisions are made by adjusters; the workflow verifies and summarises.\n\nFull blueprint: https://agentmelt.com/workflows/insurance-claims-intake/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "insurance-claims-intake-about",
@@ -13,40 +13,152 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Insurance Claims Intake Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Emails to claims@, portal and app submissions via webhook, and call-centre transcripts from the telephony platform.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Coverage determinations and claim decisions are made by adjusters; the workflow verifies and summarises.\n   - Fraud indicators are flagged with evidence for SIU review, never used to deny or delay a claim automatically.\n   - Claimant communications are approved by a person for complex or injury claims.\n   - Every automated step is logged on the claim file for regulatory audit.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/insurance-claims-intake/\nWant it built and run for you? $297/month · custom $8,000–15,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## 1. Capture the notice\nFrom email, portal, app or call transcript: claimant, policy number, date and place of loss, description, attachments (photos, police report, invoices)",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "insurance-claims-intake-note",
-      "name": "Read me first",
+      "id": "insurance-claims-intake-section-1",
+      "name": "Section: 1. Capture the notice",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Webhook: Capture the notice\n2. Information Extractor: Extract the facts\n3. HTTP Request: Verify policy and coverage\n4. Code: Triage severity and complexity\n5. AI Agent: Screen fraud indicators\n6. Switch: Route\n7. Gmail: Acknowledge the claimant\n8. HTTP Request: Create the file and assign\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 2. Extract the facts\nLoss date, cause, location, parties involved, injuries, property damaged, estimated amount, witnesses, and a structured description — with confidence per field",
+        "height": 680,
+        "width": 620,
         "color": 7
       },
-      "id": "insurance-claims-intake-steps",
-      "name": "Step outline",
+      "id": "insurance-claims-intake-section-2",
+      "name": "Section: 2. Extract the facts",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Verify policy and coverage\nPolicy status on the loss date, coverages and limits, deductible, endorsements and exclusions relevant to the cause of loss, from the policy admin system",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "insurance-claims-intake-section-3",
+      "name": "Section: 3. Verify policy and coverage",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Triage severity and complexity\nRules on estimated amount, injury involvement, liability questions, multiple parties and coverage ambiguity produce a severity tier and a complexity flag",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "insurance-claims-intake-section-4",
+      "name": "Section: 4. Triage severity and complexity",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Screen fraud indicators\nChecks for known indicators — loss shortly after inception, inconsistent narrative, prior similar claims, unusual claimant behaviour — and lists what it found with the evidence; it flags, it does not decide",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "insurance-claims-intake-section-5",
+      "name": "Section: 5. Screen fraud indicators",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Route\nFast track: low severity, clear coverage, no indicators → straight-through estimation or a desk adjuster",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "insurance-claims-intake-section-6",
+      "name": "Section: 6. Route",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Acknowledge the claimant\nClaim number, what was received, what is needed next and who will contact them, drafted by the agent in plain language and sent after a human click for complex claims",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "insurance-claims-intake-section-7",
+      "name": "Section: 7. Acknowledge the claimant",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2840,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Create the file and assign\nClaim created in the claims system with the extracted data, documents, coverage summary, severity and indicators; adjuster assigned; intake-to-assignment time tracked",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "insurance-claims-intake-section-8",
+      "name": "Section: 8. Create the file and assign",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3160,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "insurance-claims-intake-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -59,7 +171,7 @@
       "id": "insurance-claims-intake-01",
       "name": "Webhook: Capture the notice",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
+      "typeVersion": 2.1,
       "position": [
         0,
         300
@@ -133,7 +245,7 @@
       "id": "insurance-claims-intake-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -152,7 +264,7 @@
       "id": "insurance-claims-intake-02",
       "name": "Information Extractor: Extract the facts",
       "type": "@n8n/n8n-nodes-langchain.informationExtractor",
-      "typeVersion": 1,
+      "typeVersion": 1.2,
       "position": [
         640,
         300
@@ -173,9 +285,9 @@
       "id": "insurance-claims-intake-02-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        960,
+        640,
         520
       ]
     },
@@ -207,7 +319,7 @@
       "id": "insurance-claims-intake-02-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         960,
         300
@@ -228,15 +340,17 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
         "method": "GET",
+        "url": "=https://policyadmin.example.com/api/policies/{{ $json.policy_number }}?asOf={{ $json.loss_date }}",
         "options": {},
-        "notes": "Policy status on the loss date, coverages and limits, deductible, endorsements and exclusions relevant to the cause of loss, from the policy admin system."
+        "notes": "Policy status on the loss date, coverages and limits, deductible, endorsements and exclusions relevant to the cause of loss, from the policy admin system.",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
       },
       "id": "insurance-claims-intake-03",
-      "name": "HTTP Request: Verify policy and coverage",
+      "name": "Policy admin system API: Verify policy and coverage",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.5,
       "position": [
         1280,
         300
@@ -248,7 +362,7 @@
         "jsCode": "// Triage severity and complexity\n// Rules on estimated amount, injury involvement, liability questions, multiple parties and coverage ambiguity produce a severity tier and a complexity flag.\nreturn $input.all();"
       },
       "id": "insurance-claims-intake-04",
-      "name": "Code: Triage severity and complexity",
+      "name": "Triage severity and complexity",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -269,7 +383,7 @@
       "id": "insurance-claims-intake-05",
       "name": "AI Agent: Screen fraud indicators",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         1920,
         300
@@ -290,9 +404,9 @@
       "id": "insurance-claims-intake-05-llm",
       "name": "Claude (Anthropic Chat Model) 2",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        2240,
+        1920,
         520
       ]
     },
@@ -304,9 +418,9 @@
       "id": "insurance-claims-intake-05-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        2440,
+        2100,
         520
       ]
     },
@@ -338,7 +452,7 @@
       "id": "insurance-claims-intake-05-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         2240,
         300
@@ -388,9 +502,9 @@
         "options": {}
       },
       "id": "insurance-claims-intake-06",
-      "name": "Switch: Route",
+      "name": "Route",
       "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.2,
+      "typeVersion": 3.4,
       "position": [
         2560,
         300
@@ -410,7 +524,7 @@
       "id": "insurance-claims-intake-07",
       "name": "Gmail: Acknowledge the claimant",
       "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.1,
+      "typeVersion": 2.2,
       "position": [
         2880,
         300
@@ -419,15 +533,20 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
+        "method": "POST",
+        "url": "https://claims.example.com/api/claims",
         "options": {},
-        "notes": "Claim created in the claims system with the extracted data, documents, coverage summary, severity and indicators; adjuster assigned; intake-to-assignment time tracked."
+        "notes": "Claim created in the claims system with the extracted data, documents, coverage summary, severity and indicators; adjuster assigned; intake-to-assignment time tracked.",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"claim\": ($json) } }}"
       },
       "id": "insurance-claims-intake-08",
-      "name": "HTTP Request: Create the file and assign",
+      "name": "Claims system API: Create the file and assign",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.5,
       "position": [
         3200,
         300
@@ -491,25 +610,25 @@
         ],
         [
           {
-            "node": "HTTP Request: Verify policy and coverage",
+            "node": "Policy admin system API: Verify policy and coverage",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Verify policy and coverage": {
+    "Policy admin system API: Verify policy and coverage": {
       "main": [
         [
           {
-            "node": "Code: Triage severity and complexity",
+            "node": "Triage severity and complexity",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Triage severity and complexity": {
+    "Triage severity and complexity": {
       "main": [
         [
           {
@@ -564,14 +683,14 @@
         ],
         [
           {
-            "node": "Switch: Route",
+            "node": "Route",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Switch: Route": {
+    "Route": {
       "main": [
         [
           {
@@ -586,7 +705,7 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Create the file and assign",
+            "node": "Claims system API: Create the file and assign",
             "type": "main",
             "index": 0
           }

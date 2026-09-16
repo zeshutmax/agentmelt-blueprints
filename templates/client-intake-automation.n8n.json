@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Intake new client enquiries from Gmail with Claude into Clio and DocuSign\n\n**Who's it for**\nLaw firms and professional practices that reply to enquiries a day late and re-key them into the practice system.\n\n**How it works**\nTrigger: An email to the intake address, a website form submission, or a phone note typed into the shared inbox starts intake for that enquiry.\n1. Receive the enquiry\n2. Classify the matter\n3. Extract the conflict-check facts\n4. Run the conflict check\n5. Acknowledge\n6. Draft the next document\n7. Approve\n8. Open the matter\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Clio / PracticePanther, Gmail / Outlook, DocuSign / PandaDoc (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nDefine the practice areas and the conflict-check questions in the Config node; swap Clio for PracticePanther. Keep the guardrail: Nothing is sent to an enquirer except the acknowledgement until a person approves; no advice or fee is ever quoted automatically.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/client-intake-automation/",
+        "content": "## Intake new client enquiries from Gmail with Claude into Clio and DocuSign\n\nLaw firms and professional practices that reply to enquiries a day late and re-key them into the practice system.\n\n### How it works\nTrigger: An email to the intake address, a website form submission, or a phone note typed into the shared inbox starts intake for that enquiry.\n1. Receive the enquiry\n2. Classify the matter\n3. Extract the conflict-check facts\n4. Run the conflict check\n5. Acknowledge\n6. Draft the next document\n7. Approve\n8. Open the matter\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Clio / PracticePanther, Gmail / Outlook, DocuSign / PandaDoc.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nDefine the practice areas and the conflict-check questions in the Config node; swap Clio for PracticePanther.\nGuardrail to keep: Nothing is sent to an enquirer except the acknowledgement until a person approves; no advice or fee is ever quoted automatically.\n\nFull blueprint: https://agentmelt.com/workflows/client-intake-automation/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "client-intake-automation-about",
@@ -13,40 +13,152 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Client Intake Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: An email to the intake address, a website form submission, or a phone note typed into the shared inbox starts intake for that enquiry.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Nothing is sent to an enquirer except the acknowledgement until a person approves; no advice or fee is ever quoted automatically.\n   - Conflict results are shown with their evidence; a hit blocks the engagement letter until a person clears it.\n   - Enquiry content is processed through an API with no data retention and stored only in the firm's own systems.\n   - Out-of-scope or conflicted matters get a courteous decline drafted for approval, never an automatic one.\n   - Every intake keeps an audit line: received, classified, checked, approved by whom, when.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/client-intake-automation/\nWant it built and run for you? $247/month · custom $3,500–6,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## 1. Receive the enquiry\nEmail body and attachments, form fields, or the phone note; sender details and the time received",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "client-intake-automation-note",
-      "name": "Read me first",
+      "id": "client-intake-automation-section-1",
+      "name": "Section: 1. Receive the enquiry",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Gmail Trigger: Receive the enquiry\n2. AI Agent: Classify the matter\n3. AI Agent: Extract the conflict-check facts\n4. Code: Run the conflict check\n5. Gmail: Acknowledge\n6. AI Agent: Draft the next document\n7. Slack approval: Approve\n8. HTTP Request: Open the matter\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 2. Classify the matter\nMatter type from the firm's own taxonomy (employment, commercial, family, conveyancing…), urgency, and whether it is within the firm's practice at all",
+        "height": 680,
+        "width": 620,
         "color": 7
       },
-      "id": "client-intake-automation-steps",
-      "name": "Step outline",
+      "id": "client-intake-automation-section-2",
+      "name": "Section: 2. Classify the matter",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Extract the conflict-check facts\nNames of parties and related entities, addresses, dates, the other side's counsel if named — structured, with the source sentence for each",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "client-intake-automation-section-3",
+      "name": "Section: 3. Extract the conflict-check facts",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Run the conflict check\nParties checked against the client list, former-client list and adverse-party list in the matter system, with fuzzy matching on names and companies; hits are listed with the matter they came from",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "client-intake-automation-section-4",
+      "name": "Section: 4. Run the conflict check",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Acknowledge\nA same-day acknowledgement to the enquirer from the firm's address: received, who will respond, by when",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "client-intake-automation-section-5",
+      "name": "Section: 5. Acknowledge",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Draft the next document\nEngagement letter from the firm's template for that matter type with fees from the schedule, or a decline where the matter is out of scope or conflicted — variables highlighted",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "client-intake-automation-section-6",
+      "name": "Section: 6. Draft the next document",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Approve\nThe responsible person sees the classification, the conflict result, the extracted facts and the draft; approve, edit, reassign or decline",
+        "height": 460,
+        "width": 620,
+        "color": 7
+      },
+      "id": "client-intake-automation-section-7",
+      "name": "Section: 7. Approve",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3160,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Open the matter\nOn approval: the matter is created in the practice-management system with the parties and documents, the letter is sent for signature, and the intake is closed",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "client-intake-automation-section-8",
+      "name": "Section: 8. Open the matter",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3800,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "client-intake-automation-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -64,7 +176,7 @@
       "id": "client-intake-automation-01",
       "name": "Gmail Trigger: Receive the enquiry",
       "type": "n8n-nodes-base.gmailTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         300
@@ -137,7 +249,7 @@
       "id": "client-intake-automation-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -156,7 +268,7 @@
       "id": "client-intake-automation-02",
       "name": "AI Agent: Classify the matter",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         640,
         300
@@ -177,9 +289,9 @@
       "id": "client-intake-automation-02-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        960,
+        640,
         520
       ]
     },
@@ -191,9 +303,9 @@
       "id": "client-intake-automation-02-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        1160,
+        820,
         520
       ]
     },
@@ -225,7 +337,7 @@
       "id": "client-intake-automation-02-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         960,
         300
@@ -256,7 +368,7 @@
       "id": "client-intake-automation-03",
       "name": "AI Agent: Extract the conflict-check facts",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         1280,
         300
@@ -277,9 +389,9 @@
       "id": "client-intake-automation-03-llm",
       "name": "Claude (Anthropic Chat Model) 2",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1600,
+        1280,
         520
       ]
     },
@@ -291,9 +403,9 @@
       "id": "client-intake-automation-03-parser",
       "name": "Structured Output Parser 2",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        1800,
+        1460,
         520
       ]
     },
@@ -325,7 +437,7 @@
       "id": "client-intake-automation-03-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1600,
         300
@@ -349,7 +461,7 @@
         "jsCode": "// Run the conflict check\n// Parties checked against the client list, former-client list and adverse-party list in the matter system, with fuzzy matching on names and companies; hits are listed with the matter they came from.\nreturn $input.all();"
       },
       "id": "client-intake-automation-04",
-      "name": "Code: Run the conflict check",
+      "name": "Run the conflict check",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -371,7 +483,7 @@
       "id": "client-intake-automation-05",
       "name": "Gmail: Acknowledge",
       "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.1,
+      "typeVersion": 2.2,
       "position": [
         2240,
         300
@@ -390,7 +502,7 @@
       "id": "client-intake-automation-06",
       "name": "AI Agent: Draft the next document",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         2560,
         300
@@ -411,9 +523,9 @@
       "id": "client-intake-automation-06-llm",
       "name": "Claude (Anthropic Chat Model) 3",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        2880,
+        2560,
         520
       ]
     },
@@ -425,9 +537,9 @@
       "id": "client-intake-automation-06-parser",
       "name": "Structured Output Parser 3",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        3080,
+        2740,
         520
       ]
     },
@@ -459,7 +571,7 @@
       "id": "client-intake-automation-06-gate",
       "name": "Needs a person? 3",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         2880,
         300
@@ -502,7 +614,7 @@
       "id": "client-intake-automation-07",
       "name": "Slack approval: Approve",
       "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "typeVersion": 2.7,
       "position": [
         3200,
         300
@@ -537,7 +649,7 @@
       "id": "client-intake-automation-07-approved",
       "name": "Approved?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         3520,
         300
@@ -558,15 +670,20 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
+        "method": "POST",
+        "url": "https://app.clio.com/api/v4/matters.json",
         "options": {},
-        "notes": "On approval: the matter is created in the practice-management system with the parties and documents, the letter is sent for signature, and the intake is closed."
+        "notes": "On approval: the matter is created in the practice-management system with the parties and documents, the letter is sent for signature, and the intake is closed.",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"data\": { \"description\": ($json.output?.matter_description), \"client\": { \"id\": ($json.client_id) }, \"practice_area\": { \"id\": ($json.practice_area_id) } } } }}"
       },
       "id": "client-intake-automation-08",
-      "name": "HTTP Request: Open the matter",
+      "name": "Clio API: Open the matter",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.5,
       "position": [
         3840,
         300
@@ -692,14 +809,14 @@
         ],
         [
           {
-            "node": "Code: Run the conflict check",
+            "node": "Run the conflict check",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Run the conflict check": {
+    "Run the conflict check": {
       "main": [
         [
           {
@@ -787,7 +904,7 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Open the matter",
+            "node": "Clio API: Open the matter",
             "type": "main",
             "index": 0
           }

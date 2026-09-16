@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Send appointment reminders and handle replies with Twilio and Claude\n\n**Who's it for**\nClinics, salons and service businesses losing revenue to no-shows.\n\n**How it works**\nTrigger: Hourly scan of upcoming appointments in the scheduling system; webhooks for new bookings, cancellations and inbound SMS replies.\n1. Pull upcoming appointments\n2. Decide the cadence and channel\n3. Send the reminder\n4. Understand replies\n5. Book reschedules from real availability\n6. Fill cancellations from the waitlist\n7. Update the record and the desk\n8. Report weekly\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Twilio, Scheduling system (Dentrix, Cliniko, Acuity, Calendly…) (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet the reminder timing and the reschedule rules in the Config node; connect your scheduling system (Acuity, Calendly, Cliniko…). Keep the guardrail: Only patients with recorded consent for SMS or automated calls are messaged; opt-out words stop the sequence immediately.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/appointment-reminders-automation/",
+        "content": "## Send appointment reminders and handle replies with Twilio and Claude\n\nClinics, salons and service businesses losing revenue to no-shows.\n\n### How it works\nTrigger: Hourly scan of upcoming appointments in the scheduling system; webhooks for new bookings, cancellations and inbound SMS replies.\n1. Pull upcoming appointments\n2. Decide the cadence and channel\n3. Send the reminder\n4. Understand replies\n5. Book reschedules from real availability\n6. Fill cancellations from the waitlist\n7. Update the record and the desk\n8. Report weekly\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Twilio, Scheduling system (Dentrix, Cliniko, Acuity, Calendly…).\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the reminder timing and the reschedule rules in the Config node; connect your scheduling system (Acuity, Calendly, Cliniko…).\nGuardrail to keep: Only patients with recorded consent for SMS or automated calls are messaged; opt-out words stop the sequence immediately.\n\nFull blueprint: https://agentmelt.com/workflows/appointment-reminders-automation/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "appointment-reminders-automation-about",
@@ -13,40 +13,168 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Appointment Reminder Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Hourly scan of upcoming appointments in the scheduling system; webhooks for new bookings, cancellations and inbound SMS replies.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Only patients with recorded consent for SMS or automated calls are messaged; opt-out words stop the sequence immediately.\n   - Messages contain no clinical detail — appointment type, time and location only — to stay within HIPAA-safe messaging practice.\n   - Reschedules are booked only into real availability; the agent never promises a slot it cannot see.\n   - Ambiguous or emotional replies route to a person, with the thread.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/appointment-reminders-automation/\nWant it built and run for you? $197/month · custom $2,000–4,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "appointment-reminders-automation-note",
-      "name": "Read me first",
+      "id": "appointment-reminders-automation-section-0",
+      "name": "Section: Trigger and config",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Schedule Trigger (hourly)\n2. HTTP Request: Pull upcoming appointments\n3. Code: Decide the cadence and channel\n4. HTTP Request: Send the reminder\n5. AI Agent: Understand replies\n6. HTTP Request: Book reschedules from real availability\n7. Loop Over Items: Fill cancellations from the waitlist\n8. Google Sheets: Update the record and the desk\n9. Schedule Trigger: Report weekly\n10. Code: Report weekly\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 1. Pull upcoming appointments\nAppointments in the next 7 days with patient contact preferences, provider, location and appointment type from the practice management or booking system (Dentrix, athenahealth, Cliniko, Acuity, Calendly)",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "appointment-reminders-automation-steps",
-      "name": "Step outline",
+      "id": "appointment-reminders-automation-section-1",
+      "name": "Section: 1. Pull upcoming appointments",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Decide the cadence and channel\nReminder schedule per appointment type (a 2-hour procedure gets more notice than a 15-minute check) and per patient preference; quiet hours and time zones respected",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "appointment-reminders-automation-section-2",
+      "name": "Section: 2. Decide the cadence and channel",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Send the reminder\nSMS via Twilio, email via the practice's sender, or a voice call for patients who prefer it, with a one-tap confirm and a reply-to-reschedule option",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "appointment-reminders-automation-section-3",
+      "name": "Section: 3. Send the reminder",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Understand replies\nFree-text replies are classified — confirm, cancel, reschedule (with the proposed time extracted), question — and the agent drafts a short reply; ambiguous messages go to the front desk",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "appointment-reminders-automation-section-4",
+      "name": "Section: 4. Understand replies",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Book reschedules from real availability\nFor reschedule requests, the workflow reads open slots for the same provider and type, offers the nearest three, and books the one the patient picks",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "appointment-reminders-automation-section-5",
+      "name": "Section: 5. Book reschedules from real availability",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Fill cancellations from the waitlist\nA cancelled slot triggers offers to waitlisted patients in priority order, first to accept gets it; the rest are told the slot is gone",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "appointment-reminders-automation-section-6",
+      "name": "Section: 6. Fill cancellations from the waitlist",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Update the record and the desk\nConfirmation status written back to the scheduling system; the day sheet in Slack or email shows confirmed, unconfirmed and rescheduled, so the desk calls only the unconfirmed",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "appointment-reminders-automation-section-7",
+      "name": "Section: 7. Update the record and the desk",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2840,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Report weekly\nNo-show rate by provider and appointment type, confirmation rate by channel, slots recovered from the waitlist, and reply-handling accuracy",
+        "height": 240,
+        "width": 620,
+        "color": 7
+      },
+      "id": "appointment-reminders-automation-section-8",
+      "name": "Section: 8. Report weekly",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        750
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "appointment-reminders-automation-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -63,7 +191,7 @@
       "id": "appointment-reminders-automation-00",
       "name": "Schedule Trigger (hourly)",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         300
@@ -136,7 +264,7 @@
       "id": "appointment-reminders-automation-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -145,15 +273,17 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
         "method": "GET",
+        "url": "=https://acuityscheduling.com/api/v1/appointments?minDate={{ $today.toISODate() }}&maxDate={{ $today.plus(7, 'days').toISODate() }}",
         "options": {},
-        "notes": "Appointments in the next 7 days with patient contact preferences, provider, location and appointment type from the practice management or booking system (Dentrix, athenahealth, Cliniko, Acuity, Calendly)."
+        "notes": "Appointments in the next 7 days with patient contact preferences, provider, location and appointment type from the practice management or booking system (Dentrix, athenahealth, Cliniko, Acuity, Calendly).",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth"
       },
       "id": "appointment-reminders-automation-01",
-      "name": "HTTP Request: Pull upcoming appointments",
+      "name": "Acuity Scheduling API: Pull upcoming appointments",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.5,
       "position": [
         640,
         300
@@ -165,7 +295,7 @@
         "jsCode": "// Decide the cadence and channel\n// Reminder schedule per appointment type (a 2-hour procedure gets more notice than a 15-minute check) and per patient preference; quiet hours and time zones respected.\nreturn $input.all();"
       },
       "id": "appointment-reminders-automation-02",
-      "name": "Code: Decide the cadence and channel",
+      "name": "Decide the cadence and channel",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -176,15 +306,18 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
-        "options": {},
-        "notes": "SMS via Twilio, email via the practice's sender, or a voice call for patients who prefer it, with a one-tap confirm and a reply-to-reschedule option."
+        "resource": "sms",
+        "operation": "send",
+        "from": "={{ $('Config (edit me)').item.json.config.sms_from || '' }}",
+        "to": "={{ $json.phone || $json.output?.phone || '' }}",
+        "toWhatsapp": false,
+        "message": "={{ $json.output?.draft || $json.draft || $json.summary || '' }}",
+        "options": {}
       },
       "id": "appointment-reminders-automation-03",
-      "name": "HTTP Request: Send the reminder",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "Twilio: Send the reminder",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
       "position": [
         1280,
         300
@@ -203,7 +336,7 @@
       "id": "appointment-reminders-automation-04",
       "name": "AI Agent: Understand replies",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         1600,
         300
@@ -224,9 +357,9 @@
       "id": "appointment-reminders-automation-04-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1920,
+        1600,
         520
       ]
     },
@@ -238,9 +371,9 @@
       "id": "appointment-reminders-automation-04-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        2120,
+        1780,
         520
       ]
     },
@@ -272,7 +405,7 @@
       "id": "appointment-reminders-automation-04-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1920,
         300
@@ -293,15 +426,17 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
         "method": "GET",
+        "url": "=https://acuityscheduling.com/api/v1/availability/times?appointmentTypeID={{ $json.type_id }}&date={{ $json.date }}",
         "options": {},
-        "notes": "For reschedule requests, the workflow reads open slots for the same provider and type, offers the nearest three, and books the one the patient picks."
+        "notes": "For reschedule requests, the workflow reads open slots for the same provider and type, offers the nearest three, and books the one the patient picks.",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth"
       },
       "id": "appointment-reminders-automation-05",
-      "name": "HTTP Request: Book reschedules from real availability",
+      "name": "Acuity Scheduling API: Book reschedules from real availability",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.5,
       "position": [
         2240,
         300
@@ -313,7 +448,7 @@
         "options": {}
       },
       "id": "appointment-reminders-automation-06",
-      "name": "Loop Over Items: Fill cancellations from the waitlist",
+      "name": "Fill cancellations from the waitlist",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
@@ -347,7 +482,7 @@
       "id": "appointment-reminders-automation-07",
       "name": "Google Sheets: Update the record and the desk",
       "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "typeVersion": 4.7,
       "position": [
         2880,
         300
@@ -369,7 +504,7 @@
       "id": "appointment-reminders-automation-08",
       "name": "Schedule Trigger: Report weekly",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         860
@@ -407,36 +542,36 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Pull upcoming appointments",
+            "node": "Acuity Scheduling API: Pull upcoming appointments",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Pull upcoming appointments": {
+    "Acuity Scheduling API: Pull upcoming appointments": {
       "main": [
         [
           {
-            "node": "Code: Decide the cadence and channel",
+            "node": "Decide the cadence and channel",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Decide the cadence and channel": {
+    "Decide the cadence and channel": {
       "main": [
         [
           {
-            "node": "HTTP Request: Send the reminder",
+            "node": "Twilio: Send the reminder",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Send the reminder": {
+    "Twilio: Send the reminder": {
       "main": [
         [
           {
@@ -491,25 +626,25 @@
         ],
         [
           {
-            "node": "HTTP Request: Book reschedules from real availability",
+            "node": "Acuity Scheduling API: Book reschedules from real availability",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Book reschedules from real availability": {
+    "Acuity Scheduling API: Book reschedules from real availability": {
       "main": [
         [
           {
-            "node": "Loop Over Items: Fill cancellations from the waitlist",
+            "node": "Fill cancellations from the waitlist",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Loop Over Items: Fill cancellations from the waitlist": {
+    "Fill cancellations from the waitlist": {
       "main": [
         [
           {

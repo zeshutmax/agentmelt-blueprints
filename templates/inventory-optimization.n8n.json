@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Recommend reorder quantities from ERP stock levels with Claude and approve in Slack\n\n**Who's it for**\nOperations teams that decide reorders from a spreadsheet and want the maths and the exceptions done for them.\n\n**How it works**\nTrigger: Runs after the demand-forecasting workflow writes new forecasts; a daily run checks stock positions against reorder points.\n1. Read forecasts and error\n2. Read inventory and open orders\n3. Measure supplier lead times\n4. Compute safety stock and reorder points\n5. Classify SKUs\n6. Generate purchase suggestions\n7. Explain parameter changes\n8. Publish to buyers and the ERP\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus ERP / WMS (NetSuite, SAP B1, Cin7, Fishbowl), Google Sheets (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nPut your service levels and lead times in the Config node; connect the ERP node to NetSuite, SAP B1, Cin7 or Fishbowl. Keep the guardrail: Draft POs only — a buyer approves before anything is sent to a supplier.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/inventory-optimization/",
+        "content": "## Recommend reorder quantities from ERP stock levels with Claude and approve in Slack\n\nOperations teams that decide reorders from a spreadsheet and want the maths and the exceptions done for them.\n\n### How it works\nTrigger: Runs after the demand-forecasting workflow writes new forecasts; a daily run checks stock positions against reorder points.\n1. Read forecasts and error\n2. Read inventory and open orders\n3. Measure supplier lead times\n4. Compute safety stock and reorder points\n5. Classify SKUs\n6. Generate purchase suggestions\n7. Explain parameter changes\n8. Publish to buyers and the ERP\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus ERP / WMS (NetSuite, SAP B1, Cin7, Fishbowl), Google Sheets.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nPut your service levels and lead times in the Config node; connect the ERP node to NetSuite, SAP B1, Cin7 or Fishbowl.\nGuardrail to keep: Draft POs only — a buyer approves before anything is sent to a supplier.\n\nFull blueprint: https://agentmelt.com/workflows/inventory-optimization/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "inventory-optimization-about",
@@ -13,40 +13,168 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Inventory Optimization Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Runs after the demand-forecasting workflow writes new forecasts; a daily run checks stock positions against reorder points.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Draft POs only — a buyer approves before anything is sent to a supplier.\n   - Parameter changes above a threshold are explained and can be frozen per SKU.\n   - Service-level targets are set by finance and operations together, and the achieved level is reported weekly.\n   - Supplier lead times come from receipts, not from the master data, so the numbers reflect reality.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/inventory-optimization/\nWant it built and run for you? $297/month · custom $5,000–8,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "inventory-optimization-note",
-      "name": "Read me first",
+      "id": "inventory-optimization-section-0",
+      "name": "Section: Trigger and config",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Schedule Trigger (weekly)\n2. Postgres: Read forecasts and error\n3. HTTP Request: Read inventory and open orders\n4. Code: Measure supplier lead times\n5. Code: Compute safety stock and reorder points\n6. Code: Classify SKUs\n7. IF: Generate purchase suggestions\n8. AI Agent: Explain parameter changes\n9. Google Sheets: Publish to buyers and the ERP\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 1. Read forecasts and error\np50 forecast and p90–p50 spread per SKU-location-week from the forecast table, plus measured forecast error by SKU segment",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "inventory-optimization-steps",
-      "name": "Step outline",
+      "id": "inventory-optimization-section-1",
+      "name": "Section: 1. Read forecasts and error",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Read inventory and open orders\nOn-hand, allocated, in-transit and open PO quantities from the ERP or WMS, and receipt history for lead-time measurement",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "inventory-optimization-section-2",
+      "name": "Section: 2. Read inventory and open orders",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Measure supplier lead times\nMean and variance of actual lead time per supplier-SKU from PO created → received, replacing the ERP's static lead-time field",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "inventory-optimization-section-3",
+      "name": "Section: 3. Measure supplier lead times",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Compute safety stock and reorder points\nSafety stock from the service-level target, forecast error and lead-time variability; reorder point = lead-time demand + safety stock; order quantity from EOQ or supplier minimums and pack sizes",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "inventory-optimization-section-4",
+      "name": "Section: 4. Compute safety stock and reorder points",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Classify SKUs\nABC by revenue and XYZ by demand variability, so service-level targets differ by class (e.g",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "inventory-optimization-section-5",
+      "name": "Section: 5. Classify SKUs",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Generate purchase suggestions\nEvery SKU-location whose projected position (on-hand + in-transit − forecast over lead time) falls below the reorder point becomes a suggestion, grouped by supplier into a draft PO",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "inventory-optimization-section-6",
+      "name": "Section: 6. Generate purchase suggestions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Explain parameter changes\nWhere a reorder point moved more than 20%, the agent states why in one line: forecast up, lead time slipped, error widened",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "inventory-optimization-section-7",
+      "name": "Section: 7. Explain parameter changes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Publish to buyers and the ERP\nSuggestions go to the buyer sheet with approve/adjust; approved lines are pushed to the ERP as draft POs via API",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "inventory-optimization-section-8",
+      "name": "Section: 8. Publish to buyers and the ERP",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3160,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "inventory-optimization-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -67,7 +195,7 @@
       "id": "inventory-optimization-00",
       "name": "Schedule Trigger (weekly)",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         300
@@ -140,7 +268,7 @@
       "id": "inventory-optimization-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -156,7 +284,7 @@
       "id": "inventory-optimization-01",
       "name": "Postgres: Read forecasts and error",
       "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
+      "typeVersion": 2.7,
       "position": [
         640,
         300
@@ -165,15 +293,20 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
+        "method": "POST",
+        "url": "=https://{{ $json.account_id }}.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql",
         "options": {},
-        "notes": "On-hand, allocated, in-transit and open PO quantities from the ERP or WMS, and receipt history for lead-time measurement."
+        "notes": "On-hand, allocated, in-transit and open PO quantities from the ERP or WMS, and receipt history for lead-time measurement.",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"q\": \"SELECT item, location, quantityonhand, quantityavailable FROM inventorybalance\" } }}"
       },
       "id": "inventory-optimization-02",
-      "name": "HTTP Request: Read inventory and open orders",
+      "name": "NetSuite SuiteQL API: Read inventory and open orders",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.5,
       "position": [
         960,
         300
@@ -185,7 +318,7 @@
         "jsCode": "// Measure supplier lead times\n// Mean and variance of actual lead time per supplier-SKU from PO created → received, replacing the ERP's static lead-time field.\nreturn $input.all();"
       },
       "id": "inventory-optimization-03",
-      "name": "Code: Measure supplier lead times",
+      "name": "Measure supplier lead times",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -199,7 +332,7 @@
         "jsCode": "// Compute safety stock and reorder points\n// Safety stock from the service-level target, forecast error and lead-time variability; reorder point = lead-time demand + safety stock; order quantity from EOQ or supplier minimums and pack sizes.\nreturn $input.all();"
       },
       "id": "inventory-optimization-04",
-      "name": "Code: Compute safety stock and reorder points",
+      "name": "Compute safety stock and reorder points",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -213,7 +346,7 @@
         "jsCode": "// Classify SKUs\n// ABC by revenue and XYZ by demand variability, so service-level targets differ by class (e.g. 98% for AX, 90% for CZ) instead of one number for everything.\nreturn $input.all();"
       },
       "id": "inventory-optimization-05",
-      "name": "Code: Classify SKUs",
+      "name": "Classify SKUs",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -246,9 +379,9 @@
         "options": {}
       },
       "id": "inventory-optimization-06",
-      "name": "IF: Generate purchase suggestions",
+      "name": "Generate purchase suggestions",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         2240,
         300
@@ -267,7 +400,7 @@
       "id": "inventory-optimization-07",
       "name": "AI Agent: Explain parameter changes",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         2560,
         300
@@ -288,9 +421,9 @@
       "id": "inventory-optimization-07-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        2880,
+        2560,
         520
       ]
     },
@@ -302,9 +435,9 @@
       "id": "inventory-optimization-07-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        3080,
+        2740,
         520
       ]
     },
@@ -336,7 +469,7 @@
       "id": "inventory-optimization-07-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         2880,
         300
@@ -380,7 +513,7 @@
       "id": "inventory-optimization-08",
       "name": "Google Sheets: Publish to buyers and the ERP",
       "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "typeVersion": 4.7,
       "position": [
         3200,
         300
@@ -415,58 +548,58 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Read inventory and open orders",
+            "node": "NetSuite SuiteQL API: Read inventory and open orders",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Read inventory and open orders": {
+    "NetSuite SuiteQL API: Read inventory and open orders": {
       "main": [
         [
           {
-            "node": "Code: Measure supplier lead times",
+            "node": "Measure supplier lead times",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Measure supplier lead times": {
+    "Measure supplier lead times": {
       "main": [
         [
           {
-            "node": "Code: Compute safety stock and reorder points",
+            "node": "Compute safety stock and reorder points",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Compute safety stock and reorder points": {
+    "Compute safety stock and reorder points": {
       "main": [
         [
           {
-            "node": "Code: Classify SKUs",
+            "node": "Classify SKUs",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Classify SKUs": {
+    "Classify SKUs": {
       "main": [
         [
           {
-            "node": "IF: Generate purchase suggestions",
+            "node": "Generate purchase suggestions",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "IF: Generate purchase suggestions": {
+    "Generate purchase suggestions": {
       "main": [
         [
           {

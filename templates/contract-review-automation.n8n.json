@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Review incoming contracts with Claude against your playbook in Google Docs\n\n**Who's it for**\nLegal and operations teams that review the same clause types in every contract.\n\n**How it works**\nTrigger: Attachments to contracts@, new documents in the CLM or DocuSign/PandaDoc inbox, or a form submission from sales.\n1. Capture and identify\n2. Extract clauses\n3. Compare to the playbook\n4. Draft the redline\n5. Route by risk\n6. Review surface\n7. Log and learn\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Google Docs / Word, Ironclad / DocuSign CLM / PandaDoc (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nPut your clause playbook and risk thresholds in the Config node; connect Ironclad, DocuSign CLM or PandaDoc as the source. Keep the guardrail: The workflow triages and drafts; a person approves every contract and every redline before it goes to the counterparty.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/contract-review-automation/",
+        "content": "## Review incoming contracts with Claude against your playbook in Google Docs\n\nLegal and operations teams that review the same clause types in every contract.\n\n### How it works\nTrigger: Attachments to contracts@, new documents in the CLM or DocuSign/PandaDoc inbox, or a form submission from sales.\n1. Capture and identify\n2. Extract clauses\n3. Compare to the playbook\n4. Draft the redline\n5. Route by risk\n6. Review surface\n7. Log and learn\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Google Docs / Word, Ironclad / DocuSign CLM / PandaDoc.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nPut your clause playbook and risk thresholds in the Config node; connect Ironclad, DocuSign CLM or PandaDoc as the source.\nGuardrail to keep: The workflow triages and drafts; a person approves every contract and every redline before it goes to the counterparty.\n\nFull blueprint: https://agentmelt.com/workflows/contract-review-automation/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "contract-review-automation-about",
@@ -13,40 +13,136 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Contract Review Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Attachments to contracts@, new documents in the CLM or DocuSign/PandaDoc inbox, or a form submission from sales.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - The workflow triages and drafts; a person approves every contract and every redline before it goes to the counterparty.\n   - Major-risk clauses always reach a lawyer regardless of the deviation score.\n   - Extraction confidence is shown; low-confidence clauses are flagged for manual reading.\n   - The playbook is owned and versioned by legal; the agent cannot add positions.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/contract-review-automation/\nWant it built and run for you? $297/month · custom $5,000–9,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## 1. Capture and identify\nDocument captured, type classified (NDA, MSA, DPA, SOW, vendor terms), counterparty and deal linked from the CRM",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "contract-review-automation-note",
-      "name": "Read me first",
+      "id": "contract-review-automation-section-1",
+      "name": "Section: 1. Capture and identify",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Gmail Trigger: Capture and identify\n2. Information Extractor: Extract clauses\n3. Code: Compare to the playbook\n4. AI Agent: Draft the redline\n5. Switch: Route by risk\n6. Google Docs: Review surface\n7. HubSpot: Log and learn\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 2. Extract clauses\nEach clause extracted into a structured record — term, termination, liability cap, indemnity, IP, confidentiality, data protection, governing law, payment terms — with the exact text and location",
+        "height": 680,
+        "width": 620,
         "color": 7
       },
-      "id": "contract-review-automation-steps",
-      "name": "Step outline",
+      "id": "contract-review-automation-section-2",
+      "name": "Section: 2. Extract clauses",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Compare to the playbook\nEach clause compared to the playbook's standard position, acceptable fallback and walk-away; deviations scored by severity and business impact",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "contract-review-automation-section-3",
+      "name": "Section: 3. Compare to the playbook",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Draft the redline\nFor each deviation the agent drafts the replacement language from the playbook's fallback and a one-line rationale for the counterparty, in the firm's drafting style",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "contract-review-automation-section-4",
+      "name": "Section: 4. Draft the redline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Route by risk\nNo deviations: business owner approves",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "contract-review-automation-section-5",
+      "name": "Section: 5. Route by risk",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Review surface\nThe reviewer gets the contract with deviations highlighted, the comparison table, and the redline as tracked changes in Word or Google Docs",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "contract-review-automation-section-6",
+      "name": "Section: 6. Review surface",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Log and learn\nOutcome logged on the deal; accepted fallbacks and new positions feed the playbook, which legal owns",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "contract-review-automation-section-7",
+      "name": "Section: 7. Log and learn",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2840,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "contract-review-automation-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -64,7 +160,7 @@
       "id": "contract-review-automation-01",
       "name": "Gmail Trigger: Capture and identify",
       "type": "n8n-nodes-base.gmailTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         300
@@ -137,7 +233,7 @@
       "id": "contract-review-automation-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -156,7 +252,7 @@
       "id": "contract-review-automation-02",
       "name": "Information Extractor: Extract clauses",
       "type": "@n8n/n8n-nodes-langchain.informationExtractor",
-      "typeVersion": 1,
+      "typeVersion": 1.2,
       "position": [
         640,
         300
@@ -177,9 +273,9 @@
       "id": "contract-review-automation-02-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        960,
+        640,
         520
       ]
     },
@@ -211,7 +307,7 @@
       "id": "contract-review-automation-02-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         960,
         300
@@ -235,7 +331,7 @@
         "jsCode": "// Compare to the playbook\n// Each clause compared to the playbook's standard position, acceptable fallback and walk-away; deviations scored by severity and business impact.\nreturn $input.all();"
       },
       "id": "contract-review-automation-03",
-      "name": "Code: Compare to the playbook",
+      "name": "Compare to the playbook",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -256,7 +352,7 @@
       "id": "contract-review-automation-04",
       "name": "AI Agent: Draft the redline",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         1600,
         300
@@ -277,9 +373,9 @@
       "id": "contract-review-automation-04-llm",
       "name": "Claude (Anthropic Chat Model) 2",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1920,
+        1600,
         520
       ]
     },
@@ -291,9 +387,9 @@
       "id": "contract-review-automation-04-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        2120,
+        1780,
         520
       ]
     },
@@ -325,7 +421,7 @@
       "id": "contract-review-automation-04-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1920,
         300
@@ -375,9 +471,9 @@
         "options": {}
       },
       "id": "contract-review-automation-05",
-      "name": "Switch: Route by risk",
+      "name": "Route by risk",
       "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.2,
+      "typeVersion": 3.4,
       "position": [
         2240,
         300
@@ -412,7 +508,7 @@
       "id": "contract-review-automation-07",
       "name": "HubSpot: Log and learn",
       "type": "n8n-nodes-base.hubspot",
-      "typeVersion": 2.1,
+      "typeVersion": 2.2,
       "position": [
         2880,
         300
@@ -476,14 +572,14 @@
         ],
         [
           {
-            "node": "Code: Compare to the playbook",
+            "node": "Compare to the playbook",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Compare to the playbook": {
+    "Compare to the playbook": {
       "main": [
         [
           {
@@ -538,14 +634,14 @@
         ],
         [
           {
-            "node": "Switch: Route by risk",
+            "node": "Route by risk",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Switch: Route by risk": {
+    "Route by risk": {
       "main": [
         [
           {

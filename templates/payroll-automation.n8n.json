@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Prepare payroll from Gusto time data with Claude and approve in Slack\n\n**Who's it for**\nSmall HR and finance teams that run payroll checks by hand every period and still find errors after the fact.\n\n**How it works**\nTrigger: Runs on the cut-off date each period, plus a preview run three days earlier so managers can fix missing approvals.\n1. Collect period inputs\n2. Normalise into one employee ledger\n3. Validate against policy\n4. Anomaly review\n5. Send the exceptions report\n6. Wait for approval\n7. Push the run to the provider\n8. Reconcile after the run\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Gusto / ADP / Rippling / Deel, Slack, Google Sheets (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet the pay-period rules and the anomaly thresholds in the Config node; connect Gusto, ADP, Rippling or Deel. Keep the guardrail: The workflow never submits without an explicit human approval; the Wait node is the control.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/payroll-automation/",
+        "content": "## Prepare payroll from Gusto time data with Claude and approve in Slack\n\nSmall HR and finance teams that run payroll checks by hand every period and still find errors after the fact.\n\n### How it works\nTrigger: Runs on the cut-off date each period, plus a preview run three days earlier so managers can fix missing approvals.\n1. Collect period inputs\n2. Normalise into one employee ledger\n3. Validate against policy\n4. Anomaly review\n5. Send the exceptions report\n6. Wait for approval\n7. Push the run to the provider\n8. Reconcile after the run\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Gusto / ADP / Rippling / Deel, Slack, Google Sheets.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the pay-period rules and the anomaly thresholds in the Config node; connect Gusto, ADP, Rippling or Deel.\nGuardrail to keep: The workflow never submits without an explicit human approval; the Wait node is the control.\n\nFull blueprint: https://agentmelt.com/workflows/payroll-automation/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "payroll-automation-about",
@@ -13,40 +13,168 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Payroll Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Runs on the cut-off date each period, plus a preview run three days earlier so managers can fix missing approvals.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - The workflow never submits without an explicit human approval; the Wait node is the control.\n   - The AI step annotates only; it has no write access to amounts.\n   - Every submitted file is stored with a hash and the approver's identity for audit.\n   - Provider totals are reconciled against the submitted ledger before payslips release.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/payroll-automation/\nWant it built and run for you? $297/month · custom $4,000–6,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "payroll-automation-note",
-      "name": "Read me first",
+      "id": "payroll-automation-section-0",
+      "name": "Section: Trigger and config",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Schedule Trigger (daily)\n2. HTTP Request: Collect period inputs\n3. Code: Normalise into one employee ledger\n4. IF: Validate against policy\n5. AI Agent: Anomaly review\n6. Slack: Send the exceptions report\n7. Wait: Wait for approval\n8. HTTP Request: Push the run to the provider\n9. Compare Datasets: Reconcile after the run\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 1. Collect period inputs\nPulls approved hours from the time tracker (Deputy, Clockify, Harvest), leave from the HRIS, expense claims from Expensify or Ramp, and the change log (new hires, leavers, rate changes) from the HRIS",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "payroll-automation-steps",
-      "name": "Step outline",
+      "id": "payroll-automation-section-1",
+      "name": "Section: 1. Collect period inputs",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Normalise into one employee ledger\nOne row per employee per period: base, hours, overtime, leave, allowances, deductions, one-offs",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "payroll-automation-section-2",
+      "name": "Section: 2. Normalise into one employee ledger",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Validate against policy\nDeterministic rules: missing approvals, hours above contract limits, rate changes without an HRIS record, leavers with active pay, starters missing tax details",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "payroll-automation-section-3",
+      "name": "Section: 3. Validate against policy",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Anomaly review\nCompares each employee's line to their last six periods and explains outliers in one sentence with the evidence",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "payroll-automation-section-4",
+      "name": "Section: 4. Anomaly review",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Send the exceptions report\nPayroll manager receives the ledger summary and the exceptions list with approve/hold buttons; managers get their team's missing approvals",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "payroll-automation-section-5",
+      "name": "Section: 5. Send the exceptions report",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Wait for approval\nThe workflow pauses until the payroll manager approves in Slack or the sheet",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "payroll-automation-section-6",
+      "name": "Section: 6. Wait for approval",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Push the run to the provider\nUploads the approved ledger to Gusto, ADP, Rippling, Deel or Xero Payroll via API or the provider's import format, and stores the submitted file with a hash for audit",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "payroll-automation-section-7",
+      "name": "Section: 7. Push the run to the provider",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2840,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Reconcile after the run\nCompares the provider's processed totals to the submitted ledger and alerts on any difference before payslips go out",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "payroll-automation-section-8",
+      "name": "Section: 8. Reconcile after the run",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3160,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "payroll-automation-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -64,7 +192,7 @@
       "id": "payroll-automation-00",
       "name": "Schedule Trigger (daily)",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         300
@@ -137,7 +265,7 @@
       "id": "payroll-automation-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -146,15 +274,15 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
-        "options": {},
-        "notes": "Pulls approved hours from the time tracker (Deputy, Clockify, Harvest), leave from the HRIS, expense claims from Expensify or Ramp, and the change log (new hires, leavers, rate changes) from the HRIS."
+        "resource": "employee",
+        "operation": "getAll",
+        "returnAll": true,
+        "options": {}
       },
       "id": "payroll-automation-01",
-      "name": "HTTP Request: Collect period inputs",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "BambooHR: Collect period inputs",
+      "type": "n8n-nodes-base.bambooHr",
+      "typeVersion": 1,
       "position": [
         640,
         300
@@ -166,7 +294,7 @@
         "jsCode": "// Normalise into one employee ledger\n// One row per employee per period: base, hours, overtime, leave, allowances, deductions, one-offs. Currency and locale handled per entity.\nreturn $input.all();"
       },
       "id": "payroll-automation-02",
-      "name": "Code: Normalise into one employee ledger",
+      "name": "Normalise into one employee ledger",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -199,9 +327,9 @@
         "options": {}
       },
       "id": "payroll-automation-03",
-      "name": "IF: Validate against policy",
+      "name": "Validate against policy",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1280,
         300
@@ -220,7 +348,7 @@
       "id": "payroll-automation-04",
       "name": "AI Agent: Anomaly review",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         1600,
         300
@@ -241,9 +369,9 @@
       "id": "payroll-automation-04-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1920,
+        1600,
         520
       ]
     },
@@ -255,9 +383,9 @@
       "id": "payroll-automation-04-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        2120,
+        1780,
         520
       ]
     },
@@ -289,7 +417,7 @@
       "id": "payroll-automation-04-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1920,
         300
@@ -324,7 +452,7 @@
       "id": "payroll-automation-05",
       "name": "Slack: Send the exceptions report",
       "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "typeVersion": 2.7,
       "position": [
         2240,
         300
@@ -337,7 +465,7 @@
         "options": {}
       },
       "id": "payroll-automation-06",
-      "name": "Wait: Wait for approval",
+      "name": "Wait for approval",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
@@ -348,15 +476,20 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
+        "method": "PUT",
+        "url": "=https://api.gusto.com/v1/companies/{{ $json.company_id }}/payrolls/{{ $json.payroll_id }}",
         "options": {},
-        "notes": "Uploads the approved ledger to Gusto, ADP, Rippling, Deel or Xero Payroll via API or the provider's import format, and stores the submitted file with a hash for audit."
+        "notes": "Uploads the approved ledger to Gusto, ADP, Rippling, Deel or Xero Payroll via API or the provider's import format, and stores the submitted file with a hash for audit.",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"version\": ($json.version), \"employee_compensations\": ($json.compensations) } }}"
       },
       "id": "payroll-automation-07",
-      "name": "HTTP Request: Push the run to the provider",
+      "name": "Gusto API: Push the run to the provider",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.5,
       "position": [
         2880,
         300
@@ -376,7 +509,7 @@
         "options": {}
       },
       "id": "payroll-automation-08",
-      "name": "Compare Datasets: Reconcile after the run",
+      "name": "Reconcile after the run",
       "type": "n8n-nodes-base.compareDatasets",
       "typeVersion": 2.3,
       "position": [
@@ -402,36 +535,36 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Collect period inputs",
+            "node": "BambooHR: Collect period inputs",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Collect period inputs": {
+    "BambooHR: Collect period inputs": {
       "main": [
         [
           {
-            "node": "Code: Normalise into one employee ledger",
+            "node": "Normalise into one employee ledger",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Normalise into one employee ledger": {
+    "Normalise into one employee ledger": {
       "main": [
         [
           {
-            "node": "IF: Validate against policy",
+            "node": "Validate against policy",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "IF: Validate against policy": {
+    "Validate against policy": {
       "main": [
         [
           {
@@ -497,29 +630,29 @@
       "main": [
         [
           {
-            "node": "Wait: Wait for approval",
+            "node": "Wait for approval",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Wait: Wait for approval": {
+    "Wait for approval": {
       "main": [
         [
           {
-            "node": "HTTP Request: Push the run to the provider",
+            "node": "Gusto API: Push the run to the provider",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Push the run to the provider": {
+    "Gusto API: Push the run to the provider": {
       "main": [
         [
           {
-            "node": "Compare Datasets: Reconcile after the run",
+            "node": "Reconcile after the run",
             "type": "main",
             "index": 0
           }

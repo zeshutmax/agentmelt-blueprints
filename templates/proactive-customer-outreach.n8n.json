@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Reach out to at-risk customers from Stripe and Segment events with Claude\n\n**Who's it for**\nSupport and success teams that hear about problems only when the customer complains or leaves.\n\n**How it works**\nTrigger: Stripe/Chargebee (payment failed, trial ending), product analytics (Segment, Mixpanel, PostHog events), error monitoring (Sentry), shipping (tracking exceptions).\n1. Receive or detect the signal\n2. Load the customer's context\n3. Decide whether to reach out\n4. Draft the message\n5. Approve if sensitive\n6. Send on the right channel\n7. Log and watch the response\n8. Report what it prevented\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Stripe / Chargebee, Segment / PostHog / Mixpanel, HubSpot / Intercom (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nDefine the trigger events and the message templates in the Config node; send through HubSpot, Intercom or Gmail. Keep the guardrail: Frequency cap: one proactive message per customer per week across all scenarios.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/proactive-customer-outreach/",
+        "content": "## Reach out to at-risk customers from Stripe and Segment events with Claude\n\nSupport and success teams that hear about problems only when the customer complains or leaves.\n\n### How it works\nTrigger: Stripe/Chargebee (payment failed, trial ending), product analytics (Segment, Mixpanel, PostHog events), error monitoring (Sentry), shipping (tracking exceptions).\n1. Receive or detect the signal\n2. Load the customer's context\n3. Decide whether to reach out\n4. Draft the message\n5. Approve if sensitive\n6. Send on the right channel\n7. Log and watch the response\n8. Report what it prevented\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Stripe / Chargebee, Segment / PostHog / Mixpanel, HubSpot / Intercom.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nDefine the trigger events and the message templates in the Config node; send through HubSpot, Intercom or Gmail.\nGuardrail to keep: Frequency cap: one proactive message per customer per week across all scenarios.\n\nFull blueprint: https://agentmelt.com/workflows/proactive-customer-outreach/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "proactive-customer-outreach-about",
@@ -13,40 +13,152 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Proactive Customer Outreach Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Stripe/Chargebee (payment failed, trial ending), product analytics (Segment, Mixpanel, PostHog events), error monitoring (Sentry), shipping (tracking exceptions). A daily Schedule Trigger scans for slow signals like feature non-adoption.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Frequency cap: one proactive message per customer per week across all scenarios.\n   - Sensitive scenarios require a human click; the agent never sends about money or churn risk unattended.\n   - Every message links to one action and is sent from a real inbox that receives replies.\n   - Opt-outs and do-not-contact flags are honoured before any drafting happens.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/proactive-customer-outreach/\nWant it built and run for you? $247/month · custom $3,500–6,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## 1. Receive or detect the signal\nEach covered scenario has a trigger: payment_failed, trial_ending_3d, error_rate_spike, feature_not_used_14d, shipment_delayed, usage_drop_50pct",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "proactive-customer-outreach-note",
-      "name": "Read me first",
+      "id": "proactive-customer-outreach-section-1",
+      "name": "Section: 1. Receive or detect the signal",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Webhook: Receive or detect the signal\n2. HTTP Request: Load the customer's context\n3. IF: Decide whether to reach out\n4. AI Agent: Draft the message\n5. Wait: Approve if sensitive\n6. Gmail: Send on the right channel\n7. HubSpot: Log and watch the response\n8. Schedule Trigger: Report what it prevented\n9. Code: Report what it prevented\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 2. Load the customer's context\nPlan, tenure, recent tickets, health score, account owner and communication preferences from the CRM",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "proactive-customer-outreach-steps",
-      "name": "Step outline",
+      "id": "proactive-customer-outreach-section-2",
+      "name": "Section: 2. Load the customer's context",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Decide whether to reach out\nSuppression rules: not more than one proactive message per customer per week, not during an open incident, not to accounts a CSM owns unless the CSM is copied",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "proactive-customer-outreach-section-3",
+      "name": "Section: 3. Decide whether to reach out",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Draft the message\nFrom a scenario template and the context, the agent writes a short, specific message: what happened, what to do, one link",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "proactive-customer-outreach-section-4",
+      "name": "Section: 4. Draft the message",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Approve if sensitive\nScenarios marked sensitive (large accounts, churn-risk, anything mentioning money) pause for a one-click approval in Slack; the rest send automatically",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "proactive-customer-outreach-section-5",
+      "name": "Section: 5. Approve if sensitive",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Send on the right channel\nEmail by default; in-app message via Intercom or SMS for time-critical scenarios like a delayed delivery",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "proactive-customer-outreach-section-6",
+      "name": "Section: 6. Send on the right channel",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Log and watch the response\nThe outreach is logged on the contact; replies open a ticket routed to the right person; the covered event is tracked to see whether it resolved",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "proactive-customer-outreach-section-7",
+      "name": "Section: 7. Log and watch the response",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Report what it prevented\nWeekly: for each scenario, messages sent, replies, resolution rate and — by comparison with the pre-workflow baseline — tickets avoided and payments recovered",
+        "height": 240,
+        "width": 620,
+        "color": 7
+      },
+      "id": "proactive-customer-outreach-section-8",
+      "name": "Section: 8. Report what it prevented",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        750
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "proactive-customer-outreach-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -59,7 +171,7 @@
       "id": "proactive-customer-outreach-01",
       "name": "Webhook: Receive or detect the signal",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
+      "typeVersion": 2.1,
       "position": [
         0,
         300
@@ -133,7 +245,7 @@
       "id": "proactive-customer-outreach-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -142,15 +254,20 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
-        "options": {},
-        "notes": "Plan, tenure, recent tickets, health score, account owner and communication preferences from the CRM. Customers with an open escalation or a do-not-contact flag are excluded here."
+        "resource": "contact",
+        "operation": "get",
+        "email": "={{ $json.email || $json.output?.email || '' }}",
+        "additionalFields": {},
+        "contactId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.contactId || $json.vid || '' }}"
+        }
       },
       "id": "proactive-customer-outreach-02",
-      "name": "HTTP Request: Load the customer's context",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "HubSpot: Load the customer's context",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
       "position": [
         640,
         300
@@ -181,9 +298,9 @@
         "options": {}
       },
       "id": "proactive-customer-outreach-03",
-      "name": "IF: Decide whether to reach out",
+      "name": "Decide whether to reach out",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         960,
         300
@@ -202,7 +319,7 @@
       "id": "proactive-customer-outreach-04",
       "name": "AI Agent: Draft the message",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         1280,
         300
@@ -223,9 +340,9 @@
       "id": "proactive-customer-outreach-04-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1600,
+        1280,
         520
       ]
     },
@@ -237,9 +354,9 @@
       "id": "proactive-customer-outreach-04-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        1800,
+        1460,
         520
       ]
     },
@@ -271,7 +388,7 @@
       "id": "proactive-customer-outreach-04-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1600,
         300
@@ -296,7 +413,7 @@
         "options": {}
       },
       "id": "proactive-customer-outreach-05",
-      "name": "Wait: Approve if sensitive",
+      "name": "Approve if sensitive",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
@@ -318,7 +435,7 @@
       "id": "proactive-customer-outreach-06",
       "name": "Gmail: Send on the right channel",
       "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.1,
+      "typeVersion": 2.2,
       "position": [
         2240,
         300
@@ -335,7 +452,7 @@
       "id": "proactive-customer-outreach-07",
       "name": "HubSpot: Log and watch the response",
       "type": "n8n-nodes-base.hubspot",
-      "typeVersion": 2.1,
+      "typeVersion": 2.2,
       "position": [
         2560,
         300
@@ -357,7 +474,7 @@
       "id": "proactive-customer-outreach-08",
       "name": "Schedule Trigger: Report what it prevented",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         860
@@ -395,25 +512,25 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Load the customer's context",
+            "node": "HubSpot: Load the customer's context",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Load the customer's context": {
+    "HubSpot: Load the customer's context": {
       "main": [
         [
           {
-            "node": "IF: Decide whether to reach out",
+            "node": "Decide whether to reach out",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "IF: Decide whether to reach out": {
+    "Decide whether to reach out": {
       "main": [
         [
           {
@@ -468,14 +585,14 @@
         ],
         [
           {
-            "node": "Wait: Approve if sensitive",
+            "node": "Approve if sensitive",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Wait: Approve if sensitive": {
+    "Approve if sensitive": {
       "main": [
         [
           {

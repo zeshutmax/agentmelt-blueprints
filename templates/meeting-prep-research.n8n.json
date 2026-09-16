@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Prepare meeting briefs from Google Calendar with Claude, HubSpot and Clay\n\n**Who's it for**\nSales reps and founders who walk into external meetings with two minutes of research.\n\n**How it works**\nTrigger: Google or Microsoft calendar scanned for meetings with external attendees in the next 24 hours; new bookings via webhook.\n1. Find upcoming external meetings\n2. Identify attendees and account\n3. Research the company\n4. Research the people\n5. Write the brief\n6. Deliver\n7. Capture the outcome\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus HubSpot / Salesforce, Clay / Apollo (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet the lookahead window and the brief sections in the Config node; swap HubSpot for Salesforce. Keep the guardrail: Only public and first-party data; no scraping behind logins, no personal data beyond professional role.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/meeting-prep-research/",
+        "content": "## Prepare meeting briefs from Google Calendar with Claude, HubSpot and Clay\n\nSales reps and founders who walk into external meetings with two minutes of research.\n\n### How it works\nTrigger: Google or Microsoft calendar scanned for meetings with external attendees in the next 24 hours; new bookings via webhook.\n1. Find upcoming external meetings\n2. Identify attendees and account\n3. Research the company\n4. Research the people\n5. Write the brief\n6. Deliver\n7. Capture the outcome\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus HubSpot / Salesforce, Clay / Apollo.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the lookahead window and the brief sections in the Config node; swap HubSpot for Salesforce.\nGuardrail to keep: Only public and first-party data; no scraping behind logins, no personal data beyond professional role.\n\nFull blueprint: https://agentmelt.com/workflows/meeting-prep-research/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "meeting-prep-research-about",
@@ -13,40 +13,152 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Meeting Prep Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Google or Microsoft calendar scanned for meetings with external attendees in the next 24 hours; new bookings via webhook.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Only public and first-party data; no scraping behind logins, no personal data beyond professional role.\n   - Every statement in the brief carries a source; the agent is instructed to omit rather than guess.\n   - Briefs go only to the rep and the CRM; they are not forwarded externally.\n   - Enrichment credits are spent only for meetings that survive the external-attendee filter.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/meeting-prep-research/\nWant it built and run for you? $197/month · custom $2,000–3,500 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "meeting-prep-research-note",
-      "name": "Read me first",
+      "id": "meeting-prep-research-section-0",
+      "name": "Section: Trigger and config",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Schedule Trigger (hourly)\n2. HTTP Request: Find upcoming external meetings\n3. HubSpot: Identify attendees and account\n4. HTTP Request: Research the company\n5. HTTP Request: Research the people\n6. AI Agent: Write the brief\n7. Slack: Deliver\n8. Wait: Capture the outcome\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 1. Find upcoming external meetings\nMeetings in the next 24 hours with attendees outside the company domain; internal-only meetings are ignored",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "meeting-prep-research-steps",
-      "name": "Step outline",
+      "id": "meeting-prep-research-section-1",
+      "name": "Section: 1. Find upcoming external meetings",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Identify attendees and account\nContacts and company matched in the CRM; deal stage, owner, open tickets and last interactions pulled",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "meeting-prep-research-section-2",
+      "name": "Section: 2. Identify attendees and account",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Research the company\nCompany site (about, product, pricing pages), recent news, funding and hiring signals from enrichment and news APIs; product usage or billing signals for existing customers",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "meeting-prep-research-section-3",
+      "name": "Section: 3. Research the company",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Research the people\nRole, tenure and public professional profile per attendee from enrichment providers; recent public posts where available",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "meeting-prep-research-section-4",
+      "name": "Section: 4. Research the people",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Write the brief\nOne page: company in two lines, what changed recently, attendees and roles, relationship history and open items, live account signals, and three suggested angles tied to the evidence",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "meeting-prep-research-section-5",
+      "name": "Section: 5. Write the brief",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Deliver\nPosted as a DM to the rep an hour before, and attached to the calendar event and the CRM deal",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "meeting-prep-research-section-6",
+      "name": "Section: 6. Deliver",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Capture the outcome\nAfter the meeting a one-question prompt ('how did it go, next step?'); the answer is logged to the CRM so the next brief includes it",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "meeting-prep-research-section-7",
+      "name": "Section: 7. Capture the outcome",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2840,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "meeting-prep-research-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -63,7 +175,7 @@
       "id": "meeting-prep-research-00",
       "name": "Schedule Trigger (hourly)",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         300
@@ -136,7 +248,7 @@
       "id": "meeting-prep-research-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -145,15 +257,29 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
-        "options": {},
-        "notes": "Meetings in the next 24 hours with attendees outside the company domain; internal-only meetings are ignored."
+        "resource": "event",
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Config (edit me)').item.json.config.your_email }}"
+        },
+        "start": "={{ $json.start || $now }}",
+        "end": "={{ $json.end || $now.plus(1, 'hour') }}",
+        "additionalFields": {},
+        "returnAll": false,
+        "limit": 50,
+        "timeMin": "={{ $now }}",
+        "timeMax": "={{ $now.plus(1, 'day') }}",
+        "options": {
+          "singleEvents": true,
+          "orderBy": "startTime"
+        }
       },
       "id": "meeting-prep-research-01",
-      "name": "HTTP Request: Find upcoming external meetings",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "Google Calendar: Find upcoming external meetings",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
       "position": [
         640,
         300
@@ -170,7 +296,7 @@
       "id": "meeting-prep-research-02",
       "name": "HubSpot: Identify attendees and account",
       "type": "n8n-nodes-base.hubspot",
-      "typeVersion": 2.1,
+      "typeVersion": 2.2,
       "position": [
         960,
         300
@@ -179,15 +305,16 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
-        "options": {},
-        "notes": "Company site (about, product, pricing pages), recent news, funding and hiring signals from enrichment and news APIs; product usage or billing signals for existing customers."
+        "resource": "company",
+        "operation": "enrich",
+        "email": "={{ $json.email || '' }}",
+        "additionalFields": {},
+        "domain": "={{ $json.domain }}"
       },
       "id": "meeting-prep-research-03",
-      "name": "HTTP Request: Research the company",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "Clearbit: Research the company",
+      "type": "n8n-nodes-base.clearbit",
+      "typeVersion": 1,
       "position": [
         1280,
         300
@@ -196,15 +323,15 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
-        "options": {},
-        "notes": "Role, tenure and public professional profile per attendee from enrichment providers; recent public posts where available."
+        "resource": "person",
+        "operation": "enrich",
+        "email": "={{ $json.email || $json.output?.email || '' }}",
+        "additionalFields": {}
       },
       "id": "meeting-prep-research-04",
-      "name": "HTTP Request: Research the people",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "Clearbit: Research the people",
+      "type": "n8n-nodes-base.clearbit",
+      "typeVersion": 1,
       "position": [
         1600,
         300
@@ -223,7 +350,7 @@
       "id": "meeting-prep-research-05",
       "name": "AI Agent: Write the brief",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         1920,
         300
@@ -244,9 +371,9 @@
       "id": "meeting-prep-research-05-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        2240,
+        1920,
         520
       ]
     },
@@ -258,9 +385,9 @@
       "id": "meeting-prep-research-05-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        2440,
+        2100,
         520
       ]
     },
@@ -292,7 +419,7 @@
       "id": "meeting-prep-research-05-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         2240,
         300
@@ -327,7 +454,7 @@
       "id": "meeting-prep-research-06",
       "name": "Slack: Deliver",
       "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "typeVersion": 2.7,
       "position": [
         2560,
         300
@@ -340,7 +467,7 @@
         "options": {}
       },
       "id": "meeting-prep-research-07",
-      "name": "Wait: Capture the outcome",
+      "name": "Capture the outcome",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
@@ -366,14 +493,14 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Find upcoming external meetings",
+            "node": "Google Calendar: Find upcoming external meetings",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Find upcoming external meetings": {
+    "Google Calendar: Find upcoming external meetings": {
       "main": [
         [
           {
@@ -388,25 +515,25 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Research the company",
+            "node": "Clearbit: Research the company",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Research the company": {
+    "Clearbit: Research the company": {
       "main": [
         [
           {
-            "node": "HTTP Request: Research the people",
+            "node": "Clearbit: Research the people",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Research the people": {
+    "Clearbit: Research the people": {
       "main": [
         [
           {
@@ -472,7 +599,7 @@
       "main": [
         [
           {
-            "node": "Wait: Capture the outcome",
+            "node": "Capture the outcome",
             "type": "main",
             "index": 0
           }

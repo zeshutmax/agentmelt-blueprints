@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Extract broker submissions from Gmail with Claude and triage them for underwriters\n\n**Who's it for**\nCommercial underwriting teams that key submissions from email into the workbench by hand.\n\n**How it works**\nTrigger: New emails to submissions@ with attachments; portal submissions arrive as webhooks.\n1. Capture and classify attachments\n2. Extract application data\n3. Check completeness\n4. Pull third-party data\n5. Apply appetite rules\n6. Indicative rating\n7. Assemble the file and questions\n8. Queue and track\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Policy admin / workbench (Duck Creek, Guidewire, Applied, or in-house), Third-party data providers, Outlook / Gmail (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nDefine the appetite rules and the required-fields list in the Config node; point the write-back node at your policy admin system. Keep the guardrail: No binding decisions are automated; the workflow triages and prepares.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/insurance-underwriting-intake/",
+        "content": "## Extract broker submissions from Gmail with Claude and triage them for underwriters\n\nCommercial underwriting teams that key submissions from email into the workbench by hand.\n\n### How it works\nTrigger: New emails to submissions@ with attachments; portal submissions arrive as webhooks.\n1. Capture and classify attachments\n2. Extract application data\n3. Check completeness\n4. Pull third-party data\n5. Apply appetite rules\n6. Indicative rating\n7. Assemble the file and questions\n8. Queue and track\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Policy admin / workbench (Duck Creek, Guidewire, Applied, or in-house), Third-party data providers, Outlook / Gmail.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nDefine the appetite rules and the required-fields list in the Config node; point the write-back node at your policy admin system.\nGuardrail to keep: No binding decisions are automated; the workflow triages and prepares.\n\nFull blueprint: https://agentmelt.com/workflows/insurance-underwriting-intake/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "insurance-underwriting-intake-about",
@@ -13,40 +13,152 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Insurance Underwriting Intake Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: New emails to submissions@ with attachments; portal submissions arrive as webhooks.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - No binding decisions are automated; the workflow triages and prepares. Declines outside appetite are drafted and sent after a human click unless the carrier chooses to automate below a threshold.\n   - Every extracted field carries confidence; low-confidence fields are highlighted for verification before rating.\n   - Appetite and rating rules are versioned and owned by underwriting management, not embedded in prompts.\n   - Sanctions screening is mandatory and blocks progress on a hit.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/insurance-underwriting-intake/\nWant it built and run for you? $297/month · custom $8,000–15,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## 1. Capture and classify attachments\nEach attachment is classified — ACORD application, loss runs, schedule of values, financials, supplemental questionnaire, other — and stored against a new submission record",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "insurance-underwriting-intake-note",
-      "name": "Read me first",
+      "id": "insurance-underwriting-intake-section-1",
+      "name": "Section: 1. Capture and classify attachments",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Gmail Trigger: Capture and classify attachments\n2. Information Extractor: Extract application data\n3. Code: Check completeness\n4. HTTP Request: Pull third-party data\n5. IF: Apply appetite rules\n6. Code: Indicative rating\n7. AI Agent: Assemble the file and questions\n8. HTTP Request: Queue and track\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 2. Extract application data\nInsured details, operations description, revenue, employees, locations with construction/occupancy/protection data, requested limits and coverages, prior carrier and premium, loss history by year — with confidence per field",
+        "height": 680,
+        "width": 620,
         "color": 7
       },
-      "id": "insurance-underwriting-intake-steps",
-      "name": "Step outline",
+      "id": "insurance-underwriting-intake-section-2",
+      "name": "Section: 2. Extract application data",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Check completeness\nRequired fields per line of business; missing items generate a broker request drafted by the agent with the exact list, sent after a human click or automatically below a size threshold",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "insurance-underwriting-intake-section-3",
+      "name": "Section: 3. Check completeness",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Pull third-party data\nProperty data (construction, roof age, flood zone), business verification, sanctions and OFAC checks, and loss-control reports where available; results attached to the file",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "insurance-underwriting-intake-section-4",
+      "name": "Section: 4. Pull third-party data",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Apply appetite rules\nClass of business, geography, revenue band, loss ratio and limits against the appetite guide",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "insurance-underwriting-intake-section-5",
+      "name": "Section: 5. Apply appetite rules",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Indicative rating\nFor in-appetite risks, an indicative premium from the rating algorithm or rater API, with the factors listed so the underwriter sees what drove it",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "insurance-underwriting-intake-section-6",
+      "name": "Section: 6. Indicative rating",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Assemble the file and questions\nThe agent writes the submission summary — the risk in one paragraph, key exposures, loss history narrative, third-party findings, indicative rating — and the specific questions an underwriter would ask this broker about this account",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "insurance-underwriting-intake-section-7",
+      "name": "Section: 7. Assemble the file and questions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Queue and track\nSubmission created in the policy admin or underwriting workbench with the data and documents; the underwriter is assigned by line and capacity; turnaround is tracked from receipt to quote",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "insurance-underwriting-intake-section-8",
+      "name": "Section: 8. Queue and track",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3160,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "insurance-underwriting-intake-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -64,7 +176,7 @@
       "id": "insurance-underwriting-intake-01",
       "name": "Gmail Trigger: Capture and classify attachments",
       "type": "n8n-nodes-base.gmailTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         300
@@ -137,7 +249,7 @@
       "id": "insurance-underwriting-intake-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -156,7 +268,7 @@
       "id": "insurance-underwriting-intake-02",
       "name": "Information Extractor: Extract application data",
       "type": "@n8n/n8n-nodes-langchain.informationExtractor",
-      "typeVersion": 1,
+      "typeVersion": 1.2,
       "position": [
         640,
         300
@@ -177,9 +289,9 @@
       "id": "insurance-underwriting-intake-02-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        960,
+        640,
         520
       ]
     },
@@ -211,7 +323,7 @@
       "id": "insurance-underwriting-intake-02-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         960,
         300
@@ -235,7 +347,7 @@
         "jsCode": "// Check completeness\n// Required fields per line of business; missing items generate a broker request drafted by the agent with the exact list, sent after a human click or automatically below a size threshold.\nreturn $input.all();"
       },
       "id": "insurance-underwriting-intake-03",
-      "name": "Code: Check completeness",
+      "name": "Check completeness",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -246,15 +358,17 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
         "method": "GET",
+        "url": "=https://api.example-data-provider.com/v1/property?address={{ encodeURIComponent($json.address) }}",
         "options": {},
-        "notes": "Property data (construction, roof age, flood zone), business verification, sanctions and OFAC checks, and loss-control reports where available; results attached to the file."
+        "notes": "Property data (construction, roof age, flood zone), business verification, sanctions and OFAC checks, and loss-control reports where available; results attached to the file.",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
       },
       "id": "insurance-underwriting-intake-04",
-      "name": "HTTP Request: Pull third-party data",
+      "name": "Third-party data provider API: Pull third-party data",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.5,
       "position": [
         1600,
         300
@@ -285,9 +399,9 @@
         "options": {}
       },
       "id": "insurance-underwriting-intake-05",
-      "name": "IF: Apply appetite rules",
+      "name": "Apply appetite rules",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1920,
         300
@@ -299,7 +413,7 @@
         "jsCode": "// Indicative rating\n// For in-appetite risks, an indicative premium from the rating algorithm or rater API, with the factors listed so the underwriter sees what drove it.\nreturn $input.all();"
       },
       "id": "insurance-underwriting-intake-06",
-      "name": "Code: Indicative rating",
+      "name": "Indicative rating",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -320,7 +434,7 @@
       "id": "insurance-underwriting-intake-07",
       "name": "AI Agent: Assemble the file and questions",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         2560,
         300
@@ -341,9 +455,9 @@
       "id": "insurance-underwriting-intake-07-llm",
       "name": "Claude (Anthropic Chat Model) 2",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        2880,
+        2560,
         520
       ]
     },
@@ -355,9 +469,9 @@
       "id": "insurance-underwriting-intake-07-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        3080,
+        2740,
         520
       ]
     },
@@ -389,7 +503,7 @@
       "id": "insurance-underwriting-intake-07-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         2880,
         300
@@ -410,15 +524,20 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
+        "method": "POST",
+        "url": "https://workbench.example.com/api/submissions",
         "options": {},
-        "notes": "Submission created in the policy admin or underwriting workbench with the data and documents; the underwriter is assigned by line and capacity; turnaround is tracked from receipt to quote."
+        "notes": "Submission created in the policy admin or underwriting workbench with the data and documents; the underwriter is assigned by line and capacity; turnaround is tracked from receipt to quote.",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"submission\": ($json) } }}"
       },
       "id": "insurance-underwriting-intake-08",
-      "name": "HTTP Request: Queue and track",
+      "name": "Policy admin / underwriting workbench API: Queue and track",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.5,
       "position": [
         3200,
         300
@@ -482,47 +601,47 @@
         ],
         [
           {
-            "node": "Code: Check completeness",
+            "node": "Check completeness",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Check completeness": {
+    "Check completeness": {
       "main": [
         [
           {
-            "node": "HTTP Request: Pull third-party data",
+            "node": "Third-party data provider API: Pull third-party data",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Pull third-party data": {
+    "Third-party data provider API: Pull third-party data": {
       "main": [
         [
           {
-            "node": "IF: Apply appetite rules",
+            "node": "Apply appetite rules",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "IF: Apply appetite rules": {
+    "Apply appetite rules": {
       "main": [
         [
           {
-            "node": "Code: Indicative rating",
+            "node": "Indicative rating",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Indicative rating": {
+    "Indicative rating": {
       "main": [
         [
           {
@@ -577,7 +696,7 @@
         ],
         [
           {
-            "node": "HTTP Request: Queue and track",
+            "node": "Policy admin / underwriting workbench API: Queue and track",
             "type": "main",
             "index": 0
           }

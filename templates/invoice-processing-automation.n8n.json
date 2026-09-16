@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Extract supplier invoices from Gmail with Claude and post them to Xero for approval\n\n**Who's it for**\nAccountants, bookkeepers and AP teams that key invoices in by hand and chase approvals by email.\n\n**How it works**\nTrigger: New attachments to ap@ start the run; supplier portals and scanned batches are polled hourly.\n1. Capture the invoice\n2. Extract fields\n3. Validate and detect duplicates\n4. Match to PO and receipt\n5. Route exceptions and approvals\n6. Approve on the phone\n7. Post to the ERP\n8. Supplier status replies\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus NetSuite / Xero / QuickBooks / Sage, Slack / email, Google Drive / S3 (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet the coding rules and the approval thresholds in the Config node; swap Xero for QuickBooks, NetSuite or Sage. Keep the guardrail: Bank-detail changes never post automatically; they trigger a verification call with the supplier.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/invoice-processing-automation/",
+        "content": "## Extract supplier invoices from Gmail with Claude and post them to Xero for approval\n\nAccountants, bookkeepers and AP teams that key invoices in by hand and chase approvals by email.\n\n### How it works\nTrigger: New attachments to ap@ start the run; supplier portals and scanned batches are polled hourly.\n1. Capture the invoice\n2. Extract fields\n3. Validate and detect duplicates\n4. Match to PO and receipt\n5. Route exceptions and approvals\n6. Approve on the phone\n7. Post to the ERP\n8. Supplier status replies\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus NetSuite / Xero / QuickBooks / Sage, Slack / email, Google Drive / S3.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the coding rules and the approval thresholds in the Config node; swap Xero for QuickBooks, NetSuite or Sage.\nGuardrail to keep: Bank-detail changes never post automatically; they trigger a verification call with the supplier.\n\nFull blueprint: https://agentmelt.com/workflows/invoice-processing-automation/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "invoice-processing-automation-about",
@@ -13,40 +13,152 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Invoice Processing Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: New attachments to ap@ start the run; supplier portals and scanned batches are polled hourly.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Bank-detail changes never post automatically; they trigger a verification call with the supplier.\n   - Auto-approval applies only to PO-matched invoices within tolerance and policy limits; everything else has a named approver.\n   - Duplicates are blocked before posting, not caught at month end.\n   - Low-confidence extractions are reviewed by a person before matching.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/invoice-processing-automation/\nWant it built and run for you? $297/month · custom $5,000–9,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## 1. Capture the invoice\nPDF, image or e-invoice attachment saved to a document store with the email metadata; non-invoice attachments are classified and filed elsewhere",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "invoice-processing-automation-note",
-      "name": "Read me first",
+      "id": "invoice-processing-automation-section-1",
+      "name": "Section: 1. Capture the invoice",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Gmail Trigger: Capture the invoice\n2. Information Extractor: Extract fields\n3. Code: Validate and detect duplicates\n4. HTTP Request: Match to PO and receipt\n5. Switch: Route exceptions and approvals\n6. Slack approval: Approve on the phone\n7. HTTP Request: Post to the ERP\n8. AI Agent: Supplier status replies\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 2. Extract fields\nSupplier, invoice number, dates, line items, quantities, unit prices, tax, totals, PO reference and bank details, with a confidence per field",
+        "height": 680,
+        "width": 620,
         "color": 7
       },
-      "id": "invoice-processing-automation-steps",
-      "name": "Step outline",
+      "id": "invoice-processing-automation-section-2",
+      "name": "Section: 2. Extract fields",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Validate and detect duplicates\nTotals foot, tax is arithmetically right, supplier exists (or is flagged as new), bank details match the master (change = fraud alert), and no invoice with the same supplier + number + amount exists",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "invoice-processing-automation-section-3",
+      "name": "Section: 3. Validate and detect duplicates",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Match to PO and receipt\nThree-way match against the ERP: PO lines, quantities received, prices within tolerance",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "invoice-processing-automation-section-4",
+      "name": "Section: 4. Match to PO and receipt",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Route exceptions and approvals\nClean matches auto-approve within policy limits; mismatches go to the buyer with the specific difference; non-PO invoices go to the cost-centre owner; new suppliers go to procurement for onboarding",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "invoice-processing-automation-section-5",
+      "name": "Section: 5. Route exceptions and approvals",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Approve on the phone\nApprovers get the invoice summary and the exception in Slack or email with approve/reject/query buttons; reminders escalate after the SLA",
+        "height": 460,
+        "width": 620,
+        "color": 7
+      },
+      "id": "invoice-processing-automation-section-6",
+      "name": "Section: 6. Approve on the phone",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Post to the ERP\nApproved invoices are created in NetSuite, Xero, QuickBooks, Sage or SAP with coding, attachments and the approval trail; payment runs pick them up",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "invoice-processing-automation-section-7",
+      "name": "Section: 7. Post to the ERP",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2840,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Supplier status replies\nSupplier emails asking about payment status are answered from the ERP data (received, approved, scheduled for date) so AP stops fielding calls",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "invoice-processing-automation-section-8",
+      "name": "Section: 8. Supplier status replies",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3160,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "invoice-processing-automation-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -64,7 +176,7 @@
       "id": "invoice-processing-automation-01",
       "name": "Gmail Trigger: Capture the invoice",
       "type": "n8n-nodes-base.gmailTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         300
@@ -137,7 +249,7 @@
       "id": "invoice-processing-automation-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -156,7 +268,7 @@
       "id": "invoice-processing-automation-02",
       "name": "Information Extractor: Extract fields",
       "type": "@n8n/n8n-nodes-langchain.informationExtractor",
-      "typeVersion": 1,
+      "typeVersion": 1.2,
       "position": [
         640,
         300
@@ -177,9 +289,9 @@
       "id": "invoice-processing-automation-02-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        960,
+        640,
         520
       ]
     },
@@ -211,7 +323,7 @@
       "id": "invoice-processing-automation-02-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         960,
         300
@@ -235,7 +347,7 @@
         "jsCode": "// Validate and detect duplicates\n// Totals foot, tax is arithmetically right, supplier exists (or is flagged as new), bank details match the master (change = fraud alert), and no invoice with the same supplier + number + amount exists.\nreturn $input.all();"
       },
       "id": "invoice-processing-automation-03",
-      "name": "Code: Validate and detect duplicates",
+      "name": "Validate and detect duplicates",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -246,15 +358,17 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
         "method": "GET",
+        "url": "=https://api.xero.com/api.xro/2.0/PurchaseOrders?where=PurchaseOrderNumber%3D%3D%22{{ $json.output?.po_reference }}%22",
         "options": {},
-        "notes": "Three-way match against the ERP: PO lines, quantities received, prices within tolerance. Non-PO invoices are coded by the agent from supplier history and GL rules."
+        "notes": "Three-way match against the ERP: PO lines, quantities received, prices within tolerance. Non-PO invoices are coded by the agent from supplier history and GL rules.",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "xeroOAuth2Api"
       },
       "id": "invoice-processing-automation-04",
-      "name": "HTTP Request: Match to PO and receipt",
+      "name": "Xero API: Match to PO and receipt",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.5,
       "position": [
         1600,
         300
@@ -292,9 +406,9 @@
         "options": {}
       },
       "id": "invoice-processing-automation-05",
-      "name": "Switch: Route exceptions and approvals",
+      "name": "Route exceptions and approvals",
       "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.2,
+      "typeVersion": 3.4,
       "position": [
         1920,
         300
@@ -325,7 +439,7 @@
       "id": "invoice-processing-automation-06",
       "name": "Slack approval: Approve on the phone",
       "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "typeVersion": 2.7,
       "position": [
         2240,
         300
@@ -360,7 +474,7 @@
       "id": "invoice-processing-automation-06-approved",
       "name": "Approved?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         2560,
         300
@@ -381,15 +495,34 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
+        "resource": "invoice",
+        "operation": "create",
+        "organizationId": "={{ 'replace-with-your-xero-tenant-id' }}",
+        "returnAll": false,
+        "limit": 100,
         "options": {},
-        "notes": "Approved invoices are created in NetSuite, Xero, QuickBooks, Sage or SAP with coding, attachments and the approval trail; payment runs pick them up."
+        "type": "ACCPAY",
+        "contactId": "={{ $json.supplier_contact_id }}",
+        "lineItemsUi": {
+          "lineItemsValues": [
+            {
+              "description": "={{ $json.output?.line_description || 'Invoice line' }}",
+              "quantity": "={{ $json.output?.quantity || 1 }}",
+              "unitAmount": "={{ $json.output?.unit_amount || $json.output?.total }}",
+              "accountCode": "={{ $json.output?.account_code || '' }}",
+              "taxType": "INPUT"
+            }
+          ]
+        },
+        "additionalFields": {
+          "invoiceNumber": "={{ $json.output?.invoice_number }}",
+          "status": "DRAFT"
+        }
       },
       "id": "invoice-processing-automation-07",
-      "name": "HTTP Request: Post to the ERP",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "Xero: Post to the ERP",
+      "type": "n8n-nodes-base.xero",
+      "typeVersion": 1,
       "position": [
         2880,
         300
@@ -408,7 +541,7 @@
       "id": "invoice-processing-automation-08",
       "name": "AI Agent: Supplier status replies",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         3200,
         300
@@ -429,9 +562,9 @@
       "id": "invoice-processing-automation-08-llm",
       "name": "Claude (Anthropic Chat Model) 2",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        3520,
+        3200,
         520
       ]
     },
@@ -443,9 +576,9 @@
       "id": "invoice-processing-automation-08-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        3720,
+        3380,
         520
       ]
     },
@@ -477,7 +610,7 @@
       "id": "invoice-processing-automation-08-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         3520,
         300
@@ -553,36 +686,36 @@
         ],
         [
           {
-            "node": "Code: Validate and detect duplicates",
+            "node": "Validate and detect duplicates",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code: Validate and detect duplicates": {
+    "Validate and detect duplicates": {
       "main": [
         [
           {
-            "node": "HTTP Request: Match to PO and receipt",
+            "node": "Xero API: Match to PO and receipt",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Match to PO and receipt": {
+    "Xero API: Match to PO and receipt": {
       "main": [
         [
           {
-            "node": "Switch: Route exceptions and approvals",
+            "node": "Route exceptions and approvals",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Switch: Route exceptions and approvals": {
+    "Route exceptions and approvals": {
       "main": [
         [
           {
@@ -608,7 +741,7 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Post to the ERP",
+            "node": "Xero: Post to the ERP",
             "type": "main",
             "index": 0
           }
@@ -622,7 +755,7 @@
         ]
       ]
     },
-    "HTTP Request: Post to the ERP": {
+    "Xero: Post to the ERP": {
       "main": [
         [
           {

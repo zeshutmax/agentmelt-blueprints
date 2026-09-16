@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Resolve IT requests from Slack with Claude, Okta and Jira Service Management\n\n**Who's it for**\nSmall IT teams that answer password resets and access requests all day.\n\n**How it works**\nTrigger: Messages to the IT bot or #it-help channel, and new tickets in Jira Service Management, Freshservice or ServiceNow.\n1. Receive the request\n2. Classify the request\n3. Answer from the knowledge base\n4. Self-service actions with approval\n5. Execute through the systems\n6. Create or update the ticket\n7. Route unresolved requests\n8. Improve the knowledge base\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Okta / Entra ID / Google Workspace, Jamf / Intune, Jira Service Management / Freshservice (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nEdit the request types and the self-service rules in the Config node; add Jamf or Intune for device actions. Keep the guardrail: Identity is taken from the chat platform's SSO, never from the message; sensitive actions require a fresh MFA step.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/it-helpdesk-automation/",
+        "content": "## Resolve IT requests from Slack with Claude, Okta and Jira Service Management\n\nSmall IT teams that answer password resets and access requests all day.\n\n### How it works\nTrigger: Messages to the IT bot or #it-help channel, and new tickets in Jira Service Management, Freshservice or ServiceNow.\n1. Receive the request\n2. Classify the request\n3. Answer from the knowledge base\n4. Self-service actions with approval\n5. Execute through the systems\n6. Create or update the ticket\n7. Route unresolved requests\n8. Improve the knowledge base\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Okta / Entra ID / Google Workspace, Jamf / Intune, Jira Service Management / Freshservice.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nEdit the request types and the self-service rules in the Config node; add Jamf or Intune for device actions.\nGuardrail to keep: Identity is taken from the chat platform's SSO, never from the message; sensitive actions require a fresh MFA step.\n\nFull blueprint: https://agentmelt.com/workflows/it-helpdesk-automation/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "it-helpdesk-automation-about",
@@ -13,40 +13,152 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## IT Helpdesk Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Messages to the IT bot or #it-help channel, and new tickets in Jira Service Management, Freshservice or ServiceNow.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Identity is taken from the chat platform's SSO, never from the message; sensitive actions require a fresh MFA step.\n   - Access grants always require manager (or app owner) approval recorded in the ticket; privileged groups are excluded from self-service.\n   - Every automated action is logged with requester, approver and timestamp for audit.\n   - Outage reports and security concerns bypass the bot and go straight to the on-call engineer.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/it-helpdesk-automation/\nWant it built and run for you? $297/month · custom $5,000–9,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## 1. Receive the request\nMessage text, requester identity (verified through the chat platform's SSO), device and location from the MDM where available",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "it-helpdesk-automation-note",
-      "name": "Read me first",
+      "id": "it-helpdesk-automation-section-1",
+      "name": "Section: 1. Receive the request",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Webhook: Receive the request\n2. Text Classifier: Classify the request\n3. AI Agent: Answer from the knowledge base\n4. Switch: Self-service actions with approval\n5. HTTP Request: Execute through the systems\n6. Jira: Create or update the ticket\n7. Slack: Route unresolved requests\n8. Schedule Trigger: Improve the knowledge base\n9. Code: Improve the knowledge base\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 2. Classify the request\nPassword/MFA, access request, software/licence, hardware, how-to, outage report, other — with urgency",
+        "height": 680,
+        "width": 620,
         "color": 7
       },
-      "id": "it-helpdesk-automation-steps",
-      "name": "Step outline",
+      "id": "it-helpdesk-automation-section-2",
+      "name": "Section: 2. Classify the request",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Answer from the knowledge base\nHow-to questions are answered from the IT knowledge base with the steps and a link; the agent asks a clarifying question when the request is ambiguous",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "it-helpdesk-automation-section-3",
+      "name": "Section: 3. Answer from the knowledge base",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Self-service actions with approval\nPassword reset → identity-provider API after MFA verification",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "it-helpdesk-automation-section-4",
+      "name": "Section: 4. Self-service actions with approval",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Execute through the systems\nOkta/Entra ID/Google Workspace for identity actions, Jamf/Intune for software deployment, the licence platform for seat assignment — each call logged with requester, approver and timestamp",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "it-helpdesk-automation-section-5",
+      "name": "Section: 5. Execute through the systems",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Create or update the ticket\nEvery request, resolved or not, becomes a ticket with the classification, the actions taken and the conversation, so metrics and audits are complete",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "it-helpdesk-automation-section-6",
+      "name": "Section: 6. Create or update the ticket",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Route unresolved requests\nAnything the bot cannot resolve is assigned to the right IT queue with the context and a summary; the requester is told who has it and the expected time",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "it-helpdesk-automation-section-7",
+      "name": "Section: 7. Route unresolved requests",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2840,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Improve the knowledge base\nWeekly: questions the agent could not answer, grouped by topic, become draft KB articles for IT to approve; resolved-by-bot rate and time-to-resolve reported per category",
+        "height": 240,
+        "width": 620,
+        "color": 7
+      },
+      "id": "it-helpdesk-automation-section-8",
+      "name": "Section: 8. Improve the knowledge base",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        750
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "it-helpdesk-automation-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -59,7 +171,7 @@
       "id": "it-helpdesk-automation-01",
       "name": "Webhook: Receive the request",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
+      "typeVersion": 2.1,
       "position": [
         0,
         300
@@ -133,7 +245,7 @@
       "id": "it-helpdesk-automation-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -160,7 +272,7 @@
       "id": "it-helpdesk-automation-02",
       "name": "Text Classifier: Classify the request",
       "type": "@n8n/n8n-nodes-langchain.textClassifier",
-      "typeVersion": 1,
+      "typeVersion": 1.1,
       "position": [
         640,
         300
@@ -181,9 +293,9 @@
       "id": "it-helpdesk-automation-02-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        960,
+        640,
         520
       ]
     },
@@ -215,7 +327,7 @@
       "id": "it-helpdesk-automation-02-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         960,
         300
@@ -246,7 +358,7 @@
       "id": "it-helpdesk-automation-03",
       "name": "AI Agent: Answer from the knowledge base",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         1280,
         300
@@ -267,9 +379,9 @@
       "id": "it-helpdesk-automation-03-llm",
       "name": "Claude (Anthropic Chat Model) 2",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1600,
+        1280,
         520
       ]
     },
@@ -281,9 +393,9 @@
       "id": "it-helpdesk-automation-03-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        1800,
+        1460,
         520
       ]
     },
@@ -315,7 +427,7 @@
       "id": "it-helpdesk-automation-03-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1600,
         300
@@ -365,9 +477,9 @@
         "options": {}
       },
       "id": "it-helpdesk-automation-04",
-      "name": "Switch: Self-service actions with approval",
+      "name": "Self-service actions with approval",
       "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.2,
+      "typeVersion": 3.4,
       "position": [
         1920,
         300
@@ -376,15 +488,22 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
-        "options": {},
-        "notes": "Okta/Entra ID/Google Workspace for identity actions, Jamf/Intune for software deployment, the licence platform for seat assignment — each call logged with requester, approver and timestamp."
+        "resource": "user",
+        "operation": "update",
+        "returnAll": false,
+        "limit": 50,
+        "simplify": true,
+        "userId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.email || $json.login }}"
+        },
+        "fields": {}
       },
       "id": "it-helpdesk-automation-05",
-      "name": "HTTP Request: Execute through the systems",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "Okta: Execute through the systems",
+      "type": "n8n-nodes-base.okta",
+      "typeVersion": 1,
       "position": [
         2240,
         300
@@ -434,7 +553,7 @@
       "id": "it-helpdesk-automation-07",
       "name": "Slack: Route unresolved requests",
       "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "typeVersion": 2.7,
       "position": [
         2880,
         300
@@ -456,7 +575,7 @@
       "id": "it-helpdesk-automation-08",
       "name": "Schedule Trigger: Improve the knowledge base",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         860
@@ -585,25 +704,25 @@
         ],
         [
           {
-            "node": "Switch: Self-service actions with approval",
+            "node": "Self-service actions with approval",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Switch: Self-service actions with approval": {
+    "Self-service actions with approval": {
       "main": [
         [
           {
-            "node": "HTTP Request: Execute through the systems",
+            "node": "Okta: Execute through the systems",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Execute through the systems": {
+    "Okta: Execute through the systems": {
       "main": [
         [
           {

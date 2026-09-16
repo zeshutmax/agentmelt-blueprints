@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Answer Zendesk tickets from your help centre with Claude and escalate the rest\n\n**Who's it for**\nSupport teams that answer the same twenty questions every day and want them handled before an agent opens the ticket.\n\n**How it works**\nTrigger: Zendesk, Intercom, Freshdesk, Help Scout or HubSpot posts each new conversation.\n1. Receive the ticket\n2. Fetch customer context\n3. Classify and prioritise\n4. Retrieve knowledge\n5. Draft the answer with a confidence score\n6. Resolve or route\n7. Send and log\n8. Learn from reopens\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Zendesk / Intercom / Freshdesk, Pinecone / Supabase / Qdrant, HubSpot / Stripe (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nPoint the vector store at your own help-centre export; set the confidence threshold and the escalation tags in the Config node. Keep the guardrail: The agent answers only from your knowledge base and cites the source; no general-knowledge answers.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/support-ticket-deflection/",
+        "content": "## Answer Zendesk tickets from your help centre with Claude and escalate the rest\n\nSupport teams that answer the same twenty questions every day and want them handled before an agent opens the ticket.\n\n### How it works\nTrigger: Zendesk, Intercom, Freshdesk, Help Scout or HubSpot posts each new conversation.\n1. Receive the ticket\n2. Fetch customer context\n3. Classify and prioritise\n4. Retrieve knowledge\n5. Draft the answer with a confidence score\n6. Resolve or route\n7. Send and log\n8. Learn from reopens\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Zendesk / Intercom / Freshdesk, Pinecone / Supabase / Qdrant, HubSpot / Stripe.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nPoint the vector store at your own help-centre export; set the confidence threshold and the escalation tags in the Config node.\nGuardrail to keep: The agent answers only from your knowledge base and cites the source; no general-knowledge answers.\n\nFull blueprint: https://agentmelt.com/workflows/support-ticket-deflection/",
         "height": 900,
-        "width": 620,
+        "width": 640,
         "color": 1
       },
       "id": "support-ticket-deflection-about",
@@ -13,40 +13,152 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1180,
-        -420
+        -720,
+        -40
       ]
     },
     {
       "parameters": {
-        "content": "## Support Ticket Deflection Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Zendesk, Intercom, Freshdesk, Help Scout or HubSpot posts each new conversation. Email-only teams use a Gmail or Outlook trigger on the support inbox.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - The agent answers only from your knowledge base and cites the source; no general-knowledge answers.\n   - Cancellations, complaints, legal, security and anything with strong negative sentiment always go to a person.\n   - Automated answers are marked, and a customer reply reopens the ticket to a human immediately.\n   - The confidence threshold is set from measured reopen rates, not by feel, and reviewed weekly.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/support-ticket-deflection/\nWant it built and run for you? $297/month · custom $4,000–7,000 one-time",
-        "height": 520,
-        "width": 460,
+        "content": "## 1. Receive the ticket\nSubject, body, channel, customer identifier and any attachments",
+        "height": 240,
+        "width": 620,
         "color": 7
       },
-      "id": "support-ticket-deflection-note",
-      "name": "Read me first",
+      "id": "support-ticket-deflection-section-1",
+      "name": "Section: 1. Receive the ticket",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        40
+        -40,
+        190
       ]
     },
     {
       "parameters": {
-        "content": "## Steps\n\n1. Webhook: Receive the ticket\n2. HTTP Request: Fetch customer context\n3. Text Classifier: Classify and prioritise\n4. Vector Store: Retrieve knowledge\n5. AI Agent: Draft the answer with a confidence score\n6. IF: Resolve or route\n7. HTTP Request: Send and log\n8. Schedule Trigger: Learn from reopens\n9. Code: Learn from reopens\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
-        "height": 360,
-        "width": 460,
+        "content": "## 2. Fetch customer context\nPlan, recent orders or invoices, open tickets and account status from your CRM or billing system, so the answer is specific, not generic",
+        "height": 240,
+        "width": 300,
         "color": 7
       },
-      "id": "support-ticket-deflection-steps",
-      "name": "Step outline",
+      "id": "support-ticket-deflection-section-2",
+      "name": "Section: 2. Fetch customer context",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        -360
+        600,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Classify and prioritise\nCategory (billing, access, how-to, bug, cancellation…), sentiment and urgency",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "support-ticket-deflection-section-3",
+      "name": "Section: 3. Classify and prioritise",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Retrieve knowledge\nHelp-centre articles, macros and product docs, chunked and embedded, refreshed nightly",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "support-ticket-deflection-section-4",
+      "name": "Section: 4. Retrieve knowledge",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 5. Draft the answer with a confidence score\nThe agent answers only from retrieved passages, cites the article, and reports a confidence score",
+        "height": 680,
+        "width": 620,
+        "color": 7
+      },
+      "id": "support-ticket-deflection-section-5",
+      "name": "Section: 5. Draft the answer with a confidence score",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        -30
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 6. Resolve or route\nHigh confidence and a deflectable category: send the answer and mark the ticket solved-pending (reopens if the customer replies)",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "support-ticket-deflection-section-6",
+      "name": "Section: 6. Resolve or route",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 7. Send and log\nReply through the help desk so it appears in the normal conversation history with an “answered by assistant” tag agents can filter",
+        "height": 240,
+        "width": 300,
+        "color": 7
+      },
+      "id": "support-ticket-deflection-section-7",
+      "name": "Section: 7. Send and log",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2840,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 8. Learn from reopens\nDaily: tickets reopened after an automated answer are collected for review; the failing questions become new articles or corrections, and the confidence threshold is tuned from the data",
+        "height": 240,
+        "width": 620,
+        "color": 7
+      },
+      "id": "support-ticket-deflection-section-8",
+      "name": "Section: 8. Learn from reopens",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        750
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
+        "height": 300,
+        "width": 300,
+        "color": 3
+      },
+      "id": "support-ticket-deflection-warning",
+      "name": "Warning: configure before running",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        270,
+        180
       ]
     },
     {
@@ -59,7 +171,7 @@
       "id": "support-ticket-deflection-01",
       "name": "Webhook: Receive the ticket",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
+      "typeVersion": 2.1,
       "position": [
         0,
         300
@@ -133,7 +245,7 @@
       "id": "support-ticket-deflection-config",
       "name": "Config (edit me)",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         320,
         300
@@ -142,15 +254,20 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
-        "options": {},
-        "notes": "Plan, recent orders or invoices, open tickets and account status from your CRM or billing system, so the answer is specific, not generic."
+        "resource": "contact",
+        "operation": "get",
+        "email": "={{ $json.email || $json.output?.email || '' }}",
+        "additionalFields": {},
+        "contactId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.contactId || $json.vid || '' }}"
+        }
       },
       "id": "support-ticket-deflection-02",
-      "name": "HTTP Request: Fetch customer context",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "HubSpot: Fetch customer context",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
       "position": [
         640,
         300
@@ -177,7 +294,7 @@
       "id": "support-ticket-deflection-03",
       "name": "Text Classifier: Classify and prioritise",
       "type": "@n8n/n8n-nodes-langchain.textClassifier",
-      "typeVersion": 1,
+      "typeVersion": 1.1,
       "position": [
         960,
         300
@@ -198,9 +315,9 @@
       "id": "support-ticket-deflection-03-llm",
       "name": "Claude (Anthropic Chat Model)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        1280,
+        960,
         520
       ]
     },
@@ -232,7 +349,7 @@
       "id": "support-ticket-deflection-03-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         1280,
         300
@@ -259,7 +376,7 @@
       "id": "support-ticket-deflection-04",
       "name": "Vector Store: Retrieve knowledge",
       "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
-      "typeVersion": 1.1,
+      "typeVersion": 1.3,
       "position": [
         1600,
         300
@@ -278,7 +395,7 @@
       "id": "support-ticket-deflection-05",
       "name": "AI Agent: Draft the answer with a confidence score",
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.9,
+      "typeVersion": 3.1,
       "position": [
         1920,
         300
@@ -299,9 +416,9 @@
       "id": "support-ticket-deflection-05-llm",
       "name": "Claude (Anthropic Chat Model) 2",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
+      "typeVersion": 1.6,
       "position": [
-        2240,
+        1920,
         520
       ]
     },
@@ -313,9 +430,9 @@
       "id": "support-ticket-deflection-05-parser",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
+      "typeVersion": 1.3,
       "position": [
-        2440,
+        2100,
         520
       ]
     },
@@ -347,7 +464,7 @@
       "id": "support-ticket-deflection-05-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         2240,
         300
@@ -390,9 +507,9 @@
         "options": {}
       },
       "id": "support-ticket-deflection-06",
-      "name": "IF: Resolve or route",
+      "name": "Resolve or route",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
         2560,
         300
@@ -401,15 +518,24 @@
     },
     {
       "parameters": {
-        "url": "https://api.example.com/replace-me",
-        "method": "GET",
+        "resource": "ticket",
+        "operation": "update",
+        "ticketType": "regular",
+        "returnAll": false,
+        "limit": 100,
         "options": {},
-        "notes": "Reply through the help desk so it appears in the normal conversation history with an “answered by assistant” tag agents can filter."
+        "id": "={{ $json.ticket_id || $json.id }}",
+        "updateFields": {
+          "status": "solved",
+          "tags": [
+            "answered-by-assistant"
+          ]
+        }
       },
       "id": "support-ticket-deflection-07",
-      "name": "HTTP Request: Send and log",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "name": "Zendesk: Send and log",
+      "type": "n8n-nodes-base.zendesk",
+      "typeVersion": 1,
       "position": [
         2880,
         300
@@ -431,7 +557,7 @@
       "id": "support-ticket-deflection-08",
       "name": "Schedule Trigger: Learn from reopens",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.4,
       "position": [
         0,
         860
@@ -469,14 +595,14 @@
       "main": [
         [
           {
-            "node": "HTTP Request: Fetch customer context",
+            "node": "HubSpot: Fetch customer context",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request: Fetch customer context": {
+    "HubSpot: Fetch customer context": {
       "main": [
         [
           {
@@ -582,18 +708,18 @@
         ],
         [
           {
-            "node": "IF: Resolve or route",
+            "node": "Resolve or route",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "IF: Resolve or route": {
+    "Resolve or route": {
       "main": [
         [
           {
-            "node": "HTTP Request: Send and log",
+            "node": "Zendesk: Send and log",
             "type": "main",
             "index": 0
           }
