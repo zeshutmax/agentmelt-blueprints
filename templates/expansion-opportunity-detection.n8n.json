@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Expansion Opportunity Detection Workflow",
+  "name": "Detect expansion signals in Amplitude and HubSpot with Claude and alert account owners",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Detect expansion signals in Amplitude and HubSpot with Claude and alert account owners\n\n**Who's it for**\nCustomer-success and sales teams that learn about upsell moments too late, if at all.\n\n**How it works**\nTrigger: Weekly scoring run; instant Webhook triggers for high-value signals like hitting a plan limit or a pricing-page visit by an admin.\n1. Pull usage and account data\n2. Pull engagement and buying signals\n3. Compute the readiness score\n4. Match to a play\n5. Draft the opener\n6. Route to the owner\n7. Track outcomes by signal\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Amplitude / Mixpanel / Pendo, HubSpot / Salesforce, Google Sheets (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nAdjust the signal weights and the minimum ARR in the Config node; route alerts to Slack or straight into HubSpot tasks. Keep the guardrail: Scores explain themselves — each account shows the signals behind it.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/expansion-opportunity-detection/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "expansion-opportunity-detection-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Expansion Opportunity Detection Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Weekly scoring run; instant Webhook triggers for high-value signals like hitting a plan limit or a pricing-page visit by an admin.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Scores explain themselves — each account shows the signals behind it.\n   - Accounts with an open escalation, a churn-risk flag or a renewal within 30 days are excluded or routed to a different play.\n   - The agent drafts openers; CSMs send them. No automated upsell emails.\n   - Weights are tuned from tracked outcomes, quarterly, by RevOps.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/expansion-opportunity-detection/\nWant it built and run for you? $297/month · custom $4,500–8,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "expansion-opportunity-detection-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Schedule Trigger (weekly)\n2. HTTP Request: Pull usage and account data\n3. HTTP Request: Pull engagement and buying signals\n4. Code: Compute the readiness score\n5. Switch: Match to a play\n6. AI Agent: Draft the opener\n7. HubSpot: Route to the owner\n8. Postgres: Track outcomes by signal\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "expansion-opportunity-detection-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Customer Feedback Analysis Workflow",
+  "name": "Analyze customer feedback from Zendesk and Gong with Claude and report in Notion",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Analyze customer feedback from Zendesk and Gong with Claude and report in Notion\n\n**Who's it for**\nProduct and success teams that read tickets one at a time and miss the pattern.\n\n**How it works**\nTrigger: Daily pulls from each source; the weekly report compiles Monday morning.\n1. Collect feedback\n2. Classify by theme and sentiment\n3. Extract the quotable line\n4. Aggregate\n5. Write the weekly report\n6. Route urgent items\n7. Deliver and store\n8. Maintain the taxonomy\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Zendesk / Intercom / Gong, Notion + Google Sheets (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet the theme taxonomy and the report cadence in the Config node; add Intercom or survey tools as sources. Keep the guardrail: Personal data is stripped from quotes; sources are linked, not reproduced.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/customer-feedback-analysis/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "customer-feedback-analysis-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Customer Feedback Analysis Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Daily pulls from each source; the weekly report compiles Monday morning.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Personal data is stripped from quotes; sources are linked, not reproduced.\n   - The taxonomy is owned by product; the agent proposes new themes, it does not create them.\n   - Inference is labelled as inference and separated from counts and quotes.\n   - Spike alerts require a minimum volume to avoid false alarms from single items.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/customer-feedback-analysis/\nWant it built and run for you? $247/month · custom $3,500–6,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "customer-feedback-analysis-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Schedule Trigger (weekly)\n2. HTTP Request: Collect feedback\n3. Text Classifier: Classify by theme and sentiment\n4. Information Extractor: Extract the quotable line\n5. Code: Aggregate\n6. AI Agent: Write the weekly report\n7. IF: Route urgent items\n8. Notion: Deliver and store\n9. Google Sheets: Maintain the taxonomy\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "customer-feedback-analysis-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

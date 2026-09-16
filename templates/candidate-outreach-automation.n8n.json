@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Candidate Outreach Automation Workflow",
+  "name": "Send personalized candidate outreach from Greenhouse projects with Claude and Gmail",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Send personalized candidate outreach from Greenhouse projects with Claude and Gmail\n\n**Who's it for**\nRecruiters who source in the ATS and write every first message by hand.\n\n**How it works**\nTrigger: A candidate added to a sourcing project in the ATS or a row added to the outreach sheet starts a sequence for that person.\n1. Receive the candidate\n2. Research\n3. Pick the hook\n4. Draft the message\n5. Send from the recruiter\n6. Follow up twice\n7. Stop on reply\n8. Measure\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Greenhouse / Lever / Ashby, Gmail / Outlook, Google Sheets (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet the outreach voice and the follow-up cadence in the Config node; swap Gmail for Outlook and Greenhouse for Lever or Ashby. Keep the guardrail: Only public, professional information is used; nothing personal, nothing inferred about protected characteristics.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/candidate-outreach-automation/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "candidate-outreach-automation-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Candidate Outreach Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: A candidate added to a sourcing project in the ATS or a row added to the outreach sheet starts a sequence for that person.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Only public, professional information is used; nothing personal, nothing inferred about protected characteristics.\n   - Sending limits: 40 new messages a day per mailbox, spaced, so the recruiter's domain reputation is protected.\n   - Every message is sent from a person's address and signed by that person; replies go to them.\n   - Opt-out language in every message; an opt-out suppresses the candidate across all roles.\n   - Follow-ups stop on any reply, including 'not now', which is logged as a future-contact date.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/candidate-outreach-automation/\nWant it built and run for you? $197/month · custom $2,000–3,500 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "candidate-outreach-automation-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Webhook: Receive the candidate\n2. HTTP Request: Research\n3. AI Agent: Pick the hook\n4. AI Agent: Draft the message\n5. Gmail: Send from the recruiter\n6. Wait: Follow up twice\n7. Gmail Trigger: Stop on reply\n8. Google Sheets: Measure\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "candidate-outreach-automation-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Purchase Order Workflow",
+  "name": "Route purchase requests from Slack to approval and create POs in NetSuite with Claude",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Route purchase requests from Slack to approval and create POs in NetSuite with Claude\n\n**Who's it for**\nFinance and operations teams that approve purchases in email threads and lose track of them.\n\n**How it works**\nTrigger: A purchase-request form (or a Slack slash command) starts the workflow; email requests to procurement@ are parsed the same way.\n1. Receive the request\n2. Normalise and complete\n3. Check budget and policy\n4. Route approvals\n5. Create the PO\n6. Send to the supplier\n7. Track receipt\n8. Report committed spend\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus NetSuite / Dynamics / Xero, Slack (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet the approval thresholds and the approver map in the Config node; swap NetSuite for Dynamics or Xero. Keep the guardrail: No PO is created without the approvals the policy matrix requires; the workflow enforces, it does not decide.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/purchase-order-automation/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "purchase-order-automation-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Purchase Order Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: A purchase-request form (or a Slack slash command) starts the workflow; email requests to procurement@ are parsed the same way.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - No PO is created without the approvals the policy matrix requires; the workflow enforces, it does not decide.\n   - Supplier suggestions come from the approved catalogue; new suppliers go through onboarding first.\n   - Budget checks use live data; over-budget requests are flagged, not blocked silently.\n   - Every step is logged with actor and timestamp for audit.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/purchase-order-automation/\nWant it built and run for you? $247/month · custom $4,000–7,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "purchase-order-automation-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Webhook: Receive the request\n2. AI Agent: Normalise and complete\n3. HTTP Request: Check budget and policy\n4. Switch: Route approvals\n5. HTTP Request: Create the PO\n6. Gmail: Send to the supplier\n7. Schedule Trigger: Track receipt\n8. Google Sheets: Report committed spend\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "purchase-order-automation-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

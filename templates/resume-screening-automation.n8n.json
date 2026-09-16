@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Resume Screening Workflow",
+  "name": "Screen applications from Greenhouse with Claude and score them in Google Sheets",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Screen applications from Greenhouse with Claude and score them in Google Sheets\n\n**Who's it for**\nRecruiters and hiring teams that read every application by hand and still miss good candidates.\n\n**How it works**\nTrigger: Greenhouse, Lever, Ashby, Workable or Teamtailor post each new application; a daily run catches any missed.\n1. Receive the application\n2. Load the role criteria\n3. Parse the resume\n4. Score against criteria with evidence\n5. Flag verification items\n6. Build the ranked shortlist\n7. Present to the recruiter\n8. Audit and bias monitoring\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Greenhouse / Lever / Ashby, Google Sheets (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nPut the role's criteria and knock-out questions in the Config node; swap Greenhouse for Lever or Ashby. Keep the guardrail: No candidate is rejected automatically; the workflow ranks and explains, recruiters decide.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/resume-screening-automation/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "resume-screening-automation-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Resume Screening Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Greenhouse, Lever, Ashby, Workable or Teamtailor post each new application; a daily run catches any missed.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - No candidate is rejected automatically; the workflow ranks and explains, recruiters decide.\n   - Protected characteristics are excluded from scoring by instruction and by stripping fields before the model sees them.\n   - Every score carries an evidence quote; unexplained scores are not shown.\n   - Pass-through rates by group are monitored where lawful, and criteria that skew are reviewed.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/resume-screening-automation/\nWant it built and run for you? $247/month · custom $3,500–6,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "resume-screening-automation-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Webhook: Receive the application\n2. Google Sheets: Load the role criteria\n3. Information Extractor: Parse the resume\n4. AI Agent: Score against criteria with evidence\n5. Code: Flag verification items\n6. Code: Build the ranked shortlist\n7. HTTP Request: Present to the recruiter\n8. Schedule Trigger: Audit and bias monitoring\n9. Code: Audit and bias monitoring\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "resume-screening-automation-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

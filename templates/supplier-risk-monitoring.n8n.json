@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Supplier Risk Monitoring Workflow",
+  "name": "Score supplier risk from news and credit data with Claude and report in Slack",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Score supplier risk from news and credit data with Claude and report in Slack\n\n**Who's it for**\nProcurement teams that learn about a supplier's trouble from a missed delivery.\n\n**How it works**\nTrigger: News and delivery data refresh daily; financial and ESG data refresh weekly; the composite score is recomputed weekly and on any high-severity signal.\n1. Load the supplier portfolio\n2. Pull financial signals\n3. Pull news and events\n4. Measure delivery performance\n5. Classify and weight signals\n6. Compute the composite score\n7. Draft the risk brief\n8. Alert and track\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus D&B / Creditsafe / Coface, News API / GDELT, Slack + Google Sheets (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nEdit the risk weights and the watchlist in the Config node; add D&B, Creditsafe or your own data provider as sources. Keep the guardrail: Scores are explainable: every alert lists the signals and weights that produced it.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/supplier-risk-monitoring/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "supplier-risk-monitoring-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Supplier Risk Monitoring Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: News and delivery data refresh daily; financial and ESG data refresh weekly; the composite score is recomputed weekly and on any high-severity signal.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Scores are explainable: every alert lists the signals and weights that produced it.\n   - News is classified for relevance and severity before it affects a score; a single article never triggers an alert on its own.\n   - The agent recommends; procurement decides and records the action.\n   - Tier-3 suppliers are scored on delivery data only, so monitoring cost stays proportional.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/supplier-risk-monitoring/\nWant it built and run for you? $297/month · custom $5,000–9,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "supplier-risk-monitoring-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Schedule Trigger (weekly)\n2. Google Sheets: Load the supplier portfolio\n3. HTTP Request: Pull financial signals\n4. HTTP Request: Pull news and events\n5. Postgres: Measure delivery performance\n6. Text Classifier: Classify and weight signals\n7. Code: Compute the composite score\n8. AI Agent: Draft the risk brief\n9. Slack: Alert and track\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "supplier-risk-monitoring-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

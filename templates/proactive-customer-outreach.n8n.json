@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Proactive Customer Outreach Workflow",
+  "name": "Reach out to at-risk customers from Stripe and Segment events with Claude",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Reach out to at-risk customers from Stripe and Segment events with Claude\n\n**Who's it for**\nSupport and success teams that hear about problems only when the customer complains or leaves.\n\n**How it works**\nTrigger: Stripe/Chargebee (payment failed, trial ending), product analytics (Segment, Mixpanel, PostHog events), error monitoring (Sentry), shipping (tracking exceptions).\n1. Receive or detect the signal\n2. Load the customer's context\n3. Decide whether to reach out\n4. Draft the message\n5. Approve if sensitive\n6. Send on the right channel\n7. Log and watch the response\n8. Report what it prevented\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Stripe / Chargebee, Segment / PostHog / Mixpanel, HubSpot / Intercom (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nDefine the trigger events and the message templates in the Config node; send through HubSpot, Intercom or Gmail. Keep the guardrail: Frequency cap: one proactive message per customer per week across all scenarios.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/proactive-customer-outreach/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "proactive-customer-outreach-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Proactive Customer Outreach Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Stripe/Chargebee (payment failed, trial ending), product analytics (Segment, Mixpanel, PostHog events), error monitoring (Sentry), shipping (tracking exceptions). A daily Schedule Trigger scans for slow signals like feature non-adoption.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Frequency cap: one proactive message per customer per week across all scenarios.\n   - Sensitive scenarios require a human click; the agent never sends about money or churn risk unattended.\n   - Every message links to one action and is sent from a real inbox that receives replies.\n   - Opt-outs and do-not-contact flags are honoured before any drafting happens.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/proactive-customer-outreach/\nWant it built and run for you? $247/month · custom $3,500–6,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "proactive-customer-outreach-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Webhook: Receive or detect the signal\n2. HTTP Request: Load the customer's context\n3. IF: Decide whether to reach out\n4. AI Agent: Draft the message\n5. Wait: Approve if sensitive\n6. Gmail: Send on the right channel\n7. HubSpot: Log and watch the response\n8. Schedule Trigger: Report what it prevented\n9. Code: Report what it prevented\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "proactive-customer-outreach-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

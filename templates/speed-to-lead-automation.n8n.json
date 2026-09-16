@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Speed-to-Lead Automation Workflow",
+  "name": "Reply to new real estate leads in minutes with Claude, Follow Up Boss and Twilio",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Reply to new real estate leads in minutes with Claude, Follow Up Boss and Twilio\n\n**Who's it for**\nReal-estate agents and teams who lose portal leads to whoever answers first.\n\n**How it works**\nTrigger: A lead email from Zillow or Realtor.com, a website form submission, or a new-person webhook from Follow Up Boss or kvCORE starts the run.\n1. Receive the lead\n2. Look up the lead in the CRM\n3. Qualify\n4. Draft the first reply\n5. Check quiet hours and consent\n6. Send the reply\n7. Log and hand off\n8. Follow up on silence\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Follow Up Boss / kvCORE / HubSpot, Gmail / Outlook, Twilio (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nPut your first-reply rules and quiet hours in the Config node; swap Follow Up Boss for kvCORE or HubSpot and Twilio for your SMS provider. Keep the guardrail: Quiet hours: nothing sent 9 pm–8 am in the lead's time zone; messages queue until morning.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/speed-to-lead-automation/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "speed-to-lead-automation-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Speed-to-Lead Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: A lead email from Zillow or Realtor.com, a website form submission, or a new-person webhook from Follow Up Boss or kvCORE starts the run.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Quiet hours: nothing sent 9 pm–8 am in the lead's time zone; messages queue until morning.\n   - One question per message; the second message asks the next question, never both at once.\n   - SMS only with a number the lead gave on a form; STOP honoured on the first word and written to the CRM.\n   - Fair-housing language check on every draft; flagged drafts cannot be sent.\n   - Approval mode for the first week: drafts go to the agent for a tap before sending.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/speed-to-lead-automation/\nWant it built and run for you? $197/month · custom $2,000–3,500 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "speed-to-lead-automation-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Webhook: Receive the lead\n2. HTTP Request: Look up the lead in the CRM\n3. AI Agent: Qualify\n4. AI Agent: Draft the first reply\n5. Code: Check quiet hours and consent\n6. Gmail: Send the reply\n7. HTTP Request: Log and hand off\n8. Wait: Follow up on silence\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "speed-to-lead-automation-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

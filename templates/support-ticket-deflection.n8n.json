@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Support Ticket Deflection Workflow",
+  "name": "Answer Zendesk tickets from your help centre with Claude and escalate the rest",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Answer Zendesk tickets from your help centre with Claude and escalate the rest\n\n**Who's it for**\nSupport teams that answer the same twenty questions every day and want them handled before an agent opens the ticket.\n\n**How it works**\nTrigger: Zendesk, Intercom, Freshdesk, Help Scout or HubSpot posts each new conversation.\n1. Receive the ticket\n2. Fetch customer context\n3. Classify and prioritise\n4. Retrieve knowledge\n5. Draft the answer with a confidence score\n6. Resolve or route\n7. Send and log\n8. Learn from reopens\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Zendesk / Intercom / Freshdesk, Pinecone / Supabase / Qdrant, HubSpot / Stripe (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nPoint the vector store at your own help-centre export; set the confidence threshold and the escalation tags in the Config node. Keep the guardrail: The agent answers only from your knowledge base and cites the source; no general-knowledge answers.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/support-ticket-deflection/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "support-ticket-deflection-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Support Ticket Deflection Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Zendesk, Intercom, Freshdesk, Help Scout or HubSpot posts each new conversation. Email-only teams use a Gmail or Outlook trigger on the support inbox.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - The agent answers only from your knowledge base and cites the source; no general-knowledge answers.\n   - Cancellations, complaints, legal, security and anything with strong negative sentiment always go to a person.\n   - Automated answers are marked, and a customer reply reopens the ticket to a human immediately.\n   - The confidence threshold is set from measured reopen rates, not by feel, and reviewed weekly.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/support-ticket-deflection/\nWant it built and run for you? $297/month · custom $4,000–7,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "support-ticket-deflection-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Webhook: Receive the ticket\n2. HTTP Request: Fetch customer context\n3. Text Classifier: Classify and prioritise\n4. Vector Store: Retrieve knowledge\n5. AI Agent: Draft the answer with a confidence score\n6. IF: Resolve or route\n7. HTTP Request: Send and log\n8. Schedule Trigger: Learn from reopens\n9. Code: Learn from reopens\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "support-ticket-deflection-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

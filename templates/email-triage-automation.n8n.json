@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Email Triage Automation Workflow",
+  "name": "Triage a shared Gmail inbox with Claude and create tasks in Asana and Slack",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Triage a shared Gmail inbox with Claude and create tasks in Asana and Slack\n\n**Who's it for**\nOperations teams and assistants who sort a shared inbox by hand and lose requests in the pile.\n\n**How it works**\nTrigger: Polls the mailbox every minute for new messages via Gmail or Microsoft Outlook triggers; threads are handled as a unit.\n1. Receive and de-duplicate\n2. Classify\n3. Fetch context\n4. Extract tasks and dates\n5. Draft routine replies\n6. Route\n7. Approve and send\n8. Daily digest\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Gmail / Outlook, Asana / Linear / Notion, Slack (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nEdit the categories and the routing rules in the Config node; replace Asana with Linear or Notion. Keep the guardrail: Drafts require approval by default; auto-send is enabled per category by the inbox owner and logged.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/email-triage-automation/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "email-triage-automation-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Email Triage Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Polls the mailbox every minute for new messages via Gmail or Microsoft Outlook triggers; threads are handled as a unit.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Drafts require approval by default; auto-send is enabled per category by the inbox owner and logged.\n   - Complaints, legal, HR and anything from unknown senders with attachments go to a person unread by the agent's reply logic.\n   - The agent never invents facts about availability, pricing or commitments; it drafts from the context fetched or asks.\n   - Every automated action is visible in the thread and the digest.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/email-triage-automation/\nWant it built and run for you? $197/month · custom $2,000–4,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "email-triage-automation-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Gmail Trigger: Receive and de-duplicate\n2. Text Classifier: Classify\n3. HTTP Request: Fetch context\n4. Information Extractor: Extract tasks and dates\n5. AI Agent: Draft routine replies\n6. Switch: Route\n7. Wait: Approve and send\n8. Schedule Trigger: Daily digest\n9. Code: Daily digest\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "email-triage-automation-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

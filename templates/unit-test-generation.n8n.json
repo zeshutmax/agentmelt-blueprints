@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Unit Test Generation Workflow",
+  "name": "Generate unit tests for GitHub pull requests with Claude and run them in CI",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Generate unit tests for GitHub pull requests with Claude and run them in CI\n\n**Who's it for**\nEngineering teams with thin test coverage who want tests proposed automatically on every change.\n\n**How it works**\nTrigger: PR events on the main repositories; a label can request generation on demand.\n1. Receive the PR and diff\n2. Find untested changed functions\n3. Assemble context\n4. Generate tests\n5. Run in CI\n6. Keep what passes and adds coverage\n7. Open the companion PR\n8. Learn from reviews\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus GitHub Actions / GitLab CI, Jest / pytest / Go test / JUnit (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet the test framework and directories in the Config node; swap the GitHub nodes for GitLab if that is where the code lives. Keep the guardrail: Generated tests are proposed in a separate PR; nothing merges without an engineer's review.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/unit-test-generation/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "unit-test-generation-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Unit Test Generation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: PR events on the main repositories; a label can request generation on demand.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Generated tests are proposed in a separate PR; nothing merges without an engineer's review.\n   - Only tests that pass, are not flaky, and add coverage are proposed — the run is the filter.\n   - The agent cannot modify source code, only add test files.\n   - Repositories can be excluded, and a self-hosted model is available for sensitive code.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/unit-test-generation/\nWant it built and run for you? $247/month · custom $3,500–6,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "unit-test-generation-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Webhook: Receive the PR and diff\n2. Code: Find untested changed functions\n3. HTTP Request: Assemble context\n4. AI Agent: Generate tests\n5. HTTP Request: Run in CI\n6. IF: Keep what passes and adds coverage\n7. HTTP Request: Open the companion PR\n8. Schedule Trigger: Learn from reviews\n9. Code: Learn from reviews\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "unit-test-generation-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

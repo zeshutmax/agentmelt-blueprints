@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Document & Proposal Generation Workflow",
+  "name": "Generate proposals from HubSpot deals with Claude in Google Docs",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Generate proposals from HubSpot deals with Claude in Google Docs\n\n**Who's it for**\nSales and operations teams that assemble proposals and statements of work from the last one, every time.\n\n**How it works**\nTrigger: A 'new proposal' form, a deal moving to the proposal stage in the CRM, or an RFP document uploaded to a folder starts the run.\n1. Receive the request\n2. Pull the client record\n3. Parse the RFP or brief\n4. Retrieve past answers and case material\n5. Draft each section\n6. Consistency and compliance check\n7. Produce the document\n8. Route for review and learn\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Pinecone / Supabase, Google Docs / Microsoft Word, HubSpot / Salesforce (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nStore your section templates in the Config node; swap Google Docs for Microsoft Word and HubSpot for Salesforce. Keep the guardrail: Every reused answer is sourced to the document it came from; the writer can see what was adapted.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/document-generation-automation/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "document-generation-automation-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Document & Proposal Generation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: A 'new proposal' form, a deal moving to the proposal stage in the CRM, or an RFP document uploaded to a folder starts the run.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Every reused answer is sourced to the document it came from; the writer can see what was adapted.\n   - Commitments the rules forbid (uncapped liability, guaranteed outcomes) are blocked, not merely flagged.\n   - Pricing comes from rules and rate cards; the agent cannot invent a number.\n   - Nothing is sent to a client automatically; the workflow produces a draft for people.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/document-generation-automation/\nWant it built and run for you? $247/month · custom $4,000–7,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "document-generation-automation-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Webhook: Receive the request\n2. HubSpot: Pull the client record\n3. Information Extractor: Parse the RFP or brief\n4. Vector Store: Retrieve past answers and case material\n5. AI Agent: Draft each section\n6. Code: Consistency and compliance check\n7. Google Docs: Produce the document\n8. Slack approval: Route for review and learn\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "document-generation-automation-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

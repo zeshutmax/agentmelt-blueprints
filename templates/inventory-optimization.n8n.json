@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Inventory Optimization Workflow",
+  "name": "Recommend reorder quantities from ERP stock levels with Claude and approve in Slack",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Recommend reorder quantities from ERP stock levels with Claude and approve in Slack\n\n**Who's it for**\nOperations teams that decide reorders from a spreadsheet and want the maths and the exceptions done for them.\n\n**How it works**\nTrigger: Runs after the demand-forecasting workflow writes new forecasts; a daily run checks stock positions against reorder points.\n1. Read forecasts and error\n2. Read inventory and open orders\n3. Measure supplier lead times\n4. Compute safety stock and reorder points\n5. Classify SKUs\n6. Generate purchase suggestions\n7. Explain parameter changes\n8. Publish to buyers and the ERP\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus ERP / WMS (NetSuite, SAP B1, Cin7, Fishbowl), Google Sheets (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nPut your service levels and lead times in the Config node; connect the ERP node to NetSuite, SAP B1, Cin7 or Fishbowl. Keep the guardrail: Draft POs only — a buyer approves before anything is sent to a supplier.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/inventory-optimization/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "inventory-optimization-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Inventory Optimization Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Runs after the demand-forecasting workflow writes new forecasts; a daily run checks stock positions against reorder points.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Draft POs only — a buyer approves before anything is sent to a supplier.\n   - Parameter changes above a threshold are explained and can be frozen per SKU.\n   - Service-level targets are set by finance and operations together, and the achieved level is reported weekly.\n   - Supplier lead times come from receipts, not from the master data, so the numbers reflect reality.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/inventory-optimization/\nWant it built and run for you? $297/month · custom $5,000–8,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "inventory-optimization-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Schedule Trigger (weekly)\n2. Postgres: Read forecasts and error\n3. HTTP Request: Read inventory and open orders\n4. Code: Measure supplier lead times\n5. Code: Compute safety stock and reorder points\n6. Code: Classify SKUs\n7. IF: Generate purchase suggestions\n8. AI Agent: Explain parameter changes\n9. Google Sheets: Publish to buyers and the ERP\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "inventory-optimization-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

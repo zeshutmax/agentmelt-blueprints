@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Prior Authorization Workflow",
+  "name": "Prepare prior authorization requests from EHR orders with Claude",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Prepare prior authorization requests from EHR orders with Claude\n\n**Who's it for**\nClinic and practice staff who spend hours a day on payer portals and phone queues.\n\n**How it works**\nTrigger: New orders and referrals from the EHR (via FHIR, HL7 or a daily export) are checked against payer rules; status polling runs twice daily.\n1. Detect auth requirement\n2. Gather documentation\n3. Check completeness against criteria\n4. Draft the medical-necessity summary\n5. Submit\n6. Track status\n7. Draft appeals\n8. Report\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus EHR (Epic, athenahealth, eClinicalWorks…), Availity / payer portals (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nKeep the payer rules in the Config node; this template assumes self-hosted n8n and a model under a BAA — set both before running on patient data. Keep the guardrail: Every submission and appeal is reviewed and signed by a clinician or authorised staff member; nothing is sent automatically.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/prior-authorization-automation/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "prior-authorization-automation-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Prior Authorization Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: New orders and referrals from the EHR (via FHIR, HL7 or a daily export) are checked against payer rules; status polling runs twice daily.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Every submission and appeal is reviewed and signed by a clinician or authorised staff member; nothing is sent automatically.\n   - PHI stays within HIPAA-covered infrastructure (self-hosted n8n or a covered cloud, model API under a BAA); the model sees the minimum necessary.\n   - The summary maps documentation to criteria; it never asserts clinical facts that are not in the record.\n   - Payer rules are versioned and updated from bulletins; a rule change re-checks open requests.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/prior-authorization-automation/\nWant it built and run for you? $297/month · custom $8,000–15,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "prior-authorization-automation-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Schedule Trigger (daily)\n2. Code: Detect auth requirement\n3. HTTP Request: Gather documentation\n4. Code: Check completeness against criteria\n5. AI Agent: Draft the medical-necessity summary\n6. HTTP Request: Submit\n7. Schedule Trigger: Track status\n8. AI Agent: Draft appeals\n9. Google Sheets: Report\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "prior-authorization-automation-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Social Listening & Response Workflow",
+  "name": "Monitor brand mentions with Claude and draft replies for approval in Slack",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Monitor brand mentions with Claude and draft replies for approval in Slack\n\n**Who's it for**\nMarketing and support teams that answer social mentions by hand and miss the ones that matter.\n\n**How it works**\nTrigger: Hourly pulls from each source's API or a listening provider; high-severity classifications trigger immediate alerts.\n1. Collect mentions\n2. De-duplicate and filter\n3. Classify intent and sentiment\n4. Draft the response\n5. Route by category\n6. Approve and post\n7. Log everything\n8. Weekly listening report\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Brand24 / Mention / platform APIs, Slack, HubSpot + Zendesk (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nChange the sources and the severity rules in the Config node; add a HubSpot or Zendesk node to open a ticket for complaints. Keep the guardrail: Nothing is posted publicly without human approval; the agent drafts.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/social-listening-response/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "social-listening-response-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Social Listening & Response Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Hourly pulls from each source's API or a listening provider; high-severity classifications trigger immediate alerts.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Nothing is posted publicly without human approval; the agent drafts.\n   - Complaints are acknowledged publicly and resolved privately — the agent never debates in public.\n   - PR-risk classifications bypass drafting and go straight to a person.\n   - Author reach and account age feed urgency so a journalist's question is not treated like a bot's.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/social-listening-response/\nWant it built and run for you? $247/month · custom $3,500–6,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "social-listening-response-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Schedule Trigger (hourly)\n2. HTTP Request: Collect mentions\n3. Code: De-duplicate and filter\n4. Text Classifier: Classify intent and sentiment\n5. AI Agent: Draft the response\n6. Switch: Route by category\n7. Wait: Approve and post\n8. Google Sheets: Log everything\n9. AI Agent: Weekly listening report\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "social-listening-response-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

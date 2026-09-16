@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Competitor Monitoring Workflow",
+  "name": "Track competitor pages with Firecrawl and Claude and post a weekly brief to Notion",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Track competitor pages with Firecrawl and Claude and post a weekly brief to Notion\n\n**Who's it for**\nMarketing and product teams that check competitor sites by hand, or not at all.\n\n**How it works**\nTrigger: Daily snapshots of monitored pages and feeds; the brief compiles weekly, with instant alerts for pricing changes.\n1. Snapshot monitored pages\n2. Collect feeds\n3. Detect material changes\n4. Classify and assess\n5. Instant alerts for pricing\n6. Write the weekly brief\n7. Update battle cards\n8. Distribute and log\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Browserless / Firecrawl, Notion + Slack (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nList the pages and the change types you care about in the Config node; send the brief to Slack instead of Notion if you prefer. Keep the guardrail: Only public sources are monitored; no login walls, no scraping in violation of terms.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/competitor-monitoring/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "competitor-monitoring-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Competitor Monitoring Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Daily snapshots of monitored pages and feeds; the brief compiles weekly, with instant alerts for pricing changes.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Only public sources are monitored; no login walls, no scraping in violation of terms.\n   - Assessments are labelled as inference and tied to the evidence snapshot.\n   - Pricing alerts include the raw before/after so nobody acts on a misparse.\n   - The brief is reviewed by product marketing before it reaches sales.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/competitor-monitoring/\nWant it built and run for you? $247/month · custom $3,500–6,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "competitor-monitoring-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Schedule Trigger (weekly)\n2. HTTP Request: Snapshot monitored pages\n3. HTTP Request: Collect feeds\n4. Code: Detect material changes\n5. AI Agent: Classify and assess\n6. IF: Instant alerts for pricing\n7. AI Agent: Write the weekly brief\n8. Notion: Update battle cards\n9. Slack: Distribute and log\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "competitor-monitoring-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

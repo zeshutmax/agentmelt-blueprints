@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — AI Demand Forecasting Workflow",
+  "name": "Forecast weekly demand from sales data with Claude and publish to Google Sheets",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Forecast weekly demand from sales data with Claude and publish to Google Sheets\n\n**Who's it for**\nOperations and supply-chain planners who forecast in spreadsheets and want a repeatable weekly run with explanations.\n\n**How it works**\nTrigger: Runs Sunday night after the ERP's weekly close.\n1. Pull sales history\n2. Pull the signals\n3. Clean and align\n4. Run the forecasting model\n5. Score last week's forecast\n6. Write forecasts to the planning system\n7. Explain the exceptions\n8. Publish the weekly review\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus LightGBM / Chronos / TimesFM / TimeGPT, BigQuery / Snowflake / Postgres, Google Sheets / planning tool (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nChange the horizon and aggregation level in the Config node; replace the statistical model step with your own endpoint if you already run one. Keep the guardrail: The model forecasts; the agent explains.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/demand-forecasting/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "demand-forecasting-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## AI Demand Forecasting Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Runs Sunday night after the ERP's weekly close. A second, lighter run on Wednesday refreshes the short-term horizon with the latest POS data for the top movers.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - The model forecasts; the agent explains. No language model touches a number that goes into replenishment.\n   - Every run scores the previous run's accuracy so drift is visible within a week.\n   - Planner overrides are captured and evaluated against the model, not silently overwritten.\n   - Forecasts carry quantiles, and safety stock uses them — a point forecast alone hides the uncertainty that drives stockouts.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/demand-forecasting/\nWant it built and run for you? $297/month · custom $5,000–9,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "demand-forecasting-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Schedule Trigger (weekly)\n2. Postgres: Pull sales history\n3. HTTP Request: Pull the signals\n4. Code: Clean and align\n5. HTTP Request: Run the forecasting model\n6. Code: Score last week's forecast\n7. Postgres: Write forecasts to the planning system\n8. AI Agent: Explain the exceptions\n9. Slack: Publish the weekly review\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "demand-forecasting-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

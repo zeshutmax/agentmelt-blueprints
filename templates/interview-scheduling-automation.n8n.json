@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Interview Scheduling Automation Workflow",
+  "name": "Schedule interviews from Greenhouse stage changes with Google Calendar, Claude and Twilio",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Schedule interviews from Greenhouse stage changes with Google Calendar, Claude and Twilio\n\n**Who's it for**\nRecruiters and coordinators who spend their week on calendar tennis.\n\n**How it works**\nTrigger: Moving a candidate to an interview stage in Greenhouse, Lever or Ashby — or a row change in the tracking sheet — starts scheduling for that stage's panel.\n1. Read the stage\n2. Find common slots\n3. Offer the slots\n4. Book\n5. Remind\n6. Handle changes\n7. Sync the ATS\n8. Report\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Greenhouse / Lever / Ashby, Google Calendar / Outlook, Twilio (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet the interviewer pools and the working hours in the Config node; swap Google Calendar for Outlook. Keep the guardrail: Panel working hours and blocked times are respected; the workflow never books over a 'focus' block or outside hours.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/interview-scheduling-automation/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "interview-scheduling-automation-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Interview Scheduling Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Moving a candidate to an interview stage in Greenhouse, Lever or Ashby — or a row change in the tracking sheet — starts scheduling for that stage's panel.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Panel working hours and blocked times are respected; the workflow never books over a 'focus' block or outside hours.\n   - Candidates are never offered a slot less than 24 hours away unless the recruiter allows it for the stage.\n   - Every change is written to the same email thread, so the candidate has one conversation, not five.\n   - SMS only with a number the candidate gave; opt-out honoured.\n   - The recruiter is copied on every candidate-facing message and can take over any thread by replying.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/interview-scheduling-automation/\nWant it built and run for you? $197/month · custom $2,000–3,500 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "interview-scheduling-automation-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Webhook: Read the stage\n2. Google Calendar: Find common slots\n3. Gmail: Offer the slots\n4. Google Calendar: Book\n5. Set: Remind\n6. AI Agent: Handle changes\n7. HTTP Request: Sync the ATS\n8. Google Sheets: Report\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "interview-scheduling-automation-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

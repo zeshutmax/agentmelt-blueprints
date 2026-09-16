@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Meeting Prep Workflow",
+  "name": "Prepare meeting briefs from Google Calendar with Claude, HubSpot and Clay",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Prepare meeting briefs from Google Calendar with Claude, HubSpot and Clay\n\n**Who's it for**\nSales reps and founders who walk into external meetings with two minutes of research.\n\n**How it works**\nTrigger: Google or Microsoft calendar scanned for meetings with external attendees in the next 24 hours; new bookings via webhook.\n1. Find upcoming external meetings\n2. Identify attendees and account\n3. Research the company\n4. Research the people\n5. Write the brief\n6. Deliver\n7. Capture the outcome\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus HubSpot / Salesforce, Clay / Apollo (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet the lookahead window and the brief sections in the Config node; swap HubSpot for Salesforce. Keep the guardrail: Only public and first-party data; no scraping behind logins, no personal data beyond professional role.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/meeting-prep-research/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "meeting-prep-research-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Meeting Prep Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Google or Microsoft calendar scanned for meetings with external attendees in the next 24 hours; new bookings via webhook.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Only public and first-party data; no scraping behind logins, no personal data beyond professional role.\n   - Every statement in the brief carries a source; the agent is instructed to omit rather than guess.\n   - Briefs go only to the rep and the CRM; they are not forwarded externally.\n   - Enrichment credits are spent only for meetings that survive the external-attendee filter.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/meeting-prep-research/\nWant it built and run for you? $197/month · custom $2,000–3,500 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "meeting-prep-research-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Schedule Trigger (hourly)\n2. HTTP Request: Find upcoming external meetings\n3. HubSpot: Identify attendees and account\n4. HTTP Request: Research the company\n5. HTTP Request: Research the people\n6. AI Agent: Write the brief\n7. Slack: Deliver\n8. Wait: Capture the outcome\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "meeting-prep-research-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

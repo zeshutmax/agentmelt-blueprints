@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Lead Nurture Automation Workflow",
+  "name": "Nurture real estate leads from Follow Up Boss signals with Claude and Gmail",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Nurture real estate leads from Follow Up Boss signals with Claude and Gmail\n\n**Who's it for**\nReal-estate agents whose long-term leads go cold because nobody has a reason to write.\n\n**How it works**\nTrigger: A new listing in the CRM or MLS feed, a rate change from your lender's feed, an anniversary or birthday in the CRM, or a lead going quiet for N days each start a run for the leads they affect.\n1. Detect the reason\n2. Match leads to the signal\n3. Check the guardrails\n4. Draft the message\n5. Approve or auto-send\n6. Send and log\n7. Stop on reply\n8. Report\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Follow Up Boss / kvCORE / HubSpot, Gmail / Outlook, Slack (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet the signal types and your voice rules in the Config node; swap Follow Up Boss for kvCORE or HubSpot. Keep the guardrail: No message without a reason the lead would recognise; the model cannot invent one.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/lead-nurture-automation/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "lead-nurture-automation-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Lead Nurture Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: A new listing in the CRM or MLS feed, a rate change from your lender's feed, an anniversary or birthday in the CRM, or a lead going quiet for N days each start a run for the leads they affect.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - No message without a reason the lead would recognise; the model cannot invent one.\n   - Frequency cap: at most one touch per lead per 14 days, at most three per quarter.\n   - Anyone in an active conversation or an active CRM stage is excluded automatically.\n   - Unsubscribe and STOP are honoured on the first word; suppression is written to the CRM.\n   - Fair-housing language check on every draft; flagged drafts cannot be sent.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/lead-nurture-automation/\nWant it built and run for you? $197/month · custom $2,000–3,500 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "lead-nurture-automation-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Schedule Trigger: Detect the reason\n2. Code: Match leads to the signal\n3. Code: Check the guardrails\n4. AI Agent: Draft the message\n5. Slack approval: Approve or auto-send\n6. Gmail: Send and log\n7. Gmail Trigger: Stop on reply\n8. Google Sheets: Report\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "lead-nurture-automation-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

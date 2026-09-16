@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Contract Review Workflow",
+  "name": "Review incoming contracts with Claude against your playbook in Google Docs",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Review incoming contracts with Claude against your playbook in Google Docs\n\n**Who's it for**\nLegal and operations teams that review the same clause types in every contract.\n\n**How it works**\nTrigger: Attachments to contracts@, new documents in the CLM or DocuSign/PandaDoc inbox, or a form submission from sales.\n1. Capture and identify\n2. Extract clauses\n3. Compare to the playbook\n4. Draft the redline\n5. Route by risk\n6. Review surface\n7. Log and learn\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Google Docs / Word, Ironclad / DocuSign CLM / PandaDoc (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nPut your clause playbook and risk thresholds in the Config node; connect Ironclad, DocuSign CLM or PandaDoc as the source. Keep the guardrail: The workflow triages and drafts; a person approves every contract and every redline before it goes to the counterparty.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/contract-review-automation/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "contract-review-automation-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Contract Review Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Attachments to contracts@, new documents in the CLM or DocuSign/PandaDoc inbox, or a form submission from sales.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - The workflow triages and drafts; a person approves every contract and every redline before it goes to the counterparty.\n   - Major-risk clauses always reach a lawyer regardless of the deviation score.\n   - Extraction confidence is shown; low-confidence clauses are flagged for manual reading.\n   - The playbook is owned and versioned by legal; the agent cannot add positions.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/contract-review-automation/\nWant it built and run for you? $297/month · custom $5,000–9,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "contract-review-automation-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Gmail Trigger: Capture and identify\n2. Information Extractor: Extract clauses\n3. Code: Compare to the playbook\n4. AI Agent: Draft the redline\n5. Switch: Route by risk\n6. Google Docs: Review surface\n7. HubSpot: Log and learn\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "contract-review-automation-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

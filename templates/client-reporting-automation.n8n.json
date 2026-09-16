@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Client Reporting Automation Workflow",
+  "name": "Draft monthly client reports from Xero with Claude in Google Docs",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Draft monthly client reports from Xero with Claude in Google Docs\n\n**Who's it for**\nAccountants and bookkeepers who write the same month-end commentary for every client.\n\n**How it works**\nTrigger: On the day you set after month-end close — or when an accountant asks for a client by name — the pack for that client is built.\n1. Pull the numbers\n2. Check the close\n3. Compute the comparisons\n4. Find the variances that matter\n5. Draft the narrative\n6. Assemble the pack\n7. Review and sign off\n8. Deliver and log\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Xero / QuickBooks / Sage, Google Docs / Word, Gmail / Outlook (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet the report sections and the thresholds that trigger commentary in the Config node; swap Xero for QuickBooks or Sage. Keep the guardrail: No pack is drafted on an unclean close; the workflow reports what is open instead.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/client-reporting-automation/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "client-reporting-automation-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Client Reporting Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: On the day you set after month-end close — or when an accountant asks for a client by name — the pack for that client is built.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - No pack is drafted on an unclean close; the workflow reports what is open instead.\n   - The narrative can only cite movements present in the numbers; causes are stated as 'appears to be' unless the ledger shows them.\n   - Every pack is approved by the accountant before it reaches a client.\n   - Numbers in the narrative are checked against the tables before the draft is shown.\n   - Client data stays in the ledger and the client folder; model calls use an API with no data retention.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/client-reporting-automation/\nWant it built and run for you? $247/month · custom $3,500–6,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "client-reporting-automation-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Schedule Trigger (monthly)\n2. HTTP Request: Pull the numbers\n3. Code: Check the close\n4. Code: Compute the comparisons\n5. AI Agent: Find the variances that matter\n6. AI Agent: Draft the narrative\n7. Google Docs: Assemble the pack\n8. Slack approval: Review and sign off\n9. Gmail: Deliver and log\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "client-reporting-automation-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Subscription & Dunning Automation Workflow",
+  "name": "Recover failed Stripe payments with Claude-written emails and Twilio SMS",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Recover failed Stripe payments with Claude-written emails and Twilio SMS\n\n**Who's it for**\nSaaS finance and growth teams losing revenue to expired cards and silent cancellations.\n\n**How it works**\nTrigger: invoice.payment_failed, customer.subscription.updated, cancellation requested, trial ending, card expiring soon.\n1. Receive the billing event\n2. Choose the retry strategy\n3. Draft the dunning message\n4. Send across the sequence\n5. Handle plan changes and pauses\n6. Cancellation intercept\n7. Alert finance and the owner\n8. Weekly recovery report\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Stripe / Chargebee / Recurly, Gmail + Twilio + Intercom, Slack + Google Sheets (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nChange the retry schedule and the tone rules in the Config node; add Intercom or Slack for the high-value accounts. Keep the guardrail: Retry schedules respect card-network rules and the provider's limits.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/subscription-dunning-automation/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "subscription-dunning-automation-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Subscription & Dunning Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: invoice.payment_failed, customer.subscription.updated, cancellation requested, trial ending, card expiring soon.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Retry schedules respect card-network rules and the provider's limits.\n   - Save offers come only from the finance-approved set; the agent picks, it does not invent discounts.\n   - Customers who ask to cancel and decline the offer are cancelled promptly — no dark patterns.\n   - Every message step checks payment status first so nobody is chased for a paid invoice.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/subscription-dunning-automation/\nWant it built and run for you? $247/month · custom $3,500–6,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "subscription-dunning-automation-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Webhook: Receive the billing event\n2. Switch: Choose the retry strategy\n3. AI Agent: Draft the dunning message\n4. Gmail: Send across the sequence\n5. HTTP Request: Handle plan changes and pauses\n6. AI Agent: Cancellation intercept\n7. Slack: Alert finance and the owner\n8. Schedule Trigger: Weekly recovery report\n9. Code: Weekly recovery report\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "subscription-dunning-automation-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

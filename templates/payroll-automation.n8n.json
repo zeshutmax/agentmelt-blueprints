@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Payroll Automation Workflow",
+  "name": "Prepare payroll from Gusto time data with Claude and approve in Slack",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Prepare payroll from Gusto time data with Claude and approve in Slack\n\n**Who's it for**\nSmall HR and finance teams that run payroll checks by hand every period and still find errors after the fact.\n\n**How it works**\nTrigger: Runs on the cut-off date each period, plus a preview run three days earlier so managers can fix missing approvals.\n1. Collect period inputs\n2. Normalise into one employee ledger\n3. Validate against policy\n4. Anomaly review\n5. Send the exceptions report\n6. Wait for approval\n7. Push the run to the provider\n8. Reconcile after the run\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Gusto / ADP / Rippling / Deel, Slack, Google Sheets (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet the pay-period rules and the anomaly thresholds in the Config node; connect Gusto, ADP, Rippling or Deel. Keep the guardrail: The workflow never submits without an explicit human approval; the Wait node is the control.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/payroll-automation/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "payroll-automation-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Payroll Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Runs on the cut-off date each period, plus a preview run three days earlier so managers can fix missing approvals.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - The workflow never submits without an explicit human approval; the Wait node is the control.\n   - The AI step annotates only; it has no write access to amounts.\n   - Every submitted file is stored with a hash and the approver's identity for audit.\n   - Provider totals are reconciled against the submitted ledger before payslips release.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/payroll-automation/\nWant it built and run for you? $297/month · custom $4,000–6,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "payroll-automation-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Schedule Trigger (daily)\n2. HTTP Request: Collect period inputs\n3. Code: Normalise into one employee ledger\n4. IF: Validate against policy\n5. AI Agent: Anomaly review\n6. Slack: Send the exceptions report\n7. Wait: Wait for approval\n8. HTTP Request: Push the run to the provider\n9. Compare Datasets: Reconcile after the run\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "payroll-automation-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

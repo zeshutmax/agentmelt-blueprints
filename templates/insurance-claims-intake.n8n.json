@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Insurance Claims Intake Workflow",
+  "name": "Intake insurance claims from email and portal submissions with Claude",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Intake insurance claims from email and portal submissions with Claude\n\n**Who's it for**\nClaims teams that re-key first notice of loss from emails, forms and call notes.\n\n**How it works**\nTrigger: Emails to claims@, portal and app submissions via webhook, and call-centre transcripts from the telephony platform.\n1. Capture the notice\n2. Extract the facts\n3. Verify policy and coverage\n4. Triage severity and complexity\n5. Screen fraud indicators\n6. Route\n7. Acknowledge the claimant\n8. Create the file and assign\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Claims system (Guidewire ClaimCenter, Duck Creek, Snapsheet, in-house), Policy admin, Telephony (Five9, Talkdesk) (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nDefine the claim types and the required documents in the Config node; point the write-back at your claims system. Keep the guardrail: Coverage determinations and claim decisions are made by adjusters; the workflow verifies and summarises.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/insurance-claims-intake/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "insurance-claims-intake-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Insurance Claims Intake Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Emails to claims@, portal and app submissions via webhook, and call-centre transcripts from the telephony platform.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Coverage determinations and claim decisions are made by adjusters; the workflow verifies and summarises.\n   - Fraud indicators are flagged with evidence for SIU review, never used to deny or delay a claim automatically.\n   - Claimant communications are approved by a person for complex or injury claims.\n   - Every automated step is logged on the claim file for regulatory audit.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/insurance-claims-intake/\nWant it built and run for you? $297/month · custom $8,000–15,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "insurance-claims-intake-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Webhook: Capture the notice\n2. Information Extractor: Extract the facts\n3. HTTP Request: Verify policy and coverage\n4. Code: Triage severity and complexity\n5. AI Agent: Screen fraud indicators\n6. Switch: Route\n7. Gmail: Acknowledge the claimant\n8. HTTP Request: Create the file and assign\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "insurance-claims-intake-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

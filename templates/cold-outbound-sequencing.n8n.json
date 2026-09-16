@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Cold Outbound Automation",
+  "name": "Personalize cold outbound from Apollo lists with Claude and send via Instantly",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Personalize cold outbound from Apollo lists with Claude and send via Instantly\n\n**Who's it for**\nSales teams that send templated sequences and get templated results.\n\n**How it works**\nTrigger: A daily run selects the next batch from the list; the sending tool's webhooks report replies, bounces and unsubscribes in real time.\n1. Build the batch\n2. Research each account\n3. Write the first line and email\n4. Quality gate\n5. Load into the sequencer\n6. Detect replies and classify\n7. Hand to a rep\n8. Report by angle and segment\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Apollo / Clay, Instantly / Smartlead / Lemlist, HubSpot / Salesforce (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet the daily batch size and the personalization rules in the Config node; swap Instantly for Smartlead or Lemlist. Keep the guardrail: Daily volume per mailbox is capped and warm-up is respected; the workflow never sends outside the sequencer's limits.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/cold-outbound-sequencing/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "cold-outbound-sequencing-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Cold Outbound Automation\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: A daily run selects the next batch from the list; the sending tool's webhooks report replies, bounces and unsubscribes in real time.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Daily volume per mailbox is capped and warm-up is respected; the workflow never sends outside the sequencer's limits.\n   - Emails that fail the specificity check are not sent; generic filler is worse than silence.\n   - Any human reply stops the sequence immediately; unsubscribes are honoured across all lists.\n   - Suppression lists (customers, open deals, competitors, opt-outs) are applied before research spends any credits.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/cold-outbound-sequencing/\nWant it built and run for you? $297/month · custom $4,000–7,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "cold-outbound-sequencing-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Schedule Trigger (daily)\n2. HTTP Request: Build the batch\n3. AI Agent: Research each account\n4. AI Agent: Write the first line and email\n5. IF: Quality gate\n6. HTTP Request: Load into the sequencer\n7. Webhook: Detect replies and classify\n8. Slack: Hand to a rep\n9. Schedule Trigger: Report by angle and segment\n10. Code: Report by angle and segment\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "cold-outbound-sequencing-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

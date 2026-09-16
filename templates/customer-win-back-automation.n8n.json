@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Customer Win-Back Workflow",
+  "name": "Win back churned customers from Stripe and HubSpot with Claude-written emails",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Win back churned customers from Stripe and HubSpot with Claude-written emails\n\n**Who's it for**\nSaaS growth teams that never contact churned accounts again, even when the reason they left is fixed.\n\n**How it works**\nTrigger: Weekly scan of churned accounts against triggers; release-notes webhook or a manual trigger when a feature ships; seasonal calendar for seasonal businesses.\n1. Build the churned segment\n2. Classify the reason\n3. Match triggers to segments\n4. Draft the message\n5. Approve high-value sends\n6. Send and route replies\n7. Track reactivation\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Stripe / Chargebee + HubSpot, Gmail / Customer.io (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nDefine the win-back triggers and the offer rules in the Config node; send through Customer.io or Gmail. Keep the guardrail: Excluded segments (business closed, requested no contact, poor fit) never receive win-back messages.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/customer-win-back-automation/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "customer-win-back-automation-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Customer Win-Back Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Weekly scan of churned accounts against triggers; release-notes webhook or a manual trigger when a feature ships; seasonal calendar for seasonal businesses.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Excluded segments (business closed, requested no contact, poor fit) never receive win-back messages.\n   - One win-back message per account per quarter unless they reply.\n   - Offers come only from the approved set; the agent picks, it never invents a discount.\n   - High-value accounts require owner approval before sending.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/customer-win-back-automation/\nWant it built and run for you? $197/month · custom $2,000–3,500 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "customer-win-back-automation-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Schedule Trigger (weekly)\n2. HTTP Request: Build the churned segment\n3. Text Classifier: Classify the reason\n4. Code: Match triggers to segments\n5. AI Agent: Draft the message\n6. Wait: Approve high-value sends\n7. Gmail: Send and route replies\n8. HubSpot: Track reactivation\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "customer-win-back-automation-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

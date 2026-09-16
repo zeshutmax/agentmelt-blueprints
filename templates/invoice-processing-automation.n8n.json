@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Invoice Processing Automation Workflow",
+  "name": "Extract supplier invoices from Gmail with Claude and post them to Xero for approval",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Extract supplier invoices from Gmail with Claude and post them to Xero for approval\n\n**Who's it for**\nAccountants, bookkeepers and AP teams that key invoices in by hand and chase approvals by email.\n\n**How it works**\nTrigger: New attachments to ap@ start the run; supplier portals and scanned batches are polled hourly.\n1. Capture the invoice\n2. Extract fields\n3. Validate and detect duplicates\n4. Match to PO and receipt\n5. Route exceptions and approvals\n6. Approve on the phone\n7. Post to the ERP\n8. Supplier status replies\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus NetSuite / Xero / QuickBooks / Sage, Slack / email, Google Drive / S3 (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet the coding rules and the approval thresholds in the Config node; swap Xero for QuickBooks, NetSuite or Sage. Keep the guardrail: Bank-detail changes never post automatically; they trigger a verification call with the supplier.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/invoice-processing-automation/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "invoice-processing-automation-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Invoice Processing Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: New attachments to ap@ start the run; supplier portals and scanned batches are polled hourly.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Bank-detail changes never post automatically; they trigger a verification call with the supplier.\n   - Auto-approval applies only to PO-matched invoices within tolerance and policy limits; everything else has a named approver.\n   - Duplicates are blocked before posting, not caught at month end.\n   - Low-confidence extractions are reviewed by a person before matching.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/invoice-processing-automation/\nWant it built and run for you? $297/month · custom $5,000–9,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "invoice-processing-automation-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Gmail Trigger: Capture the invoice\n2. Information Extractor: Extract fields\n3. Code: Validate and detect duplicates\n4. HTTP Request: Match to PO and receipt\n5. Switch: Route exceptions and approvals\n6. Slack approval: Approve on the phone\n7. HTTP Request: Post to the ERP\n8. AI Agent: Supplier status replies\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "invoice-processing-automation-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

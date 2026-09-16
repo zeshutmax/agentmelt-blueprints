@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Employee Onboarding Automation Workflow",
+  "name": "Onboard new hires from BambooHR to Slack, Jira and DocuSign with Claude",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Onboard new hires from BambooHR to Slack, Jira and DocuSign with Claude\n\n**Who's it for**\nHR and people-ops teams that build every new hire's checklist, accounts and paperwork by hand.\n\n**How it works**\nTrigger: BambooHR, Rippling, Workday or Personio sends a webhook when a candidate's status becomes Hired.\n1. Receive the new-hire event\n2. Build the checklist for this role\n3. Create the tracking board\n4. Request accounts and equipment\n5. Send documents for signature\n6. Schedule the first two weeks\n7. Run the welcome sequence\n8. Answer policy questions\n9. Chase overdue tasks and check in\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus BambooHR / Rippling / Workday, Notion / Jira / Google Sheets, DocuSign / PandaDoc, Slack / Microsoft Teams (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nEdit the role-to-checklist mapping in the Config node and add your own account-provisioning nodes (Okta, Google Workspace) after the approval step. Keep the guardrail: The AI agent answers only from the handbook and cites the page; it refuses pay, performance and grievance topics and routes them to HR.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/employee-onboarding-automation/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "employee-onboarding-automation-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Employee Onboarding Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: BambooHR, Rippling, Workday or Personio sends a webhook when a candidate's status becomes Hired. A fallback Schedule Trigger polls the HRIS every hour for platforms without webhooks.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - The AI agent answers only from the handbook and cites the page; it refuses pay, performance and grievance topics and routes them to HR.\n   - Account provisioning is requested, never executed, by the workflow — IT approves in their own tool.\n   - Personal data stays in the HRIS; the workflow passes identifiers, not copies of documents.\n   - Every automated message is logged on the hire's board so HR can see exactly what was sent.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/employee-onboarding-automation/\nWant it built and run for you? $247/month · custom $3,500–5,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "employee-onboarding-automation-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Webhook: Receive the new-hire event\n2. Set: Build the checklist for this role\n3. Notion: Create the tracking board\n4. HTTP Request: Request accounts and equipment\n5. HTTP Request: Send documents for signature\n6. Google Calendar: Schedule the first two weeks\n7. Gmail: Run the welcome sequence\n8. AI Agent: Answer policy questions\n9. Schedule Trigger: Chase overdue tasks and check in\n10. Code: Chase overdue tasks and check in\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "employee-onboarding-automation-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

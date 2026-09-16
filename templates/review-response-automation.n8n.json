@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Review Response Automation Workflow",
+  "name": "Draft replies to Google reviews with Claude and approve them in Slack",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Draft replies to Google reviews with Claude and approve them in Slack\n\n**Who's it for**\nLocal businesses and franchises that answer reviews late, or only the bad ones.\n\n**How it works**\nTrigger: Polls each platform's API or a review-aggregation provider hourly; negative reviews trigger immediate alerts.\n1. Collect new reviews\n2. Classify\n3. Fetch context\n4. Draft the response\n5. Route negatives to a person first\n6. Approve and post\n7. Track resolution\n8. Monthly insight report\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Google Business Profile API / Birdeye / Podium, Slack / SMS (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet your tone rules and the escalation words in the Config node; connect Birdeye or Podium if you aggregate reviews there. Keep the guardrail: Negative and sensitive reviews are never answered publicly without a person's approval.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/review-response-automation/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "review-response-automation-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Review Response Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Polls each platform's API or a review-aggregation provider hourly; negative reviews trigger immediate alerts.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Negative and sensitive reviews are never answered publicly without a person's approval.\n   - Replies never dispute facts in public, mention other customers, or reveal personal data.\n   - Positive-review auto-posting is enabled only after a calibration period and can be turned off per location.\n   - Platform rules (no incentives, no soliciting removal) are enforced in the response rules.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/review-response-automation/\nWant it built and run for you? $197/month · custom $2,000–3,500 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "review-response-automation-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Schedule Trigger (hourly)\n2. HTTP Request: Collect new reviews\n3. Text Classifier: Classify\n4. HTTP Request: Fetch context\n5. AI Agent: Draft the response\n6. IF: Route negatives to a person first\n7. Wait: Approve and post\n8. Google Sheets: Track resolution\n9. AI Agent: Monthly insight report\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "review-response-automation-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

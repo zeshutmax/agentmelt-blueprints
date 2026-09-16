@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Customer Onboarding Automation Workflow",
+  "name": "Guide new signups to activation with Claude using Segment and HubSpot",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Guide new signups to activation with Claude using Segment and HubSpot\n\n**Who's it for**\nProduct and success teams whose new customers stall between signup and first value.\n\n**How it works**\nTrigger: The product or billing system posts new signups; a daily Schedule Trigger evaluates every account still in onboarding against milestone deadlines.\n1. Register the new account\n2. Track milestones from product events\n3. Detect stalls\n4. Send the right nudge\n5. Answer setup questions\n6. Escalate to a person\n7. Celebrate activation and hand over\n8. Report the funnel\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Segment / Mixpanel / PostHog, HubSpot / Intercom (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet the milestones and the nudge timing in the Config node; replace Segment with Mixpanel or PostHog. Keep the guardrail: Nudges are sent only on stalls, with a cap of one per milestone; no message for customers making progress.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/customer-onboarding-automation/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "customer-onboarding-automation-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Customer Onboarding Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: The product or billing system posts new signups; a daily Schedule Trigger evaluates every account still in onboarding against milestone deadlines.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Nudges are sent only on stalls, with a cap of one per milestone; no message for customers making progress.\n   - The setup-question agent answers from documentation with citations and escalates unknowns.\n   - High-value accounts get a person on the first stall, not the third.\n   - Every automated message is logged on the account so the CSM sees the full history.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/customer-onboarding-automation/\nWant it built and run for you? $247/month · custom $3,500–6,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "customer-onboarding-automation-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Webhook: Register the new account\n2. HTTP Request: Track milestones from product events\n3. IF: Detect stalls\n4. AI Agent: Send the right nudge\n5. AI Agent: Answer setup questions\n6. Slack: Escalate to a person\n7. HubSpot: Celebrate activation and hand over\n8. Schedule Trigger: Report the funnel\n9. Code: Report the funnel\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "customer-onboarding-automation-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

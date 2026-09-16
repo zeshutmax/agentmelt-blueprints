@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — IT Helpdesk Automation Workflow",
+  "name": "Resolve IT requests from Slack with Claude, Okta and Jira Service Management",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Resolve IT requests from Slack with Claude, Okta and Jira Service Management\n\n**Who's it for**\nSmall IT teams that answer password resets and access requests all day.\n\n**How it works**\nTrigger: Messages to the IT bot or #it-help channel, and new tickets in Jira Service Management, Freshservice or ServiceNow.\n1. Receive the request\n2. Classify the request\n3. Answer from the knowledge base\n4. Self-service actions with approval\n5. Execute through the systems\n6. Create or update the ticket\n7. Route unresolved requests\n8. Improve the knowledge base\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Okta / Entra ID / Google Workspace, Jamf / Intune, Jira Service Management / Freshservice (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nEdit the request types and the self-service rules in the Config node; add Jamf or Intune for device actions. Keep the guardrail: Identity is taken from the chat platform's SSO, never from the message; sensitive actions require a fresh MFA step.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/it-helpdesk-automation/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "it-helpdesk-automation-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## IT Helpdesk Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Messages to the IT bot or #it-help channel, and new tickets in Jira Service Management, Freshservice or ServiceNow.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Identity is taken from the chat platform's SSO, never from the message; sensitive actions require a fresh MFA step.\n   - Access grants always require manager (or app owner) approval recorded in the ticket; privileged groups are excluded from self-service.\n   - Every automated action is logged with requester, approver and timestamp for audit.\n   - Outage reports and security concerns bypass the bot and go straight to the on-call engineer.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/it-helpdesk-automation/\nWant it built and run for you? $297/month · custom $5,000–9,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "it-helpdesk-automation-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Webhook: Receive the request\n2. Text Classifier: Classify the request\n3. AI Agent: Answer from the knowledge base\n4. Switch: Self-service actions with approval\n5. HTTP Request: Execute through the systems\n6. Jira: Create or update the ticket\n7. Slack: Route unresolved requests\n8. Schedule Trigger: Improve the knowledge base\n9. Code: Improve the knowledge base\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "it-helpdesk-automation-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

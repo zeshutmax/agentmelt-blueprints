@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Client Intake Automation Workflow",
+  "name": "Intake new client enquiries from Gmail with Claude into Clio and DocuSign",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Intake new client enquiries from Gmail with Claude into Clio and DocuSign\n\n**Who's it for**\nLaw firms and professional practices that reply to enquiries a day late and re-key them into the practice system.\n\n**How it works**\nTrigger: An email to the intake address, a website form submission, or a phone note typed into the shared inbox starts intake for that enquiry.\n1. Receive the enquiry\n2. Classify the matter\n3. Extract the conflict-check facts\n4. Run the conflict check\n5. Acknowledge\n6. Draft the next document\n7. Approve\n8. Open the matter\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Clio / PracticePanther, Gmail / Outlook, DocuSign / PandaDoc (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nDefine the practice areas and the conflict-check questions in the Config node; swap Clio for PracticePanther. Keep the guardrail: Nothing is sent to an enquirer except the acknowledgement until a person approves; no advice or fee is ever quoted automatically.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/client-intake-automation/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "client-intake-automation-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Client Intake Automation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: An email to the intake address, a website form submission, or a phone note typed into the shared inbox starts intake for that enquiry.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Nothing is sent to an enquirer except the acknowledgement until a person approves; no advice or fee is ever quoted automatically.\n   - Conflict results are shown with their evidence; a hit blocks the engagement letter until a person clears it.\n   - Enquiry content is processed through an API with no data retention and stored only in the firm's own systems.\n   - Out-of-scope or conflicted matters get a courteous decline drafted for approval, never an automatic one.\n   - Every intake keeps an audit line: received, classified, checked, approved by whom, when.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/client-intake-automation/\nWant it built and run for you? $247/month · custom $3,500–6,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "client-intake-automation-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Gmail Trigger: Receive the enquiry\n2. AI Agent: Classify the matter\n3. AI Agent: Extract the conflict-check facts\n4. Code: Run the conflict check\n5. Gmail: Acknowledge\n6. AI Agent: Draft the next document\n7. Slack approval: Approve\n8. HTTP Request: Open the matter\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "client-intake-automation-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

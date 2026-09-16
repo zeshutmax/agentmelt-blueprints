@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Automated Code Review Workflow",
+  "name": "Review GitHub pull requests with Claude and post findings as PR comments",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Review GitHub pull requests with Claude and post findings as PR comments\n\n**Who's it for**\nEngineering teams that want a consistent first-pass review on every pull request before a human looks.\n\n**How it works**\nTrigger: pull_request opened, synchronize and ready_for_review events; draft PRs are skipped unless labelled.\n1. Receive the PR event\n2. Fetch the diff and context\n3. Run static checks\n4. Analyse the change\n5. Filter to what matters\n6. Post inline comments and summary\n7. Label and route\n8. Learn from resolutions\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus GitHub / GitLab, CI (GitHub Actions, GitLab CI), Linear / Jira (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nTune the severity threshold and the file globs in the Config node; add a Linear or Jira node to open tickets for blocking findings. Keep the guardrail: The workflow never approves or merges; it reviews and labels.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/automated-code-review/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "automated-code-review-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Automated Code Review Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: pull_request opened, synchronize and ready_for_review events; draft PRs are skipped unless labelled.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - The workflow never approves or merges; it reviews and labels. A human approval remains required.\n   - Comments are posted only for concrete findings with reasoning; style nits go to the summary or nowhere.\n   - Code is sent to the model provider under your data-processing terms; repositories can be excluded, and self-hosted models are an option for sensitive code.\n   - High-risk areas require a named human reviewer regardless of the automated verdict.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/automated-code-review/\nWant it built and run for you? $247/month · custom $3,500–6,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "automated-code-review-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Webhook: Receive the PR event\n2. HTTP Request: Fetch the diff and context\n3. Code: Run static checks\n4. AI Agent: Analyse the change\n5. IF: Filter to what matters\n6. HTTP Request: Post inline comments and summary\n7. HTTP Request: Label and route\n8. Schedule Trigger: Learn from resolutions\n9. Code: Learn from resolutions\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "automated-code-review-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Security Alert Triage Workflow",
+  "name": "Triage SIEM alerts with Claude, enrich with VirusTotal and page on-call via Slack",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Triage SIEM alerts with Claude, enrich with VirusTotal and page on-call via Slack\n\n**Who's it for**\nSmall security teams drowning in alerts from Splunk, Sentinel or CrowdStrike.\n\n**How it works**\nTrigger: Splunk, Sentinel, Elastic, CrowdStrike, SentinelOne, Wazuh or Google SecOps posts new alerts; a polling fallback exists for tools without webhooks.\n1. Receive and normalise the alert\n2. Enrich entities\n3. Correlate with recent activity\n4. Score and classify\n5. Analyst-style assessment\n6. Auto-close or queue\n7. Notify and escalate\n8. Weekly tuning report\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Splunk / Sentinel / CrowdStrike, VirusTotal / AbuseIPDB / MISP, Slack / PagerDuty (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nEdit the severity rules and the enrichment sources in the Config node; add PagerDuty for critical findings. Keep the guardrail: The workflow never takes containment actions (isolate host, disable user) on its own; it recommends and a human executes, or a separate approved playbook runs with explicit authorisation.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/security-alert-triage/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "security-alert-triage-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Security Alert Triage Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Splunk, Sentinel, Elastic, CrowdStrike, SentinelOne, Wazuh or Google SecOps posts new alerts; a polling fallback exists for tools without webhooks.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - The workflow never takes containment actions (isolate host, disable user) on its own; it recommends and a human executes, or a separate approved playbook runs with explicit authorisation.\n   - Auto-closed alerts keep the full enrichment and reason and are sampled weekly for false-negative review.\n   - Critical patterns bypass scoring and page immediately.\n   - The allowlist is versioned, owned by the security lead, and every match is logged.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/security-alert-triage/\nWant it built and run for you? $297/month · custom $6,000–12,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "security-alert-triage-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Webhook: Receive and normalise the alert\n2. HTTP Request: Enrich entities\n3. Postgres: Correlate with recent activity\n4. Code: Score and classify\n5. AI Agent: Analyst-style assessment\n6. Switch: Auto-close or queue\n7. Slack: Notify and escalate\n8. Schedule Trigger: Weekly tuning report\n9. Code: Weekly tuning report\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "security-alert-triage-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

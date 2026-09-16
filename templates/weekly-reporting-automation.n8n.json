@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Weekly Reporting Workflow",
+  "name": "Compile a weekly report from BigQuery with Claude into Google Docs and Slack",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Compile a weekly report from BigQuery with Claude into Google Docs and Slack\n\n**Who's it for**\nOperations leads who spend Monday morning assembling the same report from five dashboards.\n\n**How it works**\nTrigger: Weekly run after data sources have closed the week; on-demand run for ad-hoc periods.\n1. Run the metric queries\n2. Assemble the metrics table\n3. Pull context\n4. Draft the narrative\n5. Render the report\n6. Approve\n7. Distribute\n8. Maintain the catalogue\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus BigQuery / Snowflake / Postgres, Google Docs + Slack (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nList the metrics and their queries in the Config node; replace BigQuery with Snowflake or Postgres. Keep the guardrail: Every number in the narrative must appear in the metrics table; the agent cannot introduce figures.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/weekly-reporting-automation/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "weekly-reporting-automation-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Weekly Reporting Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Weekly run after data sources have closed the week; on-demand run for ad-hoc periods.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Every number in the narrative must appear in the metrics table; the agent cannot introduce figures.\n   - Causal claims are phrased as likely and tied to a context event; where no event exists the narrative says the cause is unknown.\n   - The report is approved by its owner before distribution.\n   - Broken or missing metrics are flagged in the report, never silently omitted.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/weekly-reporting-automation/\nWant it built and run for you? $197/month · custom $2,000–4,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "weekly-reporting-automation-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Schedule Trigger (daily)\n2. Postgres: Run the metric queries\n3. Code: Assemble the metrics table\n4. HTTP Request: Pull context\n5. AI Agent: Draft the narrative\n6. Google Docs: Render the report\n7. Wait: Approve\n8. Slack: Distribute\n9. Google Sheets: Maintain the catalogue\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "weekly-reporting-automation-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

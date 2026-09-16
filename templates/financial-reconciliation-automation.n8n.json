@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Financial Reconciliation Workflow",
+  "name": "Reconcile Stripe payouts against NetSuite with Claude and flag exceptions in Slack",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Reconcile Stripe payouts against NetSuite with Claude and flag exceptions in Slack\n\n**Who's it for**\nFinance teams that match bank feeds, processor payouts and the ledger in spreadsheets every morning.\n\n**How it works**\nTrigger: Daily run at 6am after bank and processor feeds update; on-demand run before close.\n1. Pull the three sides\n2. Match deterministically\n3. Classify the breaks\n4. Explain the unknowns\n5. Route for approval\n6. Post approved entries\n7. Maintain the reconciliation file\n8. Close-readiness report\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing, and the write-back waits for an approval in Slack or Gmail.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus NetSuite / Xero / QuickBooks, Stripe / Adyen + Plaid (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSet the matching tolerances and the exception owners in the Config node; swap NetSuite for Xero or QuickBooks. Keep the guardrail: Nothing posts to the ledger without an accountant's approval; auto-matching only marks, it does not create entries.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/financial-reconciliation-automation/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "financial-reconciliation-automation-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Financial Reconciliation Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Daily run at 6am after bank and processor feeds update; on-demand run before close.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Nothing posts to the ledger without an accountant's approval; auto-matching only marks, it does not create entries.\n   - The agent explains; it never proposes an amount that is not derivable from the data.\n   - Every posted entry carries the match evidence and approver for audit.\n   - Aged open items escalate automatically so nothing hides until close.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/financial-reconciliation-automation/\nWant it built and run for you? $297/month · custom $5,000–9,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "financial-reconciliation-automation-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Schedule Trigger (daily)\n2. HTTP Request: Pull the three sides\n3. Code: Match deterministically\n4. Code: Classify the breaks\n5. AI Agent: Explain the unknowns\n6. Slack approval: Route for approval\n7. HTTP Request: Post approved entries\n8. Google Sheets: Maintain the reconciliation file\n9. Schedule Trigger: Close-readiness report\n10. Code: Close-readiness report\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "financial-reconciliation-automation-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

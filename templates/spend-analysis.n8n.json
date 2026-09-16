@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — AI Spend Analysis Workflow",
+  "name": "Classify AP and PO lines with Claude and build a spend cube in Postgres",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Classify AP and PO lines with Claude and build a spend cube in Postgres\n\n**Who's it for**\nProcurement and finance teams that want category-level spend visibility without a six-figure spend-analytics suite.\n\n**How it works**\nTrigger: Runs after accounts payable closes the month.\n1. Extract AP and PO lines\n2. Normalise suppliers\n3. Classify each line\n4. Learn from corrections\n5. Build the spend cube\n6. Detect opportunities\n7. Write the opportunity briefs\n8. Publish and track\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Postgres / BigQuery, Looker / Power BI / Metabase, Google Sheets (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nSwap the category taxonomy in the Config node for your own (UNSPSC or in-house), and point the reporting node at Looker, Power BI or a Google Sheet. Keep the guardrail: Classification below the confidence threshold is reviewed by a person before it enters the cube.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/spend-analysis/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "spend-analysis-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## AI Spend Analysis Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Runs after accounts payable closes the month. A weekly incremental run classifies new invoices so the cube is never more than a week behind.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Classification below the confidence threshold is reviewed by a person before it enters the cube.\n   - Supplier merges are logged and reversible; tax-ID matches are the only automatic merges.\n   - The AI agent drafts briefs; savings are only reported as realised when finance confirms them.\n   - Source lines are never altered — the cube is a derived table with a run id.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/spend-analysis/\nWant it built and run for you? $297/month · custom $6,000–12,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "spend-analysis-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Schedule Trigger (monthly)\n2. Postgres: Extract AP and PO lines\n3. Code: Normalise suppliers\n4. Information Extractor: Classify each line\n5. Google Sheets: Learn from corrections\n6. Postgres: Build the spend cube\n7. Code: Detect opportunities\n8. AI Agent: Write the opportunity briefs\n9. Slack: Publish and track\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "spend-analysis-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

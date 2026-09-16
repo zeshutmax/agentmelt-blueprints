@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Insurance Underwriting Intake Workflow",
+  "name": "Extract broker submissions from Gmail with Claude and triage them for underwriters",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Extract broker submissions from Gmail with Claude and triage them for underwriters\n\n**Who's it for**\nCommercial underwriting teams that key submissions from email into the workbench by hand.\n\n**How it works**\nTrigger: New emails to submissions@ with attachments; portal submissions arrive as webhooks.\n1. Capture and classify attachments\n2. Extract application data\n3. Check completeness\n4. Pull third-party data\n5. Apply appetite rules\n6. Indicative rating\n7. Assemble the file and questions\n8. Queue and track\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Policy admin / workbench (Duck Creek, Guidewire, Applied, or in-house), Third-party data providers, Outlook / Gmail (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nDefine the appetite rules and the required-fields list in the Config node; point the write-back node at your policy admin system. Keep the guardrail: No binding decisions are automated; the workflow triages and prepares.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/insurance-underwriting-intake/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "insurance-underwriting-intake-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Insurance Underwriting Intake Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: New emails to submissions@ with attachments; portal submissions arrive as webhooks.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - No binding decisions are automated; the workflow triages and prepares. Declines outside appetite are drafted and sent after a human click unless the carrier chooses to automate below a threshold.\n   - Every extracted field carries confidence; low-confidence fields are highlighted for verification before rating.\n   - Appetite and rating rules are versioned and owned by underwriting management, not embedded in prompts.\n   - Sanctions screening is mandatory and blocks progress on a hit.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/insurance-underwriting-intake/\nWant it built and run for you? $297/month · custom $8,000–15,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "insurance-underwriting-intake-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Gmail Trigger: Capture and classify attachments\n2. Information Extractor: Extract application data\n3. Code: Check completeness\n4. HTTP Request: Pull third-party data\n5. IF: Apply appetite rules\n6. Code: Indicative rating\n7. AI Agent: Assemble the file and questions\n8. HTTP Request: Queue and track\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "insurance-underwriting-intake-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

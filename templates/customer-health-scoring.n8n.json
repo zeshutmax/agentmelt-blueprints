@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Customer Health Scoring Workflow",
+  "name": "Score customer health from Mixpanel and Zendesk data with Claude into HubSpot",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Score customer health from Mixpanel and Zendesk data with Claude into HubSpot\n\n**Who's it for**\nCustomer-success teams that manage renewals from gut feel and a quarterly spreadsheet.\n\n**How it works**\nTrigger: Weekly scoring; immediate re-score on high-severity events such as a champion's user being deactivated, a payment failure, or a very negative ticket.\n1. Collect the components\n2. Score each component\n3. Analyse ticket sentiment\n4. Compute score and trend\n5. Detect drops and thresholds\n6. Draft the intervention\n7. Alert the owner and update the CRM\n8. Calibrate quarterly\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Mixpanel / Amplitude / PostHog, Zendesk / Intercom, HubSpot / Salesforce (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nAdjust the score inputs and thresholds in the Config node; swap Mixpanel for Amplitude and HubSpot for Salesforce. Keep the guardrail: Scores show their components; no black-box number.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/customer-health-scoring/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "customer-health-scoring-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Customer Health Scoring Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Weekly scoring; immediate re-score on high-severity events such as a champion's user being deactivated, a payment failure, or a very negative ticket.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - Scores show their components; no black-box number.\n   - Alerts are suppressed for accounts already in a save play, so CSMs are not double-pinged.\n   - Outreach is drafted for a person to send; nothing goes to the customer automatically.\n   - The score is calibrated against real churn quarterly, and the calibration report is visible to leadership.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/customer-health-scoring/\nWant it built and run for you? $297/month · custom $4,500–8,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "customer-health-scoring-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Schedule Trigger (weekly)\n2. HTTP Request: Collect the components\n3. Code: Score each component\n4. Sentiment Analysis: Analyse ticket sentiment\n5. Code: Compute score and trend\n6. IF: Detect drops and thresholds\n7. AI Agent: Draft the intervention\n8. Slack: Alert the owner and update the CRM\n9. Schedule Trigger: Calibrate quarterly\n10. Code: Calibrate quarterly\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "customer-health-scoring-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {

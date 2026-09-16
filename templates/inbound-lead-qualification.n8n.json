@@ -1,12 +1,28 @@
 {
-  "name": "Agentmelt — Inbound Lead Qualification Workflow",
+  "name": "Qualify inbound leads from HubSpot forms with Clay and Claude and book meetings",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## Qualify inbound leads from HubSpot forms with Clay and Claude and book meetings\n\n**Who's it for**\nSales teams that reply to demo requests hours later and qualify by hand.\n\n**How it works**\nTrigger: Any form submission or demo request posts to the workflow; chat-widget conversations and inbound emails to sales@ use the same path.\n1. Receive the submission\n2. Enrich\n3. Score against the ICP\n4. Read the message\n5. Route\n6. Notify the rep with context\n7. Update the CRM\n8. Follow up on silence\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items instead of guessing.\n\n**How to set up**\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials to each service node.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n**Requirements**\nAn Anthropic API key for the Claude nodes, plus Clay / Apollo / Clearbit, HubSpot / Salesforce, Slack + Calendly (or their equivalents — the nodes are standard and easy to swap).\n\n**How to customize the workflow**\nEdit the qualification criteria and the routing rules in the Config node; swap Clay for Apollo or Clearbit. Keep the guardrail: The first reply commits to nothing: no pricing, no availability, no promises — it acknowledges and asks.\n\nFull blueprint with trigger, steps, guardrails and where the standard version stops: https://agentmelt.com/workflows/inbound-lead-qualification/",
+        "height": 900,
+        "width": 620,
+        "color": 1
+      },
+      "id": "inbound-lead-qualification-about",
+      "name": "About this template",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -420
+      ]
+    },
     {
       "parameters": {
         "content": "## Inbound Lead Qualification Workflow\n\nStarter template from agentmelt.com — configure before running:\n\n1. Fill in \"Config (edit me)\" (name, approver, quiet hours; test_mode stays on for the first week).\n2. Add credentials to every service node (Anthropic, mail, CRM, database…).\n3. Replace placeholder URLs, queries and field mappings with yours.\n4. Set the trigger: Any form submission or demo request posts to the workflow; chat-widget conversations and inbound emails to sales@ use the same path.\n5. Keep the gates: 'Needs a person?' after every AI step, 'Approved?' after the approval — wire their dead ends to a sheet or a channel.\n6. Keep the guardrails:\n   - The first reply commits to nothing: no pricing, no availability, no promises — it acknowledges and asks.\n   - Free-mail and suspicious submissions are never enriched with paid credits.\n   - Reps can override routing; overrides are logged and feed the threshold review.\n   - Response-time and meeting-rate by score band are reported monthly to check the ICP model.\n\nFull blueprint and pricing: https://agentmelt.com/workflows/inbound-lead-qualification/\nWant it built and run for you? $247/month · custom $3,000–5,000 one-time",
         "height": 520,
         "width": 460,
-        "color": 4
+        "color": 7
       },
       "id": "inbound-lead-qualification-note",
       "name": "Read me first",
@@ -15,6 +31,22 @@
       "position": [
         -520,
         40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Steps\n\n1. Webhook: Receive the submission\n2. HTTP Request: Enrich\n3. Code: Score against the ICP\n4. AI Agent: Read the message\n5. Switch: Route\n6. Slack: Notify the rep with context\n7. HubSpot: Update the CRM\n8. Wait: Follow up on silence\n\nEvery AI step is followed by \"Needs a person?\"; the write-back waits for \"Approved?\" where the blueprint has an approval step.",
+        "height": 360,
+        "width": 460,
+        "color": 7
+      },
+      "id": "inbound-lead-qualification-steps",
+      "name": "Step outline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -360
       ]
     },
     {
