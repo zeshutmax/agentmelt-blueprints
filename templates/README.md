@@ -69,4 +69,4 @@ The blueprint page for each template explains the trigger, the steps, the guardr
 | [Lead Nurture](./lead-nurture-automation.n8n.json) | Sales | [blueprint](./make/lead-nurture-automation.make.json) | https://agentmelt.com/workflows/lead-nurture-automation/ |
 | [Speed-to-Lead](./speed-to-lead-automation.n8n.json) | Sales | [blueprint](./make/speed-to-lead-automation.make.json) | https://agentmelt.com/workflows/speed-to-lead-automation/ |
 
-Generated from the site data on 2026-09-16. Licence: use and adapt freely; the blueprint copy and kits stay © Agentmelt.
+Generated from the site data on 2026-09-17. Licence: use and adapt freely; the blueprint copy and kits stay © Agentmelt.
