@@ -380,7 +380,7 @@ Full blueprint with trigger, steps, guardrails and where the standard version st
 
 ---
 
-## Insurance Underwriting Intake
+## Automated Insurance Underwriting Intake
 
 **File:** `insurance-underwriting-intake.n8n.json`
 
@@ -968,7 +968,7 @@ Full blueprint with trigger, steps, guardrails and where the standard version st
 
 ---
 
-## Security Alert Triage
+## Automated Security Alert Triage
 
 **File:** `security-alert-triage.n8n.json`
 
@@ -1985,7 +1985,7 @@ Full blueprint with trigger, steps, guardrails and where the standard version st
 Real-estate agents and teams who lose portal leads to whoever answers first.
 
 **How it works**
-Trigger: A lead email from Zillow or Realtor.com, a website form submission, or a new-person webhook from Follow Up Boss or kvCORE starts the run.
+Trigger: A lead email from Zillow or Realtor.com, a website form submission, or a new person appearing in Follow Up Boss or kvCORE starts the run.
 1. Receive the lead
 2. Look up the lead in the CRM
 3. Qualify

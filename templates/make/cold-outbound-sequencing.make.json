@@ -3,22 +3,6 @@
   "flow": [
     {
       "id": 1,
-      "module": "gateway:CustomWebHook",
-      "version": 1,
-      "parameters": {
-        "maxResults": 1
-      },
-      "mapper": {},
-      "metadata": {
-        "designer": {
-          "x": 0,
-          "y": 0,
-          "name": "Webhook: Build the batch"
-        }
-      }
-    },
-    {
-      "id": 2,
       "module": "util:SetVariables",
       "version": 1,
       "parameters": null,
@@ -63,15 +47,45 @@
           },
           {
             "name": "config_schedule",
-            "value": "instant (webhook)"
+            "value": "scenario schedule: Schedule Trigger (daily batch) + reply event"
           }
         ]
       },
       "metadata": {
         "designer": {
-          "x": 300,
+          "x": 0,
           "y": 0,
           "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "http:MakeRequest",
+      "version": 4,
+      "parameters": {
+        "authenticationType": "apiKey"
+      },
+      "mapper": {
+        "url": "https://api.apollo.io/api/v1/mixed_people/search",
+        "method": "post",
+        "headers": [],
+        "queryParameters": [],
+        "parseResponse": true,
+        "stopOnHttpError": true,
+        "timeout": "",
+        "allowRedirects": true,
+        "shareCookies": false,
+        "requestCompressedContent": true,
+        "contentType": "json",
+        "inputMethod": "jsonString",
+        "jsonStringBodyContent": "{\n  \"person_titles\": \"{{ $json.titles }}\",\n  \"organization_num_employees_ranges\": \"{{ $json.size_ranges }}\",\n  \"page\": 1,\n  \"per_page\": 25\n}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Apollo API: Build the batch"
         }
       }
     },
@@ -89,7 +103,7 @@
             "content": [
               {
                 "type": "text",
-                "text": "Research each account.\n\nItem (map the fields your source provides here):\n{{1.text}}{{1.body}}{{1.message}}{{1.subject}}{{1.email}}{{1.name}}{{1.data}}"
+                "text": "Research each account.\n\nItem (map the fields your source provides here):\n{{2.text}}{{2.body}}{{2.message}}{{2.subject}}{{2.email}}{{2.name}}{{2.data}}"
               }
             ]
           }
@@ -355,7 +369,7 @@
                       "parameters": {},
                       "mapper": {
                         "channelType": "public",
-                        "channel": "{{2.config_approver}}",
+                        "channel": "{{1.config_approver}}",
                         "text": "{{6.summary}}",
                         "parseText": false,
                         "mrkdwn": true
@@ -400,7 +414,7 @@
     }
   ],
   "metadata": {
-    "instant": true,
+    "instant": false,
     "version": 1,
     "scenario": {
       "roundtrips": 1,
@@ -420,7 +434,7 @@
     "notes": [
       {
         "moduleIds": [
-          2
+          1
         ],
         "content": "## Personalize cold outbound from Apollo lists with Claude and send via Instantly\n\nSales teams that send templated sequences and get templated results.\n\n### How it works\nTrigger: A daily run selects the next batch from the list; the sending tool's webhooks report replies, bounces and unsubscribes in real time.\n1. Build the batch\n2. Research each account\n3. Write the first line and email\n4. Quality gate\n5. Load into the sequencer\n6. Detect replies and classify\n7. Hand to a rep\n8. Report by angle and segment\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Apollo / Clay, Instantly / Smartlead / Lemlist, HubSpot / Salesforce.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the daily batch size and the personalization rules in the Config node; swap Instantly for Smartlead or Lemlist.\nGuardrail to keep: Daily volume per mailbox is capped and warm-up is respected; the workflow never sends outside the sequencer's limits.\n\nFull blueprint: https://agentmelt.com/workflows/cold-outbound-sequencing/",
         "isFilterNote": false,

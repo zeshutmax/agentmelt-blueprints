@@ -3,22 +3,6 @@
   "flow": [
     {
       "id": 1,
-      "module": "gateway:CustomWebHook",
-      "version": 1,
-      "parameters": {
-        "maxResults": 1
-      },
-      "mapper": {},
-      "metadata": {
-        "designer": {
-          "x": 0,
-          "y": 0,
-          "name": "Webhook: Find upcoming external meetings"
-        }
-      }
-    },
-    {
-      "id": 2,
       "module": "util:SetVariables",
       "version": 1,
       "parameters": null,
@@ -63,15 +47,37 @@
           },
           {
             "name": "config_schedule",
-            "value": "instant (webhook)"
+            "value": "scenario schedule: Calendar scan (hourly) + meeting event"
           }
         ]
       },
       "metadata": {
         "designer": {
-          "x": 300,
+          "x": 0,
           "y": 0,
           "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "google-calendar:createAnEvent",
+      "version": 5,
+      "parameters": {},
+      "mapper": {
+        "calendar": "{{1.config_your_email}}",
+        "summary": "{{1.subject}}",
+        "start": "{{1.start}}",
+        "end": "{{1.end}}",
+        "allDay": false,
+        "visibility": "default",
+        "sendUpdates": "none"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Google Calendar: Find upcoming external meetings"
         }
       }
     },
@@ -81,7 +87,7 @@
       "version": 2,
       "parameters": {},
       "mapper": {
-        "contactId": "{{1.contactId}}"
+        "contactId": "{{2.contactId}}"
       },
       "metadata": {
         "designer": {
@@ -225,7 +231,7 @@
               "parameters": {},
               "mapper": {
                 "channelType": "public",
-                "channel": "{{2.config_approver}}",
+                "channel": "{{1.config_approver}}",
                 "text": "{{7.summary}}",
                 "parseText": false,
                 "mrkdwn": true
@@ -272,7 +278,7 @@
     }
   ],
   "metadata": {
-    "instant": true,
+    "instant": false,
     "version": 1,
     "scenario": {
       "roundtrips": 1,
@@ -292,7 +298,7 @@
     "notes": [
       {
         "moduleIds": [
-          2
+          1
         ],
         "content": "## Prepare meeting briefs from Google Calendar with Claude, HubSpot and Clay\n\nSales reps and founders who walk into external meetings with two minutes of research.\n\n### How it works\nTrigger: Google or Microsoft calendar scanned for meetings with external attendees in the next 24 hours; new bookings via webhook.\n1. Find upcoming external meetings\n2. Identify attendees and account\n3. Research the company\n4. Research the people\n5. Write the brief\n6. Deliver\n7. Capture the outcome\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus HubSpot / Salesforce, Clay / Apollo.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the lookahead window and the brief sections in the Config node; swap HubSpot for Salesforce.\nGuardrail to keep: Only public and first-party data; no scraping behind logins, no personal data beyond professional role.\n\nFull blueprint: https://agentmelt.com/workflows/meeting-prep-research/",
         "isFilterNote": false,

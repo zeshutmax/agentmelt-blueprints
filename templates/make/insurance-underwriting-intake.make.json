@@ -3,9 +3,12 @@
   "flow": [
     {
       "id": 1,
-      "module": "gateway:CustomWebHook",
-      "version": 1,
+      "module": "google-email:TriggerNewEmail",
+      "version": 2,
       "parameters": {
+        "searchType": "simple",
+        "criteria": "UNSEEN",
+        "markSeen": false,
         "maxResults": 1
       },
       "mapper": {},
@@ -13,7 +16,7 @@
         "designer": {
           "x": 0,
           "y": 0,
-          "name": "Webhook: Capture and classify attachments"
+          "name": "Gmail: Capture and classify attachments"
         }
       }
     },
@@ -63,7 +66,7 @@
           },
           {
             "name": "config_schedule",
-            "value": "instant (webhook)"
+            "value": "poll the inbox every 15 minutes"
           }
         ]
       },
@@ -82,7 +85,7 @@
       "parameters": {},
       "mapper": {
         "model": "claude-sonnet-5",
-        "system": "You are the \"Extract application data\" step of the Insurance Underwriting Intake Workflow workflow run by Agentmelt.\nTask: Insured details, operations description, revenue, employees, locations with construction/occupancy/protection data, requested limits and coverages, prior carrier and premium, loss history by year — with confidence per field.\n\nRules:\n- No binding decisions are automated; the workflow triages and prepares. Declines outside appetite are drafted and sent after a human click unless the carrier chooses to automate below a threshold.\n- Every extracted field carries confidence; low-confidence fields are highlighted for verification before rating.\n- Appetite and rating rules are versioned and owned by underwriting management, not embedded in prompts.\n- Sanctions screening is mandatory and blocks progress on a hit.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+        "system": "You are the \"Extract application data\" step of the Automated Insurance Underwriting Intake workflow run by Agentmelt.\nTask: Insured details, operations description, revenue, employees, locations with construction/occupancy/protection data, requested limits and coverages, prior carrier and premium, loss history by year — with confidence per field.\n\nRules:\n- No binding decisions are automated; the workflow triages and prepares. Declines outside appetite are drafted and sent after a human click unless the carrier chooses to automate below a threshold.\n- Every extracted field carries confidence; low-confidence fields are highlighted for verification before rating.\n- Appetite and rating rules are versioned and owned by underwriting management, not embedded in prompts.\n- Sanctions screening is mandatory and blocks progress on a hit.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
         "messages": [
           {
             "role": "user",
@@ -282,7 +285,7 @@
               "parameters": {},
               "mapper": {
                 "model": "claude-sonnet-5",
-                "system": "You are the \"Assemble the file and questions\" step of the Insurance Underwriting Intake Workflow workflow run by Agentmelt.\nTask: The agent writes the submission summary — the risk in one paragraph, key exposures, loss history narrative, third-party findings, indicative rating — and the specific questions an underwriter would ask this broker about this account.\n\nRules:\n- No binding decisions are automated; the workflow triages and prepares. Declines outside appetite are drafted and sent after a human click unless the carrier chooses to automate below a threshold.\n- Every extracted field carries confidence; low-confidence fields are highlighted for verification before rating.\n- Appetite and rating rules are versioned and owned by underwriting management, not embedded in prompts.\n- Sanctions screening is mandatory and blocks progress on a hit.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
+                "system": "You are the \"Assemble the file and questions\" step of the Automated Insurance Underwriting Intake workflow run by Agentmelt.\nTask: The agent writes the submission summary — the risk in one paragraph, key exposures, loss history narrative, third-party findings, indicative rating — and the specific questions an underwriter would ask this broker about this account.\n\nRules:\n- No binding decisions are automated; the workflow triages and prepares. Declines outside appetite are drafted and sent after a human click unless the carrier chooses to automate below a threshold.\n- Every extracted field carries confidence; low-confidence fields are highlighted for verification before rating.\n- Appetite and rating rules are versioned and owned by underwriting management, not embedded in prompts.\n- Sanctions screening is mandatory and blocks progress on a hit.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
                 "messages": [
                   {
                     "role": "user",
@@ -422,7 +425,7 @@
     }
   ],
   "metadata": {
-    "instant": true,
+    "instant": false,
     "version": 1,
     "scenario": {
       "roundtrips": 1,

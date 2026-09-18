@@ -196,7 +196,7 @@
         0,
         300
       ],
-      "notes": "Schedule Trigger (hourly) + booking-system webhooks\n\nHourly scan of upcoming appointments in the scheduling system; webhooks for new bookings, cancellations and inbound SMS replies."
+      "notes": "Schedule Trigger (hourly) + booking-system event\n\nHourly scan of upcoming appointments in the scheduling system; webhooks for new bookings, cancellations and inbound SMS replies."
     },
     {
       "parameters": {

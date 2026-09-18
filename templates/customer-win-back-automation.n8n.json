@@ -184,7 +184,7 @@
         0,
         300
       ],
-      "notes": "Schedule Trigger (weekly) + product/release webhooks\n\nWeekly scan of churned accounts against triggers; release-notes webhook or a manual trigger when a feature ships; seasonal calendar for seasonal businesses."
+      "notes": "Schedule Trigger (weekly) + product/release event\n\nWeekly scan of churned accounts against triggers; release-notes webhook or a manual trigger when a feature ships; seasonal calendar for seasonal businesses."
     },
     {
       "parameters": {

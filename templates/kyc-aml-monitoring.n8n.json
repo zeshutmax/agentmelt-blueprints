@@ -197,7 +197,7 @@
         0,
         300
       ],
-      "notes": "Onboarding webhook + daily screening + transaction webhooks\n\nNew customers screened at onboarding; the full book re-screened daily against list updates; transaction events evaluated in near real time."
+      "notes": "Onboarding event + daily screening + transaction event\n\nNew customers screened at onboarding; the full book re-screened daily against list updates; transaction events evaluated in near real time."
     },
     {
       "parameters": {

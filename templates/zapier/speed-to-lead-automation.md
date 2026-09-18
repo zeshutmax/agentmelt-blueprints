@@ -10,7 +10,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 
 ## Steps
 
-1. **Trigger — Webhooks by Zapier — Catch Hook (trigger).** A lead email from Zillow or Realtor.com, a website form submission, or a new-person webhook from Follow Up Boss or kvCORE starts the run.
+1. **Trigger — Webhooks by Zapier — Catch Hook (trigger).** A lead email from Zillow or Realtor.com, a website form submission, or a new person appearing in Follow Up Boss or kvCORE starts the run.
 2. **Webhooks by Zapier — Custom Request.** GET `https://api.followupboss.com/v1/people?email=…&includeTrash=false` (Follow Up Boss API; add the API key header). Existing record, past conversations, stage, and any notes — so the reply does not treat a past client like a stranger.
 3. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
 

@@ -3,9 +3,12 @@
   "flow": [
     {
       "id": 1,
-      "module": "gateway:CustomWebHook",
-      "version": 1,
+      "module": "google-email:TriggerNewEmail",
+      "version": 2,
       "parameters": {
+        "searchType": "simple",
+        "criteria": "UNSEEN",
+        "markSeen": false,
         "maxResults": 1
       },
       "mapper": {},
@@ -13,7 +16,7 @@
         "designer": {
           "x": 0,
           "y": 0,
-          "name": "Webhook: Capture and identify"
+          "name": "Gmail: Capture and identify"
         }
       }
     },
@@ -63,7 +66,7 @@
           },
           {
             "name": "config_schedule",
-            "value": "instant (webhook)"
+            "value": "poll the inbox every 15 minutes"
           }
         ]
       },
@@ -378,7 +381,7 @@
     }
   ],
   "metadata": {
-    "instant": true,
+    "instant": false,
     "version": 1,
     "scenario": {
       "roundtrips": 1,

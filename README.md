@@ -29,7 +29,7 @@ The blueprint page for each template explains the trigger, the steps, the guardr
 | [Inventory Optimization](./inventory-optimization.n8n.json) | Supply chain & procurement | [blueprint](./make/inventory-optimization.make.json) | https://agentmelt.com/workflows/inventory-optimization/ |
 | [Social Listening & Response](./social-listening-response.n8n.json) | Marketing | [blueprint](./make/social-listening-response.make.json) | https://agentmelt.com/workflows/social-listening-response/ |
 | [Employee Offboarding](./employee-offboarding-automation.n8n.json) | HR | [blueprint](./make/employee-offboarding-automation.make.json) | https://agentmelt.com/workflows/employee-offboarding-automation/ |
-| [Insurance Underwriting Intake](./insurance-underwriting-intake.n8n.json) | Insurance | [blueprint](./make/insurance-underwriting-intake.make.json) | https://agentmelt.com/workflows/insurance-underwriting-intake/ |
+| [Automated Insurance Underwriting Intake](./insurance-underwriting-intake.n8n.json) | Insurance | [blueprint](./make/insurance-underwriting-intake.make.json) | https://agentmelt.com/workflows/insurance-underwriting-intake/ |
 | [Financial Reconciliation](./financial-reconciliation-automation.n8n.json) | Finance & accounting | [blueprint](./make/financial-reconciliation-automation.make.json) | https://agentmelt.com/workflows/financial-reconciliation-automation/ |
 | [Email Triage](./email-triage-automation.n8n.json) | Operations | [blueprint](./make/email-triage-automation.make.json) | https://agentmelt.com/workflows/email-triage-automation/ |
 | [Support Ticket Deflection](./support-ticket-deflection.n8n.json) | Customer support | [blueprint](./make/support-ticket-deflection.make.json) | https://agentmelt.com/workflows/support-ticket-deflection/ |
@@ -43,7 +43,7 @@ The blueprint page for each template explains the trigger, the steps, the guardr
 | [Customer Health Scoring](./customer-health-scoring.n8n.json) | Customer success | [blueprint](./make/customer-health-scoring.make.json) | https://agentmelt.com/workflows/customer-health-scoring/ |
 | [Insurance Claims Intake](./insurance-claims-intake.n8n.json) | Insurance | [blueprint](./make/insurance-claims-intake.make.json) | https://agentmelt.com/workflows/insurance-claims-intake/ |
 | [Payroll](./payroll-automation.n8n.json) | HR | [blueprint](./make/payroll-automation.make.json) | https://agentmelt.com/workflows/payroll-automation/ |
-| [Security Alert Triage](./security-alert-triage.n8n.json) | Security & IT | [blueprint](./make/security-alert-triage.make.json) | https://agentmelt.com/workflows/security-alert-triage/ |
+| [Automated Security Alert Triage](./security-alert-triage.n8n.json) | Security & IT | [blueprint](./make/security-alert-triage.make.json) | https://agentmelt.com/workflows/security-alert-triage/ |
 | [Competitor Monitoring](./competitor-monitoring.n8n.json) | Marketing | [blueprint](./make/competitor-monitoring.make.json) | https://agentmelt.com/workflows/competitor-monitoring/ |
 | [Content Repurposing](./content-repurposing-automation.n8n.json) | Marketing | [blueprint](./make/content-repurposing-automation.make.json) | https://agentmelt.com/workflows/content-repurposing-automation/ |
 | [Customer Win-Back](./customer-win-back-automation.n8n.json) | Customer success | [blueprint](./make/customer-win-back-automation.make.json) | https://agentmelt.com/workflows/customer-win-back-automation/ |
@@ -69,4 +69,4 @@ The blueprint page for each template explains the trigger, the steps, the guardr
 | [Lead Nurture](./lead-nurture-automation.n8n.json) | Sales | [blueprint](./make/lead-nurture-automation.make.json) | https://agentmelt.com/workflows/lead-nurture-automation/ |
 | [Speed-to-Lead](./speed-to-lead-automation.n8n.json) | Sales | [blueprint](./make/speed-to-lead-automation.make.json) | https://agentmelt.com/workflows/speed-to-lead-automation/ |
 
-Generated from the site data on 2026-09-17. Licence: use and adapt freely; the blueprint copy and kits stay © Agentmelt.
+Generated from the site data on 2026-09-18. Licence: use and adapt freely; the blueprint copy and kits stay © Agentmelt.

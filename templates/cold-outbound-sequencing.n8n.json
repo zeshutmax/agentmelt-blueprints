@@ -197,7 +197,7 @@
         0,
         300
       ],
-      "notes": "Schedule Trigger (daily batch) + reply webhooks\n\nA daily run selects the next batch from the list; the sending tool's webhooks report replies, bounces and unsubscribes in real time."
+      "notes": "Schedule Trigger (daily batch) + reply event\n\nA daily run selects the next batch from the list; the sending tool's webhooks report replies, bounces and unsubscribes in real time."
     },
     {
       "parameters": {

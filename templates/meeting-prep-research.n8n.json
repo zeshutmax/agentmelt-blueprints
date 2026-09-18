@@ -180,7 +180,7 @@
         0,
         300
       ],
-      "notes": "Calendar scan (hourly) + meeting webhooks\n\nGoogle or Microsoft calendar scanned for meetings with external attendees in the next 24 hours; new bookings via webhook."
+      "notes": "Calendar scan (hourly) + meeting event\n\nGoogle or Microsoft calendar scanned for meetings with external attendees in the next 24 hours; new bookings via webhook."
     },
     {
       "parameters": {

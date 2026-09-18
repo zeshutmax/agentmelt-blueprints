@@ -3,22 +3,6 @@
   "flow": [
     {
       "id": 1,
-      "module": "gateway:CustomWebHook",
-      "version": 1,
-      "parameters": {
-        "maxResults": 1
-      },
-      "mapper": {},
-      "metadata": {
-        "designer": {
-          "x": 0,
-          "y": 0,
-          "name": "Webhook: Build the churned segment"
-        }
-      }
-    },
-    {
-      "id": 2,
       "module": "util:SetVariables",
       "version": 1,
       "parameters": null,
@@ -63,15 +47,31 @@
           },
           {
             "name": "config_schedule",
-            "value": "instant (webhook)"
+            "value": "scenario schedule: Schedule Trigger (weekly) + product/release event"
           }
         ]
       },
       "metadata": {
         "designer": {
-          "x": 300,
+          "x": 0,
           "y": 0,
           "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "stripe:retrieveCustomer",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "customerId": "{{1.customer_id}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Stripe: Build the churned segment"
         }
       }
     },
@@ -89,7 +89,7 @@
             "content": [
               {
                 "type": "text",
-                "text": "Classify the reason.\n\nItem (map the fields your source provides here):\n{{1.text}}{{1.body}}{{1.message}}{{1.subject}}{{1.email}}{{1.name}}{{1.data}}"
+                "text": "Classify the reason.\n\nItem (map the fields your source provides here):\n{{2.text}}{{2.body}}{{2.message}}{{2.subject}}{{2.email}}{{2.name}}{{2.data}}"
               }
             ]
           }
@@ -374,7 +374,7 @@
     }
   ],
   "metadata": {
-    "instant": true,
+    "instant": false,
     "version": 1,
     "scenario": {
       "roundtrips": 1,
@@ -394,7 +394,7 @@
     "notes": [
       {
         "moduleIds": [
-          2
+          1
         ],
         "content": "## Win back churned customers from Stripe and HubSpot with Claude-written emails\n\nSaaS growth teams that never contact churned accounts again, even when the reason they left is fixed.\n\n### How it works\nTrigger: Weekly scan of churned accounts against triggers; release-notes webhook or a manual trigger when a feature ships; seasonal calendar for seasonal businesses.\n1. Build the churned segment\n2. Classify the reason\n3. Match triggers to segments\n4. Draft the message\n5. Approve high-value sends\n6. Send and route replies\n7. Track reactivation\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Stripe / Chargebee + HubSpot, Gmail / Customer.io.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nDefine the win-back triggers and the offer rules in the Config node; send through Customer.io or Gmail.\nGuardrail to keep: Excluded segments (business closed, requested no contact, poor fit) never receive win-back messages.\n\nFull blueprint: https://agentmelt.com/workflows/customer-win-back-automation/",
         "isFilterNote": false,

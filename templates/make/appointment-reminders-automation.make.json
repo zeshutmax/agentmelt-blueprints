@@ -3,22 +3,6 @@
   "flow": [
     {
       "id": 1,
-      "module": "gateway:CustomWebHook",
-      "version": 1,
-      "parameters": {
-        "maxResults": 1
-      },
-      "mapper": {},
-      "metadata": {
-        "designer": {
-          "x": 0,
-          "y": 0,
-          "name": "Webhook: Pull upcoming appointments"
-        }
-      }
-    },
-    {
-      "id": 2,
       "module": "util:SetVariables",
       "version": 1,
       "parameters": null,
@@ -63,15 +47,42 @@
           },
           {
             "name": "config_schedule",
-            "value": "instant (webhook)"
+            "value": "scenario schedule: Schedule Trigger (hourly) + booking-system event"
           }
         ]
       },
       "metadata": {
         "designer": {
-          "x": 300,
+          "x": 0,
           "y": 0,
           "name": "Config (edit me)"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "http:MakeRequest",
+      "version": 4,
+      "parameters": {
+        "authenticationType": "basicAuth"
+      },
+      "mapper": {
+        "url": "https://acuityscheduling.com/api/v1/appointments?minDate={{formatDate(now; \"YYYY-MM-DD\")}}&maxDate={{formatDate(now; \"YYYY-MM-DD\")}}",
+        "method": "get",
+        "headers": [],
+        "queryParameters": [],
+        "parseResponse": true,
+        "stopOnHttpError": true,
+        "timeout": "",
+        "allowRedirects": true,
+        "shareCookies": false,
+        "requestCompressedContent": true
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Acuity Scheduling API: Pull upcoming appointments"
         }
       }
     },
@@ -103,8 +114,8 @@
       "version": 2,
       "parameters": {},
       "mapper": {
-        "to": "{{1.phone}}",
-        "body": "{{1.draft}}"
+        "to": "{{2.phone}}",
+        "body": "{{2.draft}}"
       },
       "metadata": {
         "designer": {
@@ -318,7 +329,7 @@
     }
   ],
   "metadata": {
-    "instant": true,
+    "instant": false,
     "version": 1,
     "scenario": {
       "roundtrips": 1,
@@ -338,7 +349,7 @@
     "notes": [
       {
         "moduleIds": [
-          2
+          1
         ],
         "content": "## Send appointment reminders and handle replies with Twilio and Claude\n\nClinics, salons and service businesses losing revenue to no-shows.\n\n### How it works\nTrigger: Hourly scan of upcoming appointments in the scheduling system; webhooks for new bookings, cancellations and inbound SMS replies.\n1. Pull upcoming appointments\n2. Decide the cadence and channel\n3. Send the reminder\n4. Understand replies\n5. Book reschedules from real availability\n6. Fill cancellations from the waitlist\n7. Update the record and the desk\n8. Report weekly\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Twilio, Scheduling system (Dentrix, Cliniko, Acuity, Calendly…).\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the reminder timing and the reschedule rules in the Config node; connect your scheduling system (Acuity, Calendly, Cliniko…).\nGuardrail to keep: Only patients with recorded consent for SMS or automated calls are messaged; opt-out words stop the sequence immediately.\n\nFull blueprint: https://agentmelt.com/workflows/appointment-reminders-automation/",
         "isFilterNote": false,
