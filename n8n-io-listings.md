@@ -98,7 +98,7 @@ Full blueprint with trigger, steps, guardrails and where the standard version st
 HR and people-ops teams that build every new hire's checklist, accounts and paperwork by hand.
 
 **How it works**
-Trigger: BambooHR, Rippling, Workday or Personio sends a webhook when a candidate's status becomes Hired.
+Trigger: BambooHR, Rippling, Workday or Personio announces the moment a candidate's status becomes Hired; for platforms that cannot, the workflow checks the HRIS every hour.
 1. Receive the new-hire event
 2. Build the checklist for this role
 3. Create the tracking board
@@ -183,7 +183,7 @@ Full blueprint with trigger, steps, guardrails and where the standard version st
 Customer-success and sales teams that learn about upsell moments too late, if at all.
 
 **How it works**
-Trigger: Weekly scoring run; instant Webhook triggers for high-value signals like hitting a plan limit or a pricing-page visit by an admin.
+Trigger: Weekly scoring run; instant triggers for high-value signals like hitting a plan limit or a pricing-page visit by an admin.
 1. Pull usage and account data
 2. Pull engagement and buying signals
 3. Compute the readiness score
@@ -296,7 +296,7 @@ Full blueprint with trigger, steps, guardrails and where the standard version st
 
 ---
 
-## Social Listening & Response
+## Social Listening
 
 **File:** `social-listening-response.n8n.json`
 
@@ -392,7 +392,7 @@ Full blueprint with trigger, steps, guardrails and where the standard version st
 Commercial underwriting teams that key submissions from email into the workbench by hand.
 
 **How it works**
-Trigger: New emails to submissions@ with attachments; portal submissions arrive as webhooks.
+Trigger: New emails to submissions@ with attachments; portal submissions arrive as they are filed.
 1. Capture and classify attachments
 2. Extract application data
 3. Check completeness
@@ -896,7 +896,7 @@ Full blueprint with trigger, steps, guardrails and where the standard version st
 Claims teams that re-key first notice of loss from emails, forms and call notes.
 
 **How it works**
-Trigger: Emails to claims@, portal and app submissions via webhook, and call-centre transcripts from the telephony platform.
+Trigger: Emails to claims@, portal and app submissions as they happen, and call-centre transcripts from the telephony platform.
 1. Capture the notice
 2. Extract the facts
 3. Verify policy and coverage
@@ -980,7 +980,7 @@ Full blueprint with trigger, steps, guardrails and where the standard version st
 Small security teams drowning in alerts from Splunk, Sentinel or CrowdStrike.
 
 **How it works**
-Trigger: Splunk, Sentinel, Elastic, CrowdStrike, SentinelOne, Wazuh or Google SecOps posts new alerts; a polling fallback exists for tools without webhooks.
+Trigger: Splunk, Sentinel, Elastic, CrowdStrike, SentinelOne, Wazuh or Google SecOps posts new alerts; tools that cannot push alerts are polled instead.
 1. Receive and normalise the alert
 2. Enrich entities
 3. Correlate with recent activity
@@ -1064,7 +1064,7 @@ Full blueprint with trigger, steps, guardrails and where the standard version st
 Content teams that publish one long piece and never get to the ten short ones it could become.
 
 **How it works**
-Trigger: A recording dropped in the 'episodes' folder, a new item in the podcast RSS feed, or a Riverside/Zoom recording webhook starts the run.
+Trigger: A recording dropped in the 'episodes' folder, a new item in the podcast RSS feed, or a new Riverside/Zoom recording starts the run.
 1. Transcribe
 2. Extract structure
 3. Draft the long-form
@@ -1106,7 +1106,7 @@ Full blueprint with trigger, steps, guardrails and where the standard version st
 SaaS growth teams that never contact churned accounts again, even when the reason they left is fixed.
 
 **How it works**
-Trigger: Weekly scan of churned accounts against triggers; release-notes webhook or a manual trigger when a feature ships; seasonal calendar for seasonal businesses.
+Trigger: Weekly scan of churned accounts against triggers; a release-notes event or a manual trigger when a feature ships; seasonal calendar for seasonal businesses.
 1. Build the churned segment
 2. Classify the reason
 3. Match triggers to segments
@@ -1135,7 +1135,7 @@ Full blueprint with trigger, steps, guardrails and where the standard version st
 
 ---
 
-## Appointment Reminder
+## Appointment Reminders
 
 **File:** `appointment-reminders-automation.n8n.json`
 
@@ -1147,7 +1147,7 @@ Full blueprint with trigger, steps, guardrails and where the standard version st
 Clinics, salons and service businesses losing revenue to no-shows.
 
 **How it works**
-Trigger: Hourly scan of upcoming appointments in the scheduling system; webhooks for new bookings, cancellations and inbound SMS replies.
+Trigger: Hourly scan of upcoming appointments in the scheduling system; instant triggers for new bookings, cancellations and inbound SMS replies.
 1. Pull upcoming appointments
 2. Decide the cadence and channel
 3. Send the reminder
@@ -1315,7 +1315,7 @@ Full blueprint with trigger, steps, guardrails and where the standard version st
 Sales teams that send templated sequences and get templated results.
 
 **How it works**
-Trigger: A daily run selects the next batch from the list; the sending tool's webhooks report replies, bounces and unsubscribes in real time.
+Trigger: A daily run selects the next batch from the list; the sending tool reports replies, bounces and unsubscribes in real time.
 1. Build the batch
 2. Research each account
 3. Write the first line and email
@@ -1567,7 +1567,7 @@ Full blueprint with trigger, steps, guardrails and where the standard version st
 Sales reps and founders who walk into external meetings with two minutes of research.
 
 **How it works**
-Trigger: Google or Microsoft calendar scanned for meetings with external attendees in the next 24 hours; new bookings via webhook.
+Trigger: Google or Microsoft calendar scanned for meetings with external attendees in the next 24 hours; new bookings as they land.
 1. Find upcoming external meetings
 2. Identify attendees and account
 3. Research the company

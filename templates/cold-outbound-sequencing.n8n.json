@@ -3,7 +3,7 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Personalize cold outbound from Apollo lists with Claude and send via Instantly\n\nSales teams that send templated sequences and get templated results.\n\n### How it works\nTrigger: A daily run selects the next batch from the list; the sending tool's webhooks report replies, bounces and unsubscribes in real time.\n1. Build the batch\n2. Research each account\n3. Write the first line and email\n4. Quality gate\n5. Load into the sequencer\n6. Detect replies and classify\n7. Hand to a rep\n8. Report by angle and segment\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Apollo / Clay, Instantly / Smartlead / Lemlist, HubSpot / Salesforce.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the daily batch size and the personalization rules in the Config node; swap Instantly for Smartlead or Lemlist.\nGuardrail to keep: Daily volume per mailbox is capped and warm-up is respected; the workflow never sends outside the sequencer's limits.\n\nFull blueprint: https://agentmelt.com/workflows/cold-outbound-sequencing/",
+        "content": "## Personalize cold outbound from Apollo lists with Claude and send via Instantly\n\nSales teams that send templated sequences and get templated results.\n\n### How it works\nTrigger: A daily run selects the next batch from the list; the sending tool reports replies, bounces and unsubscribes in real time.\n1. Build the batch\n2. Research each account\n3. Write the first line and email\n4. Quality gate\n5. Load into the sequencer\n6. Detect replies and classify\n7. Hand to a rep\n8. Report by angle and segment\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Apollo / Clay, Instantly / Smartlead / Lemlist, HubSpot / Salesforce.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the daily batch size and the personalization rules in the Config node; swap Instantly for Smartlead or Lemlist.\nGuardrail to keep: Daily volume per mailbox is capped and warm-up is respected; the workflow never sends outside the sequencer's limits.\n\nFull blueprint: https://agentmelt.com/workflows/cold-outbound-sequencing/",
         "height": 900,
         "width": 640,
         "color": 1
@@ -197,7 +197,7 @@
         0,
         300
       ],
-      "notes": "Schedule Trigger (daily batch) + reply event\n\nA daily run selects the next batch from the list; the sending tool's webhooks report replies, bounces and unsubscribes in real time."
+      "notes": "Schedule Trigger (daily batch) + reply event\n\nA daily run selects the next batch from the list; the sending tool reports replies, bounces and unsubscribes in real time."
     },
     {
       "parameters": {

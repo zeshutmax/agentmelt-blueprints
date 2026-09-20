@@ -27,7 +27,7 @@ The blueprint page for each template explains the trigger, the steps, the guardr
 | [Expansion Opportunity Detection](./expansion-opportunity-detection.n8n.json) | Customer success | [blueprint](./make/expansion-opportunity-detection.make.json) | https://agentmelt.com/workflows/expansion-opportunity-detection/ |
 | [Unit Test Generation](./unit-test-generation.n8n.json) | Engineering | [blueprint](./make/unit-test-generation.make.json) | https://agentmelt.com/workflows/unit-test-generation/ |
 | [Inventory Optimization](./inventory-optimization.n8n.json) | Supply chain & procurement | [blueprint](./make/inventory-optimization.make.json) | https://agentmelt.com/workflows/inventory-optimization/ |
-| [Social Listening & Response](./social-listening-response.n8n.json) | Marketing | [blueprint](./make/social-listening-response.make.json) | https://agentmelt.com/workflows/social-listening-response/ |
+| [Social Listening](./social-listening-response.n8n.json) | Marketing | [blueprint](./make/social-listening-response.make.json) | https://agentmelt.com/workflows/social-listening-response/ |
 | [Employee Offboarding](./employee-offboarding-automation.n8n.json) | HR | [blueprint](./make/employee-offboarding-automation.make.json) | https://agentmelt.com/workflows/employee-offboarding-automation/ |
 | [Automated Insurance Underwriting Intake](./insurance-underwriting-intake.n8n.json) | Insurance | [blueprint](./make/insurance-underwriting-intake.make.json) | https://agentmelt.com/workflows/insurance-underwriting-intake/ |
 | [Financial Reconciliation](./financial-reconciliation-automation.n8n.json) | Finance & accounting | [blueprint](./make/financial-reconciliation-automation.make.json) | https://agentmelt.com/workflows/financial-reconciliation-automation/ |
@@ -47,7 +47,7 @@ The blueprint page for each template explains the trigger, the steps, the guardr
 | [Competitor Monitoring](./competitor-monitoring.n8n.json) | Marketing | [blueprint](./make/competitor-monitoring.make.json) | https://agentmelt.com/workflows/competitor-monitoring/ |
 | [Content Repurposing](./content-repurposing-automation.n8n.json) | Marketing | [blueprint](./make/content-repurposing-automation.make.json) | https://agentmelt.com/workflows/content-repurposing-automation/ |
 | [Customer Win-Back](./customer-win-back-automation.n8n.json) | Customer success | [blueprint](./make/customer-win-back-automation.make.json) | https://agentmelt.com/workflows/customer-win-back-automation/ |
-| [Appointment Reminder](./appointment-reminders-automation.n8n.json) | Operations | [blueprint](./make/appointment-reminders-automation.make.json) | https://agentmelt.com/workflows/appointment-reminders-automation/ |
+| [Appointment Reminders](./appointment-reminders-automation.n8n.json) | Operations | [blueprint](./make/appointment-reminders-automation.make.json) | https://agentmelt.com/workflows/appointment-reminders-automation/ |
 | [KYC/AML Monitoring](./kyc-aml-monitoring.n8n.json) | Finance & accounting | [blueprint](./make/kyc-aml-monitoring.make.json) | https://agentmelt.com/workflows/kyc-aml-monitoring/ |
 | [Inbound Lead Qualification](./inbound-lead-qualification.n8n.json) | Sales | [blueprint](./make/inbound-lead-qualification.make.json) | https://agentmelt.com/workflows/inbound-lead-qualification/ |
 | [Data Migration](./data-migration-automation.n8n.json) | Engineering | [blueprint](./make/data-migration-automation.make.json) | https://agentmelt.com/workflows/data-migration-automation/ |
@@ -69,4 +69,4 @@ The blueprint page for each template explains the trigger, the steps, the guardr
 | [Lead Nurture](./lead-nurture-automation.n8n.json) | Sales | [blueprint](./make/lead-nurture-automation.make.json) | https://agentmelt.com/workflows/lead-nurture-automation/ |
 | [Speed-to-Lead](./speed-to-lead-automation.n8n.json) | Sales | [blueprint](./make/speed-to-lead-automation.make.json) | https://agentmelt.com/workflows/speed-to-lead-automation/ |
 
-Generated from the site data on 2026-09-18. Licence: use and adapt freely; the blueprint copy and kits stay © Agentmelt.
+Generated from the site data on 2026-09-20. Licence: use and adapt freely; the blueprint copy and kits stay © Agentmelt.

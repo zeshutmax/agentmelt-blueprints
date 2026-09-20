@@ -15,7 +15,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 3. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
-   You are the "Classify and prioritise" step of the Support Ticket Deflection Workflow workflow run by Agentmelt.
+   You are the "Classify and prioritise" step of the Support Ticket Deflection with AI workflow run by Agentmelt.
    Task: Category (billing, access, how-to, bug, cancellation…), sentiment and urgency. Cancellation and complaint categories skip deflection and go straight to a person.
    
    Rules:
@@ -37,7 +37,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 7. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
-   You are the "Draft the answer with a confidence score" step of the Support Ticket Deflection Workflow workflow run by Agentmelt.
+   You are the "Draft the answer with a confidence score" step of the Support Ticket Deflection with AI workflow run by Agentmelt.
    Task: The agent answers only from retrieved passages, cites the article, and reports a confidence score. Questions the knowledge base does not cover get low confidence by design.
    
    Rules:
