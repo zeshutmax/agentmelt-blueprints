@@ -33,8 +33,8 @@ The blueprint page for each template explains the trigger, the steps, the guardr
 | [Financial Reconciliation](./financial-reconciliation-automation.n8n.json) | Finance & accounting | [blueprint](./make/financial-reconciliation-automation.make.json) | https://agentmelt.com/workflows/financial-reconciliation-automation/ |
 | [Email Triage](./email-triage-automation.n8n.json) | Operations | [blueprint](./make/email-triage-automation.make.json) | https://agentmelt.com/workflows/email-triage-automation/ |
 | [Support Ticket Deflection](./support-ticket-deflection.n8n.json) | Customer support | [blueprint](./make/support-ticket-deflection.make.json) | https://agentmelt.com/workflows/support-ticket-deflection/ |
-| [Document & Proposal Generation](./document-generation-automation.n8n.json) | Operations | [blueprint](./make/document-generation-automation.make.json) | https://agentmelt.com/workflows/document-generation-automation/ |
-| [Subscription & Dunning](./subscription-dunning-automation.n8n.json) | Finance & accounting | [blueprint](./make/subscription-dunning-automation.make.json) | https://agentmelt.com/workflows/subscription-dunning-automation/ |
+| [Document and Proposal Generation](./document-generation-automation.n8n.json) | Operations | [blueprint](./make/document-generation-automation.make.json) | https://agentmelt.com/workflows/document-generation-automation/ |
+| [Subscription Dunning](./subscription-dunning-automation.n8n.json) | Finance & accounting | [blueprint](./make/subscription-dunning-automation.make.json) | https://agentmelt.com/workflows/subscription-dunning-automation/ |
 | [Logistics Optimization](./logistics-optimization.n8n.json) | Supply chain & procurement | [blueprint](./make/logistics-optimization.make.json) | https://agentmelt.com/workflows/logistics-optimization/ |
 | [Proactive Customer Outreach](./proactive-customer-outreach.n8n.json) | Customer support | [blueprint](./make/proactive-customer-outreach.make.json) | https://agentmelt.com/workflows/proactive-customer-outreach/ |
 | [Customer Onboarding](./customer-onboarding-automation.n8n.json) | Customer success | [blueprint](./make/customer-onboarding-automation.make.json) | https://agentmelt.com/workflows/customer-onboarding-automation/ |
@@ -53,7 +53,7 @@ The blueprint page for each template explains the trigger, the steps, the guardr
 | [Data Migration](./data-migration-automation.n8n.json) | Engineering | [blueprint](./make/data-migration-automation.make.json) | https://agentmelt.com/workflows/data-migration-automation/ |
 | [Cold Outbound](./cold-outbound-sequencing.n8n.json) | Sales | [blueprint](./make/cold-outbound-sequencing.make.json) | https://agentmelt.com/workflows/cold-outbound-sequencing/ |
 | [Weekly Reporting](./weekly-reporting-automation.n8n.json) | Operations | [blueprint](./make/weekly-reporting-automation.make.json) | https://agentmelt.com/workflows/weekly-reporting-automation/ |
-| [Real Estate Listing](./listing-description-automation.n8n.json) | Marketing | [blueprint](./make/listing-description-automation.make.json) | https://agentmelt.com/workflows/listing-description-automation/ |
+| [Real Estate Listing Description](./listing-description-automation.n8n.json) | Marketing | [blueprint](./make/listing-description-automation.make.json) | https://agentmelt.com/workflows/listing-description-automation/ |
 | [IT Helpdesk](./it-helpdesk-automation.n8n.json) | Security & IT | [blueprint](./make/it-helpdesk-automation.make.json) | https://agentmelt.com/workflows/it-helpdesk-automation/ |
 | [Purchase Order](./purchase-order-automation.n8n.json) | Supply chain & procurement | [blueprint](./make/purchase-order-automation.make.json) | https://agentmelt.com/workflows/purchase-order-automation/ |
 | [Invoice Processing](./invoice-processing-automation.n8n.json) | Finance & accounting | [blueprint](./make/invoice-processing-automation.make.json) | https://agentmelt.com/workflows/invoice-processing-automation/ |
@@ -69,4 +69,4 @@ The blueprint page for each template explains the trigger, the steps, the guardr
 | [Lead Nurture](./lead-nurture-automation.n8n.json) | Sales | [blueprint](./make/lead-nurture-automation.make.json) | https://agentmelt.com/workflows/lead-nurture-automation/ |
 | [Speed-to-Lead](./speed-to-lead-automation.n8n.json) | Sales | [blueprint](./make/speed-to-lead-automation.make.json) | https://agentmelt.com/workflows/speed-to-lead-automation/ |
 
-Generated from the site data on 2026-09-21. Licence: use and adapt freely; the blueprint copy and kits stay © Agentmelt.
+Generated from the site data on 2026-09-22. Licence: use and adapt freely; the blueprint copy and kits stay © Agentmelt.

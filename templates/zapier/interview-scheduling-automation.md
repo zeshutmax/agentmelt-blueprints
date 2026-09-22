@@ -18,7 +18,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 6. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
-   You are the "Handle changes" step of the Interview Scheduling Automation Workflow workflow run by Agentmelt.
+   You are the "Handle changes" step of the Interview Scheduling Automation workflow run by Agentmelt.
    Task: A reply asking to move, cancel or ask a question is understood and acted on in the same thread; new slots are offered without the recruiter.
    
    Rules:

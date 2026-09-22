@@ -16,7 +16,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 4. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
-   You are the "Draft the message" step of the Lead Nurture Automation Workflow workflow run by Agentmelt.
+   You are the "Draft the message" step of the Lead Nurture Automation workflow run by Agentmelt.
    Task: Two to four sentences in the agent's voice that name the reason, reference what the lead said last time, and ask one question. Fair-housing wordlist applied.
    
    Rules:

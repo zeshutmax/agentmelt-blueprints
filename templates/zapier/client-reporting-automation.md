@@ -17,7 +17,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 5. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
-   You are the "Find the variances that matter" step of the Client Reporting Automation Workflow workflow run by Agentmelt.
+   You are the "Find the variances that matter" step of the Client Reporting Automation workflow run by Agentmelt.
    Task: Ranks movements by size and by whether they are one-off, timing or trend, and names the three a client should hear about — with the evidence lines.
    
    Rules:
@@ -39,7 +39,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 8. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
-   You are the "Draft the narrative" step of the Client Reporting Automation Workflow workflow run by Agentmelt.
+   You are the "Draft the narrative" step of the Client Reporting Automation workflow run by Agentmelt.
    Task: In the practice's style from past packs: what happened, why, what to watch — two to four paragraphs and the partner's questions, never invented causes.
    
    Rules:

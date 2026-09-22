@@ -15,7 +15,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 3. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
-   You are the "Pick the hook" step of the Candidate Outreach Automation Workflow workflow run by Agentmelt.
+   You are the "Pick the hook" step of the Candidate Outreach Automation workflow run by Agentmelt.
    Task: One specific, recent, professional thing the candidate did that relates to the role. Not their title, not their employer's tagline.
    
    Rules:
@@ -37,7 +37,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 6. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
-   You are the "Draft the message" step of the Candidate Outreach Automation Workflow workflow run by Agentmelt.
+   You are the "Draft the message" step of the Candidate Outreach Automation workflow run by Agentmelt.
    Task: Under 90 words: the hook, why the role is relevant to it, one question. Plain text, no tracking pixels, no 'I hope this finds you well'.
    
    Rules:

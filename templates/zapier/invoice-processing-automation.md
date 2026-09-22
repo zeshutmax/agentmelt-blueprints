@@ -14,7 +14,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 2. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
-   You are the "Extract fields" step of the Invoice Processing Automation Workflow workflow run by Agentmelt.
+   You are the "Extract fields" step of the Invoice Processing Automation workflow run by Agentmelt.
    Task: Supplier, invoice number, dates, line items, quantities, unit prices, tax, totals, PO reference and bank details, with a confidence per field. Multi-page and multi-currency handled.
    
    Rules:
@@ -41,7 +41,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 11. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
-   You are the "Supplier status replies" step of the Invoice Processing Automation Workflow workflow run by Agentmelt.
+   You are the "Supplier status replies" step of the Invoice Processing Automation workflow run by Agentmelt.
    Task: Supplier emails asking about payment status are answered from the ERP data (received, approved, scheduled for date) so AP stops fielding calls.
    
    Rules:

@@ -548,7 +548,7 @@ Full blueprint with trigger, steps, guardrails and where the standard version st
 
 ---
 
-## Document & Proposal Generation
+## Document and Proposal Generation
 
 **File:** `document-generation-automation.n8n.json`
 
@@ -590,7 +590,7 @@ Full blueprint with trigger, steps, guardrails and where the standard version st
 
 ---
 
-## Subscription & Dunning
+## Subscription Dunning
 
 **File:** `subscription-dunning-automation.n8n.json`
 
@@ -1387,7 +1387,7 @@ Full blueprint with trigger, steps, guardrails and where the standard version st
 
 ---
 
-## Real Estate Listing
+## Real Estate Listing Description
 
 **File:** `listing-description-automation.n8n.json`
 

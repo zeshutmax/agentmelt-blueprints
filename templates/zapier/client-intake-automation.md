@@ -14,7 +14,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 2. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
-   You are the "Classify the matter" step of the Client Intake Automation Workflow workflow run by Agentmelt.
+   You are the "Classify the matter" step of the Client Intake Automation workflow run by Agentmelt.
    Task: Matter type from the firm's own taxonomy (employment, commercial, family, conveyancing…), urgency, and whether it is within the firm's practice at all.
    
    Rules:
@@ -36,7 +36,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 5. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
-   You are the "Extract the conflict-check facts" step of the Client Intake Automation Workflow workflow run by Agentmelt.
+   You are the "Extract the conflict-check facts" step of the Client Intake Automation workflow run by Agentmelt.
    Task: Names of parties and related entities, addresses, dates, the other side's counsel if named — structured, with the source sentence for each.
    
    Rules:
@@ -60,7 +60,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 10. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
-   You are the "Draft the next document" step of the Client Intake Automation Workflow workflow run by Agentmelt.
+   You are the "Draft the next document" step of the Client Intake Automation workflow run by Agentmelt.
    Task: Engagement letter from the firm's template for that matter type with fees from the schedule, or a decline where the matter is out of scope or conflicted — variables highlighted.
    
    Rules:

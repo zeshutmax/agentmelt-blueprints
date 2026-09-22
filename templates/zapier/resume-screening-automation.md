@@ -15,7 +15,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 3. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
-   You are the "Parse the resume" step of the Resume Screening Workflow workflow run by Agentmelt.
+   You are the "Parse the resume" step of the Resume Screening Automation workflow run by Agentmelt.
    Task: Roles, dates, employers, skills, education, certifications and locations into structured fields, with the source text kept for quoting.
    
    Rules:
@@ -36,7 +36,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 6. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
-   You are the "Score against criteria with evidence" step of the Resume Screening Workflow workflow run by Agentmelt.
+   You are the "Score against criteria with evidence" step of the Resume Screening Automation workflow run by Agentmelt.
    Task: Each criterion scored met / partially / not met with a quote from the application as evidence; the agent is instructed to ignore name, photo, age, gender, nationality and school prestige unless a certification is a legal requirement.
    
    Rules:

@@ -15,7 +15,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 3. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
-   You are the "Qualify" step of the Speed-to-Lead Automation Workflow workflow run by Agentmelt.
+   You are the "Qualify" step of the Speed-to-Lead Automation workflow run by Agentmelt.
    Task: Timeline, pre-approval, price band and intent from the enquiry text; 'hot' only when the timeline is near and something specific is named. Nothing is inferred beyond the text.
    
    Rules:
@@ -37,7 +37,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 6. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
-   You are the "Draft the first reply" step of the Speed-to-Lead Automation Workflow workflow run by Agentmelt.
+   You are the "Draft the first reply" step of the Speed-to-Lead Automation workflow run by Agentmelt.
    Task: Two to four sentences in the agent's voice, referencing the property or page, with exactly one question. Fair-housing wordlist applied.
    
    Rules:

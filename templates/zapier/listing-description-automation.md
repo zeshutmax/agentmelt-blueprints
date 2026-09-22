@@ -14,7 +14,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 2. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
-   You are the "Describe the photos" step of the Real Estate Listing Automation Workflow workflow run by Agentmelt.
+   You are the "Describe the photos" step of the Real Estate Listing Description Automation workflow run by Agentmelt.
    Task: A vision-capable model describes each photo (kitchen with quartz island, west-facing deck, finished basement) so the copy references what buyers will actually see.
    
    Rules:
@@ -35,7 +35,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 5. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
-   You are the "Draft the MLS description" step of the Real Estate Listing Automation Workflow workflow run by Agentmelt.
+   You are the "Draft the MLS description" step of the Real Estate Listing Description Automation workflow run by Agentmelt.
    Task: Within the MLS character limit, in the agent's voice, leading with the strongest feature, with a fair-housing compliance check for protected-class language.
    
    Rules:
@@ -56,7 +56,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 8. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
-   You are the "Draft the derivatives" step of the Real Estate Listing Automation Workflow workflow run by Agentmelt.
+   You are the "Draft the derivatives" step of the Real Estate Listing Description Automation workflow run by Agentmelt.
    Task: Instagram and Facebook captions, a 'just listed' story script, a buyer-list email with the three best photos, and a 60-second virtual-tour narration script.
    
    Rules:
