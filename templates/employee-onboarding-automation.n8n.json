@@ -187,7 +187,7 @@
       "id": "employee-onboarding-automation-01",
       "name": "Webhook: Receive the new-hire event",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2.1,
+      "typeVersion": 2.2,
       "position": [
         0,
         300

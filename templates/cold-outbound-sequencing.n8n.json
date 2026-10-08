@@ -560,7 +560,7 @@
       "id": "cold-outbound-sequencing-06",
       "name": "Webhook: Detect replies and classify",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2.1,
+      "typeVersion": 2.2,
       "position": [
         0,
         860

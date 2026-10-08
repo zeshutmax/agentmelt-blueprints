@@ -171,7 +171,7 @@
       "id": "interview-scheduling-automation-01",
       "name": "Webhook: Read the stage",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2.1,
+      "typeVersion": 2.2,
       "position": [
         0,
         300

@@ -171,7 +171,7 @@
       "id": "insurance-claims-intake-01",
       "name": "Webhook: Capture the notice",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2.1,
+      "typeVersion": 2.2,
       "position": [
         0,
         300

@@ -171,7 +171,7 @@
       "id": "unit-test-generation-01",
       "name": "Webhook: Receive the PR and diff",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2.1,
+      "typeVersion": 2.2,
       "position": [
         0,
         300

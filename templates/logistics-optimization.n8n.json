@@ -171,7 +171,7 @@
       "id": "logistics-optimization-01",
       "name": "Webhook: Receive the shipment",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2.1,
+      "typeVersion": 2.2,
       "position": [
         0,
         300
