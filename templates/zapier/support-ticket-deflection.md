@@ -12,7 +12,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 
 1. **Trigger — Webhooks by Zapier — Catch Hook (trigger).** Zendesk, Intercom, Freshdesk, Help Scout or HubSpot posts each new conversation. Email-only teams use a Gmail or Outlook trigger on the support inbox.
 2. **HubSpot — Find Contact — Fetch customer context.** Plan, recent orders or invoices, open tickets and account status from your CRM or billing system, so the answer is specific, not generic.
-3. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
+3. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5-5`, max tokens 2000 (leave temperature at its default: Claude Sonnet 5.5 rejects any other value). Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
    You are the "Classify and prioritise" step of the Support Ticket Deflection with AI workflow run by Agentmelt.
@@ -34,7 +34,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 4. **Code by Zapier (JavaScript) — parse Claude's JSON.** Input `text` = Claude's reply; code `return JSON.parse(inputData.text);` so the fields become mappable in later steps.
 5. **Filter by Zapier.** Only continue if `needs_human` (from the previous step) *does not exactly match* `true`. Everything Claude is unsure about stops here — check Zap History for those, or add a **Paths** step whose second path posts the item to your approver.
 6. **Webhooks by Zapier — Custom Request — Retrieve knowledge.** Help-centre articles, macros and product docs, chunked and embedded, refreshed nightly.
-7. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
+7. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5-5`, max tokens 2000 (leave temperature at its default: Claude Sonnet 5.5 rejects any other value). Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
    You are the "Draft the answer with a confidence score" step of the Support Ticket Deflection with AI workflow run by Agentmelt.

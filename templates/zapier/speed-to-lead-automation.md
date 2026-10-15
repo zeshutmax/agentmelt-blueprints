@@ -12,7 +12,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 
 1. **Trigger — Webhooks by Zapier — Catch Hook (trigger).** A lead email from Zillow or Realtor.com, a website form submission, or a new person appearing in Follow Up Boss or kvCORE starts the run.
 2. **Webhooks by Zapier — Custom Request.** GET `https://api.followupboss.com/v1/people?email=…&includeTrash=false` (Follow Up Boss API; add the API key header). Existing record, past conversations, stage, and any notes — so the reply does not treat a past client like a stranger.
-3. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
+3. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5-5`, max tokens 2000 (leave temperature at its default: Claude Sonnet 5.5 rejects any other value). Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
    You are the "Qualify" step of the Speed-to-Lead Automation workflow run by Agentmelt.
@@ -34,7 +34,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 
 4. **Code by Zapier (JavaScript) — parse Claude's JSON.** Input `text` = Claude's reply; code `return JSON.parse(inputData.text);` so the fields become mappable in later steps.
 5. **Filter by Zapier.** Only continue if `needs_human` (from the previous step) *does not exactly match* `true`. Everything Claude is unsure about stops here — check Zap History for those, or add a **Paths** step whose second path posts the item to your approver.
-6. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
+6. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5-5`, max tokens 2000 (leave temperature at its default: Claude Sonnet 5.5 rejects any other value). Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
    You are the "Draft the first reply" step of the Speed-to-Lead Automation workflow run by Agentmelt.

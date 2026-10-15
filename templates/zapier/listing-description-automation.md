@@ -11,7 +11,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 ## Steps
 
 1. **Trigger — Webhooks by Zapier — Catch Hook (trigger).** Follow Up Boss, kvCORE, a Google Form, or a change in the MLS feed for the agent's listings starts the run.
-2. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
+2. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5-5`, max tokens 2000 (leave temperature at its default: Claude Sonnet 5.5 rejects any other value). Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
    You are the "Describe the photos" step of the Real Estate Listing Description Automation workflow run by Agentmelt.
@@ -32,7 +32,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 
 3. **Code by Zapier (JavaScript) — parse Claude's JSON.** Input `text` = Claude's reply; code `return JSON.parse(inputData.text);` so the fields become mappable in later steps.
 4. **Filter by Zapier.** Only continue if `needs_human` (from the previous step) *does not exactly match* `true`. Everything Claude is unsure about stops here — check Zap History for those, or add a **Paths** step whose second path posts the item to your approver.
-5. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
+5. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5-5`, max tokens 2000 (leave temperature at its default: Claude Sonnet 5.5 rejects any other value). Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
    You are the "Draft the MLS description" step of the Real Estate Listing Description Automation workflow run by Agentmelt.
@@ -53,7 +53,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 
 6. **Code by Zapier (JavaScript) — parse Claude's JSON.** Input `text` = Claude's reply; code `return JSON.parse(inputData.text);` so the fields become mappable in later steps.
 7. **Filter by Zapier.** Only continue if `needs_human` (from the previous step) *does not exactly match* `true`. Everything Claude is unsure about stops here — check Zap History for those, or add a **Paths** step whose second path posts the item to your approver.
-8. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
+8. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5-5`, max tokens 2000 (leave temperature at its default: Claude Sonnet 5.5 rejects any other value). Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
    You are the "Draft the derivatives" step of the Real Estate Listing Description Automation workflow run by Agentmelt.

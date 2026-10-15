@@ -393,11 +393,9 @@
         "model": {
           "__rl": true,
           "mode": "id",
-          "value": "claude-sonnet-5"
+          "value": "claude-sonnet-5-5"
         },
-        "options": {
-          "temperature": 0.2
-        }
+        "options": {}
       },
       "id": "supplier-risk-monitoring-05-llm",
       "name": "Claude (Anthropic Chat Model)",
@@ -493,11 +491,9 @@
         "model": {
           "__rl": true,
           "mode": "id",
-          "value": "claude-sonnet-5"
+          "value": "claude-sonnet-5-5"
         },
-        "options": {
-          "temperature": 0.2
-        }
+        "options": {}
       },
       "id": "supplier-risk-monitoring-07-llm",
       "name": "Claude (Anthropic Chat Model) 2",

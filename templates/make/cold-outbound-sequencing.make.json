@@ -95,7 +95,7 @@
       "version": 1,
       "parameters": {},
       "mapper": {
-        "model": "claude-sonnet-5",
+        "model": "claude-sonnet-5-5",
         "system": "You are the \"Research each account\" step of the Cold Outbound Automation workflow run by Agentmelt.\nTask: Reads the company site, recent news, job postings and tech stack (via enrichment and a web-fetch tool) and writes a five-line research note: what they do, what changed recently, a plausible trigger for your offer.\n\nRules:\n- Daily volume per mailbox is capped and warm-up is respected; the workflow never sends outside the sequencer's limits.\n- Emails that fail the specificity check are not sent; generic filler is worse than silence.\n- Any human reply stops the sequence immediately; unsubscribes are honoured across all lists.\n- Suppression lists (customers, open deals, competitors, opt-outs) are applied before research spends any credits.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
         "messages": [
           {
@@ -109,7 +109,6 @@
           }
         ],
         "max_tokens": "2000",
-        "temperature": "0.2",
         "metadata": {}
       },
       "metadata": {
@@ -190,7 +189,7 @@
               "version": 1,
               "parameters": {},
               "mapper": {
-                "model": "claude-sonnet-5",
+                "model": "claude-sonnet-5-5",
                 "system": "You are the \"Write the first line and email\" step of the Cold Outbound Automation workflow run by Agentmelt.\nTask: From the research note and your messaging playbook, writes the opening line and a sub-80-word email for the chosen angle. Structured output enforces length, no adjectives about your product, and one clear ask.\n\nRules:\n- Daily volume per mailbox is capped and warm-up is respected; the workflow never sends outside the sequencer's limits.\n- Emails that fail the specificity check are not sent; generic filler is worse than silence.\n- Any human reply stops the sequence immediately; unsubscribes are honoured across all lists.\n- Suppression lists (customers, open deals, competitors, opt-outs) are applied before research spends any credits.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
                 "messages": [
                   {
@@ -204,7 +203,6 @@
                   }
                 ],
                 "max_tokens": "2000",
-                "temperature": "0.2",
                 "metadata": {}
               },
               "metadata": {

@@ -325,11 +325,9 @@
         "model": {
           "__rl": true,
           "mode": "id",
-          "value": "claude-sonnet-5"
+          "value": "claude-sonnet-5-5"
         },
-        "options": {
-          "temperature": 0.2
-        }
+        "options": {}
       },
       "id": "security-alert-triage-05-llm",
       "name": "Claude (Anthropic Chat Model)",

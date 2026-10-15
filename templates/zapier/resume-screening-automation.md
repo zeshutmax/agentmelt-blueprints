@@ -12,7 +12,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 
 1. **Trigger — Webhooks by Zapier — Catch Hook (trigger).** Greenhouse, Lever, Ashby, Workable or Teamtailor post each new application; a daily run catches any missed.
 2. **Google Sheets — Create Spreadsheet Row — Load the role criteria.** Must-haves, nice-to-haves and disqualifiers for the role, written by the hiring manager in plain language and approved by HR; weights per criterion.
-3. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
+3. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5-5`, max tokens 2000 (leave temperature at its default: Claude Sonnet 5.5 rejects any other value). Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
    You are the "Parse the resume" step of the Resume Screening Automation workflow run by Agentmelt.
@@ -33,7 +33,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 
 4. **Code by Zapier (JavaScript) — parse Claude's JSON.** Input `text` = Claude's reply; code `return JSON.parse(inputData.text);` so the fields become mappable in later steps.
 5. **Filter by Zapier.** Only continue if `needs_human` (from the previous step) *does not exactly match* `true`. Everything Claude is unsure about stops here — check Zap History for those, or add a **Paths** step whose second path posts the item to your approver.
-6. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
+6. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5-5`, max tokens 2000 (leave temperature at its default: Claude Sonnet 5.5 rejects any other value). Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
    You are the "Score against criteria with evidence" step of the Resume Screening Automation workflow run by Agentmelt.

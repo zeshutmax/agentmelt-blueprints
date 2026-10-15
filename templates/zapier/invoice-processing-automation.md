@@ -11,7 +11,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 ## Steps
 
 1. **Trigger — Gmail — New Email Matching Search (trigger).** New attachments to ap@ start the run; supplier portals and scanned batches are polled hourly.
-2. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
+2. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5-5`, max tokens 2000 (leave temperature at its default: Claude Sonnet 5.5 rejects any other value). Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
    You are the "Extract fields" step of the Invoice Processing Automation workflow run by Agentmelt.
@@ -38,7 +38,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 8. **Slack — Send Channel Message (approval).** Send the summary to your approver with what would be written. Zapier has no wait-for-reply step: with approval mode on, stop the Zap here and re-run the write-back by hand (or from a second Zap triggered by a Slack reaction on the message). With approval mode off, the next step runs immediately.
 9. **Filter by Zapier.** Only continue if the stored `approval_mode` is `false`.
 10. **Xero — Create Bill — Post to the ERP.** Approved invoices are created in NetSuite, Xero, QuickBooks, Sage or SAP with coding, attachments and the approval trail; payment runs pick them up.
-11. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
+11. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5-5`, max tokens 2000 (leave temperature at its default: Claude Sonnet 5.5 rejects any other value). Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
    You are the "Supplier status replies" step of the Invoice Processing Automation workflow run by Agentmelt.

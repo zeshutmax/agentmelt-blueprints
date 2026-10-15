@@ -288,11 +288,9 @@
         "model": {
           "__rl": true,
           "mode": "id",
-          "value": "claude-sonnet-5"
+          "value": "claude-sonnet-5-5"
         },
-        "options": {
-          "temperature": 0.2
-        }
+        "options": {}
       },
       "id": "email-triage-automation-02-llm",
       "name": "Claude (Anthropic Chat Model)",
@@ -396,11 +394,9 @@
         "model": {
           "__rl": true,
           "mode": "id",
-          "value": "claude-sonnet-5"
+          "value": "claude-sonnet-5-5"
         },
-        "options": {
-          "temperature": 0.2
-        }
+        "options": {}
       },
       "id": "email-triage-automation-04-llm",
       "name": "Claude (Anthropic Chat Model) 2",
@@ -482,11 +478,9 @@
         "model": {
           "__rl": true,
           "mode": "id",
-          "value": "claude-sonnet-5"
+          "value": "claude-sonnet-5-5"
         },
-        "options": {
-          "temperature": 0.2
-        }
+        "options": {}
       },
       "id": "email-triage-automation-05-llm",
       "name": "Claude (Anthropic Chat Model) 3",

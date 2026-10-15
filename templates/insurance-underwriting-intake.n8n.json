@@ -280,11 +280,9 @@
         "model": {
           "__rl": true,
           "mode": "id",
-          "value": "claude-sonnet-5"
+          "value": "claude-sonnet-5-5"
         },
-        "options": {
-          "temperature": 0.2
-        }
+        "options": {}
       },
       "id": "insurance-underwriting-intake-02-llm",
       "name": "Claude (Anthropic Chat Model)",
@@ -446,11 +444,9 @@
         "model": {
           "__rl": true,
           "mode": "id",
-          "value": "claude-sonnet-5"
+          "value": "claude-sonnet-5-5"
         },
-        "options": {
-          "temperature": 0.2
-        }
+        "options": {}
       },
       "id": "insurance-underwriting-intake-07-llm",
       "name": "Claude (Anthropic Chat Model) 2",

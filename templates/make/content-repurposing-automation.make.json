@@ -95,7 +95,7 @@
       "version": 1,
       "parameters": {},
       "mapper": {
-        "model": "claude-sonnet-5",
+        "model": "claude-sonnet-5-5",
         "system": "You are the \"Extract structure\" step of the AI Content Repurposing workflow run by Agentmelt.\nTask: Segments with titles and timestamps, key claims, the three most quotable lines, named people and resources mentioned, and the episode's single main idea.\n\nRules:\n- Nothing publishes without approval on the review board.\n- Quotes are verbatim from the transcript with timestamps; the agent cannot invent a quote.\n- Claims extracted from the episode are attributed to the speaker, not stated as fact by the brand.\n- Style rules (no emojis, no hashtags, sentence length) are enforced by structured output and checked before the board.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
         "messages": [
           {
@@ -109,7 +109,6 @@
           }
         ],
         "max_tokens": "2000",
-        "temperature": "0.2",
         "metadata": {}
       },
       "metadata": {
@@ -190,7 +189,7 @@
               "version": 1,
               "parameters": {},
               "mapper": {
-                "model": "claude-sonnet-5",
+                "model": "claude-sonnet-5-5",
                 "system": "You are the \"Draft the long-form\" step of the AI Content Repurposing workflow run by Agentmelt.\nTask: Show notes with timestamps and a blog post that restructures the conversation into an article — not a transcript summary — in your voice guide, with the resources linked.\n\nRules:\n- Nothing publishes without approval on the review board.\n- Quotes are verbatim from the transcript with timestamps; the agent cannot invent a quote.\n- Claims extracted from the episode are attributed to the speaker, not stated as fact by the brand.\n- Style rules (no emojis, no hashtags, sentence length) are enforced by structured output and checked before the board.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
                 "messages": [
                   {
@@ -204,7 +203,6 @@
                   }
                 ],
                 "max_tokens": "2000",
-                "temperature": "0.2",
                 "metadata": {}
               },
               "metadata": {
@@ -297,7 +295,7 @@
                       "version": 1,
                       "parameters": {},
                       "mapper": {
-                        "model": "claude-sonnet-5",
+                        "model": "claude-sonnet-5-5",
                         "system": "You are the \"Draft the short-form\" step of the AI Content Repurposing workflow run by Agentmelt.\nTask: Five LinkedIn posts (one per key idea, different hooks), an X thread, a newsletter section, and a pull-quote graphic brief; each within platform limits and your style rules.\n\nRules:\n- Nothing publishes without approval on the review board.\n- Quotes are verbatim from the transcript with timestamps; the agent cannot invent a quote.\n- Claims extracted from the episode are attributed to the speaker, not stated as fact by the brand.\n- Style rules (no emojis, no hashtags, sentence length) are enforced by structured output and checked before the board.\n- Answer only from the data provided in the input. If something is missing, say so in the output instead of guessing.\n- If this step produces a message or a document, put the full text in `draft` (and a `subject` if it is an email); put a one-line summary in `summary`.\n- Set `needs_human` true whenever you are unsure, the input is unusual, or a rule above applies; a person will look at it.\n- Return valid JSON matching the output schema; no prose outside the JSON.\n\nReply with a single JSON object and nothing else: the fields the task needs, plus \"needs_human\" (true when unsure), \"confidence\" (0–1) and \"summary\" (one line).",
                         "messages": [
                           {
@@ -311,7 +309,6 @@
                           }
                         ],
                         "max_tokens": "2000",
-                        "temperature": "0.2",
                         "metadata": {}
                       },
                       "metadata": {

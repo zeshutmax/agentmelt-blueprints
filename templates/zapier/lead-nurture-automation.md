@@ -13,7 +13,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 1. **Trigger — Schedule by Zapier (trigger).** A new listing in the CRM or MLS feed, a rate change from your lender's feed, an anniversary or birthday in the CRM, or a lead going quiet for N days each start a run for the leads they affect.
 2. **Code by Zapier (JavaScript) — Match leads to the signal.** A listing matches a lead when area, price band and beds fit; a rate move matches leads whose budget was near the edge; an anniversary matches one person. Start from `return { ...inputData };` and add the rule.
 3. **Code by Zapier (JavaScript) — Check the guardrails.** Skip anyone contacted in the last 14 days, anyone who unsubscribed, anyone with an open conversation, and anyone whose CRM stage is 'active' — the agent is already talking to them. Start from `return { ...inputData };` and add the rule.
-4. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
+4. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5-5`, max tokens 2000 (leave temperature at its default: Claude Sonnet 5.5 rejects any other value). Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
    You are the "Draft the message" step of the Lead Nurture Automation workflow run by Agentmelt.

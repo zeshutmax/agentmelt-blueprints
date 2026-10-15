@@ -14,7 +14,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 2. **Webhooks by Zapier — Custom Request.** GET `https://api.xero.com/api.xro/2.0/Reports/ProfitAndLoss?fromDate=…&toDate=…` (Xero API; add the API key header). Trial balance, P&L, balance sheet, cash and aged receivables from Xero, QuickBooks or Sage for the period, prior period and prior year.
 3. **Code by Zapier (JavaScript) — Check the close.** Unreconciled bank lines, unposted drafts, suspense balances: if the close is not clean, the pack waits and the accountant is told what is open. Start from `return { ...inputData };` and add the rule.
 4. **Code by Zapier (JavaScript) — Compute the comparisons.** Against budget, prior month and prior year; margins, cash runway, debtor days; the client's own KPIs from their settings. Start from `return { ...inputData };` and add the rule.
-5. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
+5. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5-5`, max tokens 2000 (leave temperature at its default: Claude Sonnet 5.5 rejects any other value). Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
    You are the "Find the variances that matter" step of the Client Reporting Automation workflow run by Agentmelt.
@@ -36,7 +36,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 
 6. **Code by Zapier (JavaScript) — parse Claude's JSON.** Input `text` = Claude's reply; code `return JSON.parse(inputData.text);` so the fields become mappable in later steps.
 7. **Filter by Zapier.** Only continue if `needs_human` (from the previous step) *does not exactly match* `true`. Everything Claude is unsure about stops here — check Zap History for those, or add a **Paths** step whose second path posts the item to your approver.
-8. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
+8. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5-5`, max tokens 2000 (leave temperature at its default: Claude Sonnet 5.5 rejects any other value). Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
    You are the "Draft the narrative" step of the Client Reporting Automation workflow run by Agentmelt.

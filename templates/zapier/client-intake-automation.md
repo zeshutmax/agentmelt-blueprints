@@ -11,7 +11,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 ## Steps
 
 1. **Trigger — Gmail — New Email Matching Search (trigger).** An email to the intake address, a website form submission, or a phone note typed into the shared inbox starts intake for that enquiry.
-2. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
+2. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5-5`, max tokens 2000 (leave temperature at its default: Claude Sonnet 5.5 rejects any other value). Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
    You are the "Classify the matter" step of the Client Intake Automation workflow run by Agentmelt.
@@ -33,7 +33,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 
 3. **Code by Zapier (JavaScript) — parse Claude's JSON.** Input `text` = Claude's reply; code `return JSON.parse(inputData.text);` so the fields become mappable in later steps.
 4. **Filter by Zapier.** Only continue if `needs_human` (from the previous step) *does not exactly match* `true`. Everything Claude is unsure about stops here — check Zap History for those, or add a **Paths** step whose second path posts the item to your approver.
-5. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
+5. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5-5`, max tokens 2000 (leave temperature at its default: Claude Sonnet 5.5 rejects any other value). Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
    You are the "Extract the conflict-check facts" step of the Client Intake Automation workflow run by Agentmelt.
@@ -57,7 +57,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 7. **Filter by Zapier.** Only continue if `needs_human` (from the previous step) *does not exactly match* `true`. Everything Claude is unsure about stops here — check Zap History for those, or add a **Paths** step whose second path posts the item to your approver.
 8. **Code by Zapier (JavaScript) — Run the conflict check.** Parties checked against the client list, former-client list and adverse-party list in the matter system, with fuzzy matching on names and companies; hits are listed with the matter they came from. Start from `return { ...inputData };` and add the rule.
 9. **Gmail — Send Email — Acknowledge.** A same-day acknowledgement to the enquirer from the firm's address: received, who will respond, by when.
-10. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
+10. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5-5`, max tokens 2000 (leave temperature at its default: Claude Sonnet 5.5 rejects any other value). Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
    You are the "Draft the next document" step of the Client Intake Automation workflow run by Agentmelt.

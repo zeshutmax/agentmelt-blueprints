@@ -15,7 +15,7 @@ Zapier has no importable file, so this is the build guide: the same process as t
 3. **Gmail — Send Email — Offer the slots.** One email from the recruiter with three buttons or links, the format, who they will meet, and what to prepare — written for the stage, not a template dump.
 4. **Google Calendar — Create Detailed Event — Book.** The chosen slot becomes an event on every calendar with the video link or room, the candidate's CV attached for the panel, and the interview kit.
 5. **Twilio — Send SMS — Remind.** Candidate: 24 hours and 2 hours before, by email and SMS if they gave a number.
-6. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5`, max tokens 2000, temperature 0.2. Paste the system prompt below; the user message is the fields from the previous step.
+6. **Anthropic (Claude) — Send Message.** Model `claude-sonnet-5-5`, max tokens 2000 (leave temperature at its default: Claude Sonnet 5.5 rejects any other value). Paste the system prompt below; the user message is the fields from the previous step.
 
    ```
    You are the "Handle changes" step of the Interview Scheduling Automation workflow run by Agentmelt.
