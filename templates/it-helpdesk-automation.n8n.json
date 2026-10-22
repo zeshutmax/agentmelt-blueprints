@@ -325,7 +325,7 @@
       "id": "it-helpdesk-automation-02-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         960,
         300
@@ -423,7 +423,7 @@
       "id": "it-helpdesk-automation-03-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         1600,
         300
@@ -475,7 +475,7 @@
       "id": "it-helpdesk-automation-04",
       "name": "Self-service actions with approval",
       "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         1920,
         300

@@ -373,7 +373,7 @@
       "id": "kyc-aml-monitoring-02-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         1280,
         300
@@ -482,7 +482,7 @@
       "id": "kyc-aml-monitoring-05-approved",
       "name": "Approved?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         2560,
         300

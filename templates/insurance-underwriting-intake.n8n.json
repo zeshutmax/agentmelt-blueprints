@@ -321,7 +321,7 @@
       "id": "insurance-underwriting-intake-02-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         960,
         300
@@ -399,7 +399,7 @@
       "id": "insurance-underwriting-intake-05",
       "name": "Apply appetite rules",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         1920,
         300
@@ -499,7 +499,7 @@
       "id": "insurance-underwriting-intake-07-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         2880,
         300

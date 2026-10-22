@@ -335,7 +335,7 @@
       "id": "client-intake-automation-02-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         960,
         300
@@ -433,7 +433,7 @@
       "id": "client-intake-automation-03-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         1600,
         300
@@ -565,7 +565,7 @@
       "id": "client-intake-automation-06-gate",
       "name": "Needs a person? 3",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         2880,
         300
@@ -643,7 +643,7 @@
       "id": "client-intake-automation-07-approved",
       "name": "Approved?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         3520,
         300

@@ -478,7 +478,7 @@
       "id": "employee-onboarding-automation-08-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         2880,
         300

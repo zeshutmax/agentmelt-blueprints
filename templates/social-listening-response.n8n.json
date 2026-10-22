@@ -377,7 +377,7 @@
       "id": "social-listening-response-03-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         1600,
         300
@@ -475,7 +475,7 @@
       "id": "social-listening-response-04-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         2240,
         300
@@ -527,7 +527,7 @@
       "id": "social-listening-response-05",
       "name": "Route by category",
       "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         2560,
         300
@@ -660,7 +660,7 @@
       "id": "social-listening-response-08-gate",
       "name": "Needs a person? 3",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         3840,
         300

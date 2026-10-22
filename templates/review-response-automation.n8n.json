@@ -371,7 +371,7 @@
       "id": "review-response-automation-02-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         1280,
         300
@@ -491,7 +491,7 @@
       "id": "review-response-automation-04-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         2240,
         300
@@ -536,7 +536,7 @@
       "id": "review-response-automation-05",
       "name": "Route negatives to a person first",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         2560,
         300
@@ -669,7 +669,7 @@
       "id": "review-response-automation-08-gate",
       "name": "Needs a person? 3",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         3840,
         300

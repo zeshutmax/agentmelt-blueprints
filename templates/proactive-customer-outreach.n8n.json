@@ -300,7 +300,7 @@
       "id": "proactive-customer-outreach-03",
       "name": "Decide whether to reach out",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         960,
         300
@@ -386,7 +386,7 @@
       "id": "proactive-customer-outreach-04-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         1600,
         300

@@ -381,7 +381,7 @@
       "id": "inventory-optimization-06",
       "name": "Generate purchase suggestions",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         2240,
         300
@@ -467,7 +467,7 @@
       "id": "inventory-optimization-07-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         2880,
         300

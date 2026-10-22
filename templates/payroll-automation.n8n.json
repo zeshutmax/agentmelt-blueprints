@@ -329,7 +329,7 @@
       "id": "payroll-automation-03",
       "name": "Validate against policy",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         1280,
         300
@@ -415,7 +415,7 @@
       "id": "payroll-automation-04-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         1920,
         300

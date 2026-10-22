@@ -374,7 +374,7 @@
       "id": "unit-test-generation-04-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         1600,
         300
@@ -456,7 +456,7 @@
       "id": "unit-test-generation-06",
       "name": "Keep what passes and adds coverage",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         2240,
         300

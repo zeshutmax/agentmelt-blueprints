@@ -411,7 +411,7 @@
       "id": "logistics-optimization-06-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         640,
         860

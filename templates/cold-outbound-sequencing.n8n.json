@@ -373,7 +373,7 @@
       "id": "cold-outbound-sequencing-02-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         1280,
         300
@@ -471,7 +471,7 @@
       "id": "cold-outbound-sequencing-03-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         1920,
         300
@@ -516,7 +516,7 @@
       "id": "cold-outbound-sequencing-04",
       "name": "Quality gate",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         2240,
         300

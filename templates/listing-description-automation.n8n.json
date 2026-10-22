@@ -331,7 +331,7 @@
       "id": "listing-description-automation-02-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         960,
         300
@@ -429,7 +429,7 @@
       "id": "listing-description-automation-03-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         1600,
         300
@@ -527,7 +527,7 @@
       "id": "listing-description-automation-04-gate",
       "name": "Needs a person? 3",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         2240,
         300
@@ -619,7 +619,7 @@
       "id": "listing-description-automation-06-approved",
       "name": "Approved?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         3200,
         300

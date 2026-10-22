@@ -364,7 +364,7 @@
       "id": "automated-code-review-04-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         1600,
         300
@@ -409,7 +409,7 @@
       "id": "automated-code-review-05",
       "name": "Filter to what matters",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         1920,
         300

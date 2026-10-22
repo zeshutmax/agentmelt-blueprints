@@ -405,7 +405,7 @@
       "id": "competitor-monitoring-04-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         1920,
         300
@@ -450,7 +450,7 @@
       "id": "competitor-monitoring-05",
       "name": "Instant alerts for pricing",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         2240,
         300
@@ -536,7 +536,7 @@
       "id": "competitor-monitoring-06-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         2880,
         300

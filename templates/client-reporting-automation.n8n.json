@@ -399,7 +399,7 @@
       "id": "client-reporting-automation-04-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         1920,
         300
@@ -497,7 +497,7 @@
       "id": "client-reporting-automation-05-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         2560,
         300
@@ -593,7 +593,7 @@
       "id": "client-reporting-automation-07-approved",
       "name": "Approved?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         3520,
         300

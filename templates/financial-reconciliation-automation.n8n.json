@@ -397,7 +397,7 @@
       "id": "financial-reconciliation-automation-04-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         1920,
         300
@@ -475,7 +475,7 @@
       "id": "financial-reconciliation-automation-05-approved",
       "name": "Approved?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         2560,
         300

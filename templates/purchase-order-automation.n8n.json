@@ -331,7 +331,7 @@
       "id": "purchase-order-automation-02-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         960,
         300
@@ -402,7 +402,7 @@
       "id": "purchase-order-automation-04",
       "name": "Route approvals",
       "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         1600,
         300

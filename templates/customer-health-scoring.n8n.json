@@ -373,7 +373,7 @@
       "id": "customer-health-scoring-03-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         1600,
         300
@@ -432,7 +432,7 @@
       "id": "customer-health-scoring-05",
       "name": "Detect drops and thresholds",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         2240,
         300
@@ -518,7 +518,7 @@
       "id": "customer-health-scoring-06-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         2880,
         300

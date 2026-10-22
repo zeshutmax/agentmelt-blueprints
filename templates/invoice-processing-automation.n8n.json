@@ -321,7 +321,7 @@
       "id": "invoice-processing-automation-02-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         960,
         300
@@ -406,7 +406,7 @@
       "id": "invoice-processing-automation-05",
       "name": "Route exceptions and approvals",
       "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         1920,
         300
@@ -472,7 +472,7 @@
       "id": "invoice-processing-automation-06-approved",
       "name": "Approved?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         2560,
         300
@@ -606,7 +606,7 @@
       "id": "invoice-processing-automation-08-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         3520,
         300

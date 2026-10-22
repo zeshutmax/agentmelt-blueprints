@@ -434,7 +434,7 @@
       "id": "supplier-risk-monitoring-05-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         2240,
         300
@@ -546,7 +546,7 @@
       "id": "supplier-risk-monitoring-07-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         3200,
         300

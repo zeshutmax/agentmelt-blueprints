@@ -380,7 +380,7 @@
       "id": "security-alert-triage-05-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         1920,
         300
@@ -432,7 +432,7 @@
       "id": "security-alert-triage-06",
       "name": "Auto-close or queue",
       "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         2240,
         300

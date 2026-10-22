@@ -362,7 +362,7 @@
       "id": "inbound-lead-qualification-04-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         1600,
         300
@@ -414,7 +414,7 @@
       "id": "inbound-lead-qualification-05",
       "name": "Route",
       "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         1920,
         300

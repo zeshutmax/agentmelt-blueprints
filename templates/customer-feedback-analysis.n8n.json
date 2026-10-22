@@ -371,7 +371,7 @@
       "id": "customer-feedback-analysis-02-gate",
       "name": "Needs a person?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         1280,
         300
@@ -455,7 +455,7 @@
       "id": "customer-feedback-analysis-03-gate",
       "name": "Needs a person? 2",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         1920,
         300
@@ -567,7 +567,7 @@
       "id": "customer-feedback-analysis-05-gate",
       "name": "Needs a person? 3",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         2880,
         300
@@ -612,7 +612,7 @@
       "id": "customer-feedback-analysis-06",
       "name": "Route urgent items",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.4,
       "position": [
         3200,
         300
