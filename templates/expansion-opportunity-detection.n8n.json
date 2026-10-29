@@ -478,7 +478,7 @@
       "id": "expansion-opportunity-detection-07",
       "name": "Postgres: Track outcomes by signal",
       "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.7,
+      "typeVersion": 2.8,
       "position": [
         2880,
         300

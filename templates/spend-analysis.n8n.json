@@ -282,7 +282,7 @@
       "id": "spend-analysis-01",
       "name": "Postgres: Extract AP and PO lines",
       "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.7,
+      "typeVersion": 2.8,
       "position": [
         640,
         300
@@ -428,7 +428,7 @@
       "id": "spend-analysis-05",
       "name": "Postgres: Build the spend cube",
       "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.7,
+      "typeVersion": 2.8,
       "position": [
         2240,
         300

@@ -280,7 +280,7 @@
       "id": "security-alert-triage-03",
       "name": "Postgres: Correlate with recent activity",
       "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.7,
+      "typeVersion": 2.8,
       "position": [
         960,
         300

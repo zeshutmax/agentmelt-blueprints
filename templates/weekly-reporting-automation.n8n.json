@@ -281,7 +281,7 @@
       "id": "weekly-reporting-automation-01",
       "name": "Postgres: Run the metric queries",
       "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.7,
+      "typeVersion": 2.8,
       "position": [
         640,
         300

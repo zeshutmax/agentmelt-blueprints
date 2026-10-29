@@ -284,7 +284,7 @@
       "id": "demand-forecasting-01",
       "name": "Postgres: Pull sales history",
       "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.7,
+      "typeVersion": 2.8,
       "position": [
         640,
         300
@@ -372,7 +372,7 @@
       "id": "demand-forecasting-06",
       "name": "Postgres: Write forecasts to the planning system",
       "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.7,
+      "typeVersion": 2.8,
       "position": [
         2240,
         300

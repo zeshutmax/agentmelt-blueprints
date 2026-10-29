@@ -284,7 +284,7 @@
       "id": "inventory-optimization-01",
       "name": "Postgres: Read forecasts and error",
       "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.7,
+      "typeVersion": 2.8,
       "position": [
         640,
         300

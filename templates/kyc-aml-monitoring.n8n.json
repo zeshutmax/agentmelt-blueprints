@@ -510,7 +510,7 @@
       "id": "kyc-aml-monitoring-06",
       "name": "Postgres: Record the decision",
       "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.7,
+      "typeVersion": 2.8,
       "position": [
         2880,
         300

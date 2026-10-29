@@ -354,7 +354,7 @@
       "id": "supplier-risk-monitoring-04",
       "name": "Postgres: Measure delivery performance",
       "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.7,
+      "typeVersion": 2.8,
       "position": [
         1600,
         300
