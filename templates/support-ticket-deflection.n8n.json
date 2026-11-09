@@ -374,7 +374,7 @@
       "id": "support-ticket-deflection-04",
       "name": "Vector Store: Retrieve knowledge",
       "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
-      "typeVersion": 1.3,
+      "typeVersion": 1.4,
       "position": [
         1600,
         300
