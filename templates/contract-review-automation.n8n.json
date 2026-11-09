@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Review incoming contracts with Claude against your playbook in Google Docs\n\nLegal and operations teams that review the same clause types in every contract.\n\n### How it works\nTrigger: Attachments to contracts@, new documents in the CLM or DocuSign/PandaDoc inbox, or a form submission from sales.\n1. Capture and identify\n2. Extract clauses\n3. Compare to the playbook\n4. Draft the redline\n5. Route by risk\n6. Review surface\n7. Log and learn\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Google Docs / Word, Ironclad / DocuSign CLM / PandaDoc.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nPut your clause playbook and risk thresholds in the Config node; connect Ironclad, DocuSign CLM or PandaDoc as the source.\nGuardrail to keep: The workflow triages and drafts; a person approves every contract and every redline before it goes to the counterparty.\n\nFull blueprint: https://agentmelt.com/workflows/contract-review-automation/",
-        "height": 900,
+        "height": 820,
         "width": 640,
         "color": 1
       },
@@ -13,15 +13,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 1. Capture and identify\nDocument captured, type classified (NDA, MSA, DPA, SOW, vendor terms), counterparty and deal linked from the CRM",
-        "height": 240,
-        "width": 620,
+        "height": 820,
+        "width": 300,
         "color": 7
       },
       "id": "contract-review-automation-section-1",
@@ -29,15 +29,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 2. Extract clauses\nEach clause extracted into a structured record — term, termination, liability cap, indemnity, IP, confidentiality, data protection, governing law, payment terms — with the exact text and location",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "contract-review-automation-section-2",
@@ -45,14 +45,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        -30
+        580,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 3. Compare to the playbook\nEach clause compared to the playbook's standard position, acceptable fallback and walk-away; deviations scored by severity and business impact",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -61,15 +61,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        190
+        1220,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 4. Draft the redline\nFor each deviation the agent drafts the replacement language from the playbook's fallback and a one-line rationale for the counterparty, in the firm's drafting style",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "contract-review-automation-section-4",
@@ -77,14 +77,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        -30
+        1540,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 5. Route by risk\nNo deviations: business owner approves",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2200,
-        190
+        2180,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 6. Review surface\nThe reviewer gets the contract with deviations highlighted, the comparison table, and the redline as tracked changes in Word or Google Docs",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        190
+        2500,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 7. Log and learn\nOutcome logged on the deal; accepted fallbacks and new positions feed the playbook, which legal owns",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -125,14 +125,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2840,
-        190
+        2820,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 820,
         "width": 300,
         "color": 3
       },
@@ -141,8 +141,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -110
       ]
     },
     {

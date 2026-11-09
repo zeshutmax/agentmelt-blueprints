@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Analyze customer feedback from Zendesk and Gong with Claude and report in Notion\n\nProduct and success teams that read tickets one at a time and miss the pattern.\n\n### How it works\nTrigger: Daily pulls from each source; the weekly report compiles Monday morning.\n1. Collect feedback\n2. Classify by theme and sentiment\n3. Extract the quotable line\n4. Aggregate\n5. Write the weekly report\n6. Route urgent items\n7. Deliver and store\n8. Maintain the taxonomy\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Zendesk / Intercom / Gong, Notion + Google Sheets.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the theme taxonomy and the report cadence in the Config node; add Intercom or survey tools as sources.\nGuardrail to keep: Personal data is stripped from quotes; sources are linked, not reproduced.\n\nFull blueprint: https://agentmelt.com/workflows/customer-feedback-analysis/",
-        "height": 900,
+        "height": 840,
         "width": 640,
         "color": 1
       },
@@ -13,30 +13,30 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -110
       ]
     },
     {
       "parameters": {
-        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
-        "height": 240,
-        "width": 620,
+        "content": "## Trigger\nThe entry point. The red note next to it marks the one node you edit.",
+        "height": 820,
+        "width": 300,
         "color": 7
       },
       "id": "customer-feedback-analysis-section-0",
-      "name": "Section: Trigger and config",
+      "name": "Section: Trigger",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 1. Collect feedback\nSurvey responses (Typeform, Delighted, Qualtrics), reviews (G2, app stores, Trustpilot), support tickets (Zendesk, Intercom), call notes (Gong, Fireflies), and social mentions, each with source, customer segment and date",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -45,15 +45,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 2. Classify by theme and sentiment\nEach item tagged with one or more themes from your taxonomy (pricing, onboarding, reliability, feature X…) and a sentiment; items that fit no theme are collected as candidates for a new one",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "customer-feedback-analysis-section-2",
@@ -61,15 +61,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        -30
+        900,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 3. Extract the quotable line\nThe sentence that carries the feedback, cleaned of personal data, kept with a link to the source record",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "customer-feedback-analysis-section-3",
@@ -77,14 +77,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        -30
+        1540,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 4. Aggregate\nVolume and sentiment per theme per week, by segment and plan; trend versus the previous eight weeks; new-theme candidates ranked by frequency",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -93,15 +93,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2200,
-        190
+        2180,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 5. Write the weekly report\nTop themes with numbers and quotes, rising and falling themes, new themes to review, and — clearly separated as inference — what the pattern suggests",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "customer-feedback-analysis-section-5",
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        -30
+        2500,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 6. Route urgent items\nSpikes in a negative theme (e.g",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -125,14 +125,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3160,
-        190
+        3140,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 7. Deliver and store\nReport posted to Slack and stored in the wiki; the classified dataset available for product to query",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3480,
-        190
+        3460,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 8. Maintain the taxonomy\nThemes and definitions live in a sheet product owns; new-theme candidates are approved there and the classifier picks them up next run",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -157,14 +157,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3800,
-        190
+        3780,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 820,
         "width": 300,
         "color": 3
       },
@@ -173,8 +173,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -110
       ]
     },
     {

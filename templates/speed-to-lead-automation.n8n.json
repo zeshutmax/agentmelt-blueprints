@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Reply to new real estate leads in minutes with Claude, Follow Up Boss and Twilio\n\nReal-estate agents and teams who lose portal leads to whoever answers first.\n\n### How it works\nTrigger: A lead email from Zillow or Realtor.com, a website form submission, or a new person appearing in Follow Up Boss or kvCORE starts the run.\n1. Receive the lead\n2. Look up the lead in the CRM\n3. Qualify\n4. Draft the first reply\n5. Check quiet hours and consent\n6. Send the reply\n7. Log and hand off\n8. Follow up on silence\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Follow Up Boss / kvCORE / HubSpot, Gmail / Outlook, Twilio.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nPut your first-reply rules and quiet hours in the Config node; swap Follow Up Boss for kvCORE or HubSpot and Twilio for your SMS provider.\nGuardrail to keep: Quiet hours: nothing sent 9 pm–8 am in the lead's time zone; messages queue until morning.\n\nFull blueprint: https://agentmelt.com/workflows/speed-to-lead-automation/",
-        "height": 900,
+        "height": 840,
         "width": 640,
         "color": 1
       },
@@ -13,15 +13,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 1. Receive the lead\nName, email, phone, source, the property or page they enquired from, and their message",
-        "height": 240,
-        "width": 620,
+        "height": 800,
+        "width": 300,
         "color": 7
       },
       "id": "speed-to-lead-automation-section-1",
@@ -29,14 +29,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 2. Look up the lead in the CRM\nExisting record, past conversations, stage, and any notes — so the reply does not treat a past client like a stranger",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -45,15 +45,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 3. Qualify\nTimeline, pre-approval, price band and intent from the enquiry text; 'hot' only when the timeline is near and something specific is named",
-        "height": 680,
-        "width": 620,
+        "height": 800,
+        "width": 540,
         "color": 7
       },
       "id": "speed-to-lead-automation-section-3",
@@ -61,15 +61,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        -30
+        900,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 4. Draft the first reply\nTwo to four sentences in the agent's voice, referencing the property or page, with exactly one question",
-        "height": 680,
-        "width": 620,
+        "height": 800,
+        "width": 540,
         "color": 7
       },
       "id": "speed-to-lead-automation-section-4",
@@ -77,14 +77,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        -30
+        1540,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 5. Check quiet hours and consent\nHolds the message until quiet hours end in the lead's time zone; checks that a phone number came with consent before any SMS; skips leads who opted out",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2200,
-        190
+        2180,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 6. Send the reply\nFrom the agent's own address, threaded to the lead's email where there is one; SMS as an optional second channel",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        190
+        2500,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 7. Log and hand off\nNote and stage written to the CRM; hot leads text the agent a three-line summary with the number to call",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -125,14 +125,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2840,
-        190
+        2820,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 8. Follow up on silence\nTwo days without a reply: one nudge that offers two showing slots or asks what they are after",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3160,
-        190
+        3140,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 800,
         "width": 300,
         "color": 3
       },
@@ -157,8 +157,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -90
       ]
     },
     {

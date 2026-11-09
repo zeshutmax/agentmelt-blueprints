@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Score supplier risk from news and credit data with Claude and report in Slack\n\nProcurement teams that learn about a supplier's trouble from a missed delivery.\n\n### How it works\nTrigger: News and delivery data refresh daily; financial and ESG data refresh weekly; the composite score is recomputed weekly and on any high-severity signal.\n1. Load the supplier portfolio\n2. Pull financial signals\n3. Pull news and events\n4. Measure delivery performance\n5. Classify and weight signals\n6. Compute the composite score\n7. Draft the risk brief\n8. Alert and track\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus D&B / Creditsafe / Coface, News API / GDELT, Slack + Google Sheets.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nEdit the risk weights and the watchlist in the Config node; add D&B, Creditsafe or your own data provider as sources.\nGuardrail to keep: Scores are explainable: every alert lists the signals and weights that produced it.\n\nFull blueprint: https://agentmelt.com/workflows/supplier-risk-monitoring/",
-        "height": 900,
+        "height": 840,
         "width": 640,
         "color": 1
       },
@@ -13,30 +13,30 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -110
       ]
     },
     {
       "parameters": {
-        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
-        "height": 240,
-        "width": 620,
+        "content": "## Trigger\nThe entry point. The red note next to it marks the one node you edit.",
+        "height": 820,
+        "width": 300,
         "color": 7
       },
       "id": "supplier-risk-monitoring-section-0",
-      "name": "Section: Trigger and config",
+      "name": "Section: Trigger",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 1. Load the supplier portfolio\nSuppliers with spend, criticality tier, category, country of manufacture, single-source flag and contract terms",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -45,14 +45,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 2. Pull financial signals\nCredit scores and payment behaviour from D&B, Creditsafe or Coface; public filings for listed suppliers",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -61,14 +61,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        190
+        900,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 3. Pull news and events\nNews API queries per supplier and per manufacturing region; regulatory and sanctions list checks; weather and port-status feeds for logistics-critical regions",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -77,14 +77,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        190
+        1220,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 4. Measure delivery performance\nOn-time-in-full rate, lead-time drift and quality rejections per supplier from your own receipts and QC records — the most predictive signal you already own",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -93,15 +93,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        190
+        1540,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 5. Classify and weight signals\nNews items are classified (financial distress, labour action, quality recall, natural disaster, ownership change, irrelevant) with severity; irrelevant mentions are dropped",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "supplier-risk-monitoring-section-5",
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1880,
-        -30
+        1860,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 6. Compute the composite score\nWeighted score per supplier from financial, operational, geographic and news components, with the weights per tier kept in the sheet so procurement can tune them",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -125,15 +125,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        190
+        2500,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 7. Draft the risk brief\nWhen a score crosses its threshold, the agent assembles the evidence, states the exposure (parts, spend, lead time to switch) and recommends actions: increase safety stock, qualify the backup, renegotiate terms, visit the site",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "supplier-risk-monitoring-section-7",
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2840,
-        -30
+        2820,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 8. Alert and track\nBrief posted to the procurement channel and logged on the supplier record; actions get owners and due dates; scores and briefs feed the quarterly review",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -157,14 +157,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3480,
-        190
+        3460,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 820,
         "width": 300,
         "color": 3
       },
@@ -173,8 +173,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -110
       ]
     },
     {

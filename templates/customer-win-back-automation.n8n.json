@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Win back churned customers from Stripe and HubSpot with Claude-written emails\n\nSaaS growth teams that never contact churned accounts again, even when the reason they left is fixed.\n\n### How it works\nTrigger: Weekly scan of churned accounts against triggers; a release-notes event or a manual trigger when a feature ships; seasonal calendar for seasonal businesses.\n1. Build the churned segment\n2. Classify the reason\n3. Match triggers to segments\n4. Draft the message\n5. Approve high-value sends\n6. Send and route replies\n7. Track reactivation\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Stripe / Chargebee + HubSpot, Gmail / Customer.io.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nDefine the win-back triggers and the offer rules in the Config node; send through Customer.io or Gmail.\nGuardrail to keep: Excluded segments (business closed, requested no contact, poor fit) never receive win-back messages.\n\nFull blueprint: https://agentmelt.com/workflows/customer-win-back-automation/",
-        "height": 900,
+        "height": 840,
         "width": 640,
         "color": 1
       },
@@ -13,30 +13,30 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -90
       ]
     },
     {
       "parameters": {
-        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
-        "height": 240,
-        "width": 620,
+        "content": "## Trigger\nThe entry point. The red note next to it marks the one node you edit.",
+        "height": 800,
+        "width": 300,
         "color": 7
       },
       "id": "customer-win-back-automation-section-0",
-      "name": "Section: Trigger and config",
+      "name": "Section: Trigger",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 1. Build the churned segment\nCancelled and lapsed accounts from billing and CRM with tenure, last plan, revenue, cancellation reason and any exit-survey text",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -45,15 +45,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 2. Classify the reason\nExit reasons normalised into categories — price, missing feature, poor fit, switched to competitor, business closed, unresponsive — from the survey text and support history",
-        "height": 680,
-        "width": 620,
+        "height": 800,
+        "width": 540,
         "color": 7
       },
       "id": "customer-win-back-automation-section-2",
@@ -61,14 +61,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        -30
+        900,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 3. Match triggers to segments\nRules: missing-feature churn waits for that feature to ship; price churn waits for a plan change or an annual-discount window; seasonal churn waits for the season; poor-fit and closed-business are excluded",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -77,15 +77,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        190
+        1540,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 4. Draft the message\nA short, specific message referencing the reason they gave and the thing that changed, with one approved offer from the finance-owned set, in the account owner's voice",
-        "height": 680,
-        "width": 620,
+        "height": 800,
+        "width": 540,
         "color": 7
       },
       "id": "customer-win-back-automation-section-4",
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1880,
-        -30
+        1860,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 5. Approve high-value sends\nAccounts above a revenue threshold pause for the owner's approval; the rest send automatically within the frequency cap",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        190
+        2500,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 6. Send and route replies\nSent from the account owner; replies create a task for them with the account history; unsubscribes are honoured across all lists",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -125,14 +125,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2840,
-        190
+        2820,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 7. Track reactivation\nReactivations matched to the message, segment, trigger and offer, so the rules and offers can be tuned quarterly",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3160,
-        190
+        3140,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 800,
         "width": 300,
         "color": 3
       },
@@ -157,8 +157,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -90
       ]
     },
     {

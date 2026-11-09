@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Nurture real estate leads from Follow Up Boss signals with Claude and Gmail\n\nReal-estate agents whose long-term leads go cold because nobody has a reason to write.\n\n### How it works\nTrigger: A new listing in the CRM or MLS feed, a rate change from your lender's feed, an anniversary or birthday in the CRM, or a lead going quiet for N days each start a run for the leads they affect.\n1. Detect the reason\n2. Match leads to the signal\n3. Check the guardrails\n4. Draft the message\n5. Approve or auto-send\n6. Send and log\n7. Stop on reply\n8. Report\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Follow Up Boss / kvCORE / HubSpot, Gmail / Outlook, Slack.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the signal types and your voice rules in the Config node; swap Follow Up Boss for kvCORE or HubSpot.\nGuardrail to keep: No message without a reason the lead would recognise; the model cannot invent one.\n\nFull blueprint: https://agentmelt.com/workflows/lead-nurture-automation/",
-        "height": 900,
+        "height": 840,
         "width": 640,
         "color": 1
       },
@@ -13,15 +13,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 1. Detect the reason\nHourly: new listings, rate changes and CRM dates are compared against every lead's stated wants (area, beds, budget, timeline) and their history",
-        "height": 240,
-        "width": 620,
+        "height": 800,
+        "width": 300,
         "color": 7
       },
       "id": "lead-nurture-automation-section-1",
@@ -29,14 +29,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 2. Match leads to the signal\nA listing matches a lead when area, price band and beds fit; a rate move matches leads whose budget was near the edge; an anniversary matches one person",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -45,14 +45,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 3. Check the guardrails\nSkip anyone contacted in the last 14 days, anyone who unsubscribed, anyone with an open conversation, and anyone whose CRM stage is 'active' — the agent is already talking to them",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -61,15 +61,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        190
+        900,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 4. Draft the message\nTwo to four sentences in the agent's voice that name the reason, reference what the lead said last time, and ask one question",
-        "height": 680,
-        "width": 620,
+        "height": 800,
+        "width": 540,
         "color": 7
       },
       "id": "lead-nurture-automation-section-4",
@@ -77,15 +77,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        -30
+        1220,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 5. Approve or auto-send\nFor the first month every draft goes to the agent for a tap; afterwards, message types the agent has approved ten times run without review",
-        "height": 460,
-        "width": 620,
+        "height": 800,
+        "width": 540,
         "color": 7
       },
       "id": "lead-nurture-automation-section-5",
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1880,
-        -30
+        1860,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 6. Send and log\nSent from the agent's own address, threaded where a thread exists; the CRM gets a note and the 'last touched' date",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        190
+        2500,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 7. Stop on reply\nA reply ends the sequence for that person and forwards the thread to the agent with the lead's history in three lines",
-        "height": 240,
+        "height": 400,
         "width": 300,
         "color": 7
       },
@@ -125,14 +125,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        750
+        -60,
+        790
       ]
     },
     {
       "parameters": {
         "content": "## 8. Report\nMonthly: touches sent by reason, replies, showings and listings that came from a nurture touch, so the agent sees what a reason is worth",
-        "height": 240,
+        "height": 400,
         "width": 300,
         "color": 7
       },
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        280,
-        750
+        260,
+        790
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 800,
         "width": 300,
         "color": 3
       },
@@ -157,8 +157,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -90
       ]
     },
     {
@@ -498,7 +498,7 @@
       "typeVersion": 1.4,
       "position": [
         0,
-        860
+        1000
       ],
       "notes": "Stop on reply\n\nA reply ends the sequence for that person and forwards the thread to the agent with the lead's history in three lines."
     },
@@ -530,7 +530,7 @@
       "typeVersion": 4.7,
       "position": [
         320,
-        860
+        1000
       ],
       "notes": "Report\n\nMonthly: touches sent by reason, replies, showings and listings that came from a nurture touch, so the agent sees what a reason is worth."
     }

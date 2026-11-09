@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Extract supplier invoices from Gmail with Claude and post them to Xero for approval\n\nAccountants, bookkeepers and AP teams that key invoices in by hand and chase approvals by email.\n\n### How it works\nTrigger: New attachments to ap@ start the run; supplier portals and scanned batches are polled hourly.\n1. Capture the invoice\n2. Extract fields\n3. Validate and detect duplicates\n4. Match to PO and receipt\n5. Route exceptions and approvals\n6. Approve on the phone\n7. Post to the ERP\n8. Supplier status replies\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus NetSuite / Xero / QuickBooks / Sage, Slack / email, Google Drive / S3.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the coding rules and the approval thresholds in the Config node; swap Xero for QuickBooks, NetSuite or Sage.\nGuardrail to keep: Bank-detail changes never post automatically; they trigger a verification call with the supplier.\n\nFull blueprint: https://agentmelt.com/workflows/invoice-processing-automation/",
-        "height": 900,
+        "height": 840,
         "width": 640,
         "color": 1
       },
@@ -13,15 +13,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 1. Capture the invoice\nPDF, image or e-invoice attachment saved to a document store with the email metadata; non-invoice attachments are classified and filed elsewhere",
-        "height": 240,
-        "width": 620,
+        "height": 800,
+        "width": 300,
         "color": 7
       },
       "id": "invoice-processing-automation-section-1",
@@ -29,15 +29,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 2. Extract fields\nSupplier, invoice number, dates, line items, quantities, unit prices, tax, totals, PO reference and bank details, with a confidence per field",
-        "height": 680,
-        "width": 620,
+        "height": 800,
+        "width": 540,
         "color": 7
       },
       "id": "invoice-processing-automation-section-2",
@@ -45,14 +45,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        -30
+        580,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 3. Validate and detect duplicates\nTotals foot, tax is arithmetically right, supplier exists (or is flagged as new), bank details match the master (change = fraud alert), and no invoice with the same supplier + number + amount exists",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -61,14 +61,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        190
+        1220,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 4. Match to PO and receipt\nThree-way match against the ERP: PO lines, quantities received, prices within tolerance",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -77,14 +77,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        190
+        1540,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 5. Route exceptions and approvals\nClean matches auto-approve within policy limits; mismatches go to the buyer with the specific difference; non-PO invoices go to the cost-centre owner; new suppliers go to procurement for onboarding",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -93,15 +93,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1880,
-        190
+        1860,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 6. Approve on the phone\nApprovers get the invoice summary and the exception in Slack or email with approve/reject/query buttons; reminders escalate after the SLA",
-        "height": 460,
-        "width": 620,
+        "height": 800,
+        "width": 540,
         "color": 7
       },
       "id": "invoice-processing-automation-section-6",
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2200,
-        -30
+        2180,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 7. Post to the ERP\nApproved invoices are created in NetSuite, Xero, QuickBooks, Sage or SAP with coding, attachments and the approval trail; payment runs pick them up",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -125,15 +125,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2840,
-        190
+        2820,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 8. Supplier status replies\nSupplier emails asking about payment status are answered from the ERP data (received, approved, scheduled for date) so AP stops fielding calls",
-        "height": 680,
-        "width": 620,
+        "height": 800,
+        "width": 540,
         "color": 7
       },
       "id": "invoice-processing-automation-section-8",
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3160,
-        -30
+        3140,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 800,
         "width": 300,
         "color": 3
       },
@@ -157,8 +157,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -90
       ]
     },
     {

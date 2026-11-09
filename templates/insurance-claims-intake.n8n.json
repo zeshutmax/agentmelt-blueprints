@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Intake insurance claims from email and portal submissions with Claude\n\nClaims teams that re-key first notice of loss from emails, forms and call notes.\n\n### How it works\nTrigger: Emails to claims@, portal and app submissions as they happen, and call-centre transcripts from the telephony platform.\n1. Capture the notice\n2. Extract the facts\n3. Verify policy and coverage\n4. Triage severity and complexity\n5. Screen fraud indicators\n6. Route\n7. Acknowledge the claimant\n8. Create the file and assign\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Claims system (Guidewire ClaimCenter, Duck Creek, Snapsheet, in-house), Policy admin, Telephony (Five9, Talkdesk).\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nDefine the claim types and the required documents in the Config node; point the write-back at your claims system.\nGuardrail to keep: Coverage determinations and claim decisions are made by adjusters; the workflow verifies and summarises.\n\nFull blueprint: https://agentmelt.com/workflows/insurance-claims-intake/",
-        "height": 900,
+        "height": 840,
         "width": 640,
         "color": 1
       },
@@ -13,15 +13,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 1. Capture the notice\nFrom email, portal, app or call transcript: claimant, policy number, date and place of loss, description, attachments (photos, police report, invoices)",
-        "height": 240,
-        "width": 620,
+        "height": 820,
+        "width": 300,
         "color": 7
       },
       "id": "insurance-claims-intake-section-1",
@@ -29,15 +29,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 2. Extract the facts\nLoss date, cause, location, parties involved, injuries, property damaged, estimated amount, witnesses, and a structured description — with confidence per field",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "insurance-claims-intake-section-2",
@@ -45,14 +45,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        -30
+        580,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 3. Verify policy and coverage\nPolicy status on the loss date, coverages and limits, deductible, endorsements and exclusions relevant to the cause of loss, from the policy admin system",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -61,14 +61,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        190
+        1220,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 4. Triage severity and complexity\nRules on estimated amount, injury involvement, liability questions, multiple parties and coverage ambiguity produce a severity tier and a complexity flag",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -77,15 +77,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        190
+        1540,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 5. Screen fraud indicators\nChecks for known indicators — loss shortly after inception, inconsistent narrative, prior similar claims, unusual claimant behaviour — and lists what it found with the evidence; it flags, it does not decide",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "insurance-claims-intake-section-5",
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1880,
-        -30
+        1860,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 6. Route\nFast track: low severity, clear coverage, no indicators → straight-through estimation or a desk adjuster",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        190
+        2500,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 7. Acknowledge the claimant\nClaim number, what was received, what is needed next and who will contact them, drafted by the agent in plain language and sent after a human click for complex claims",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -125,14 +125,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2840,
-        190
+        2820,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 8. Create the file and assign\nClaim created in the claims system with the extracted data, documents, coverage summary, severity and indicators; adjuster assigned; intake-to-assignment time tracked",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3160,
-        190
+        3140,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 820,
         "width": 300,
         "color": 3
       },
@@ -157,8 +157,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -110
       ]
     },
     {

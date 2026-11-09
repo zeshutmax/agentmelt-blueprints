@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Screen applications from Greenhouse with Claude and score them in Google Sheets\n\nRecruiters and hiring teams that read every application by hand and still miss good candidates.\n\n### How it works\nTrigger: Greenhouse, Lever, Ashby, Workable or Teamtailor post each new application; a daily run catches any missed.\n1. Receive the application\n2. Load the role criteria\n3. Parse the resume\n4. Score against criteria with evidence\n5. Flag verification items\n6. Build the ranked shortlist\n7. Present to the recruiter\n8. Audit and bias monitoring\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Greenhouse / Lever / Ashby, Google Sheets.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nPut the role's criteria and knock-out questions in the Config node; swap Greenhouse for Lever or Ashby.\nGuardrail to keep: No candidate is rejected automatically; the workflow ranks and explains, recruiters decide.\n\nFull blueprint: https://agentmelt.com/workflows/resume-screening-automation/",
-        "height": 900,
+        "height": 840,
         "width": 640,
         "color": 1
       },
@@ -13,15 +13,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 1. Receive the application\nResume, cover letter, application answers and the job requisition id from the ATS",
-        "height": 240,
-        "width": 620,
+        "height": 840,
+        "width": 300,
         "color": 7
       },
       "id": "resume-screening-automation-section-1",
@@ -29,14 +29,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 2. Load the role criteria\nMust-haves, nice-to-haves and disqualifiers for the role, written by the hiring manager in plain language and approved by HR; weights per criterion",
-        "height": 240,
+        "height": 840,
         "width": 300,
         "color": 7
       },
@@ -45,15 +45,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 3. Parse the resume\nRoles, dates, employers, skills, education, certifications and locations into structured fields, with the source text kept for quoting",
-        "height": 680,
-        "width": 620,
+        "height": 840,
+        "width": 540,
         "color": 7
       },
       "id": "resume-screening-automation-section-3",
@@ -61,15 +61,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        -30
+        900,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 4. Score against criteria with evidence\nEach criterion scored met / partially / not met with a quote from the application as evidence; the agent is instructed to ignore name, photo, age, gender, nationality and school prestige unless a certification is a legal requirement",
-        "height": 680,
-        "width": 620,
+        "height": 840,
+        "width": 540,
         "color": 7
       },
       "id": "resume-screening-automation-section-4",
@@ -77,14 +77,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        -30
+        1540,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 5. Flag verification items\nGaps, overlapping dates, claims that need checking (certifications, seniority) listed for the interview",
-        "height": 240,
+        "height": 840,
         "width": 300,
         "color": 7
       },
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2200,
-        190
+        2180,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 6. Build the ranked shortlist\nWeighted score and band (strong / possible / unlikely); disqualifier matches are listed separately with the rule, never silently dropped",
-        "height": 240,
+        "height": 840,
         "width": 300,
         "color": 7
       },
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        190
+        2500,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 7. Present to the recruiter\nScores, bands and explanations written back to the ATS as a scorecard; the recruiter reviews the strong band plus a random sample from the others and moves candidates forward",
-        "height": 240,
+        "height": 840,
         "width": 300,
         "color": 7
       },
@@ -125,15 +125,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2840,
-        190
+        2820,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 8. Audit and bias monitoring\nWeekly: score distributions and pass-through rates by self-reported demographic group where legally collected; anomalies flagged to HR",
-        "height": 240,
-        "width": 620,
+        "height": 360,
+        "width": 540,
         "color": 7
       },
       "id": "resume-screening-automation-section-8",
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        750
+        -60,
+        790
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 840,
         "width": 300,
         "color": 3
       },
@@ -157,8 +157,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -130
       ]
     },
     {
@@ -534,7 +534,7 @@
       "typeVersion": 1.4,
       "position": [
         0,
-        860
+        960
       ],
       "notes": "Audit and bias monitoring\n\nWeekly: score distributions and pass-through rates by self-reported demographic group where legally collected; anomalies flagged to HR."
     },
@@ -548,7 +548,7 @@
       "typeVersion": 2,
       "position": [
         320,
-        860
+        960
       ],
       "notes": "Weekly: score distributions and pass-through rates by self-reported demographic group where legally collected; anomalies flagged to HR."
     }

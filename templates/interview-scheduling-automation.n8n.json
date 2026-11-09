@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Schedule interviews from Greenhouse stage changes with Google Calendar, Claude and Twilio\n\nRecruiters and coordinators who spend their week on calendar tennis.\n\n### How it works\nTrigger: Moving a candidate to an interview stage in Greenhouse, Lever or Ashby — or a row change in the tracking sheet — starts scheduling for that stage's panel.\n1. Read the stage\n2. Find common slots\n3. Offer the slots\n4. Book\n5. Remind\n6. Handle changes\n7. Sync the ATS\n8. Report\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Greenhouse / Lever / Ashby, Google Calendar / Outlook, Twilio.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the interviewer pools and the working hours in the Config node; swap Google Calendar for Outlook.\nGuardrail to keep: Panel working hours and blocked times are respected; the workflow never books over a 'focus' block or outside hours.\n\nFull blueprint: https://agentmelt.com/workflows/interview-scheduling-automation/",
-        "height": 900,
+        "height": 840,
         "width": 640,
         "color": 1
       },
@@ -13,15 +13,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 1. Read the stage\nCandidate, role, interview stage, the panel for that stage, duration, and whether it is video or on-site",
-        "height": 240,
-        "width": 620,
+        "height": 800,
+        "width": 300,
         "color": 7
       },
       "id": "interview-scheduling-automation-section-1",
@@ -29,14 +29,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 2. Find common slots\nFree/busy across every panel member for the next ten working days, inside their working hours, avoiding lunch and back-to-back blocks; three options, spread across days",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -45,14 +45,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 3. Offer the slots\nOne email from the recruiter with three buttons or links, the format, who they will meet, and what to prepare — written for the stage, not a template dump",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -61,14 +61,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        190
+        900,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 4. Book\nThe chosen slot becomes an event on every calendar with the video link or room, the candidate's CV attached for the panel, and the interview kit",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -77,14 +77,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        190
+        1220,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 5. Remind\nCandidate: 24 hours and 2 hours before, by email and SMS if they gave a number",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -93,15 +93,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        190
+        1540,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 6. Handle changes\nA reply asking to move, cancel or ask a question is understood and acted on in the same thread; new slots are offered without the recruiter",
-        "height": 680,
-        "width": 620,
+        "height": 800,
+        "width": 540,
         "color": 7
       },
       "id": "interview-scheduling-automation-section-6",
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1880,
-        -30
+        1860,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 7. Sync the ATS\nInterview scheduled, rescheduled, completed or no-show is written back to the candidate's record; the scorecard is opened for the panel",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -125,14 +125,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        190
+        2500,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 8. Report\nTime from stage change to booked, reschedule rate, no-show rate by role and stage, so the recruiter sees where the process drags",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2840,
-        190
+        2820,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 800,
         "width": 300,
         "color": 3
       },
@@ -157,8 +157,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -90
       ]
     },
     {

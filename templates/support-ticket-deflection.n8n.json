@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Answer Zendesk tickets from your help centre with Claude and escalate the rest\n\nSupport teams that answer the same twenty questions every day and want them handled before an agent opens the ticket.\n\n### How it works\nTrigger: Zendesk, Intercom, Freshdesk, Help Scout or HubSpot posts each new conversation.\n1. Receive the ticket\n2. Fetch customer context\n3. Classify and prioritise\n4. Retrieve knowledge\n5. Draft the answer with a confidence score\n6. Resolve or route\n7. Send and log\n8. Learn from reopens\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Zendesk / Intercom / Freshdesk, Pinecone / Supabase / Qdrant, HubSpot / Stripe.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nPoint the vector store at your own help-centre export; set the confidence threshold and the escalation tags in the Config node.\nGuardrail to keep: The agent answers only from your knowledge base and cites the source; no general-knowledge answers.\n\nFull blueprint: https://agentmelt.com/workflows/support-ticket-deflection/",
-        "height": 900,
+        "height": 840,
         "width": 640,
         "color": 1
       },
@@ -13,15 +13,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 1. Receive the ticket\nSubject, body, channel, customer identifier and any attachments",
-        "height": 240,
-        "width": 620,
+        "height": 800,
+        "width": 300,
         "color": 7
       },
       "id": "support-ticket-deflection-section-1",
@@ -29,14 +29,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 2. Fetch customer context\nPlan, recent orders or invoices, open tickets and account status from your CRM or billing system, so the answer is specific, not generic",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -45,15 +45,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 3. Classify and prioritise\nCategory (billing, access, how-to, bug, cancellation…), sentiment and urgency",
-        "height": 680,
-        "width": 620,
+        "height": 800,
+        "width": 540,
         "color": 7
       },
       "id": "support-ticket-deflection-section-3",
@@ -61,14 +61,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        -30
+        900,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 4. Retrieve knowledge\nHelp-centre articles, macros and product docs, chunked and embedded, refreshed nightly",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -77,15 +77,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        190
+        1540,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 5. Draft the answer with a confidence score\nThe agent answers only from retrieved passages, cites the article, and reports a confidence score",
-        "height": 680,
-        "width": 620,
+        "height": 800,
+        "width": 540,
         "color": 7
       },
       "id": "support-ticket-deflection-section-5",
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1880,
-        -30
+        1860,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 6. Resolve or route\nHigh confidence and a deflectable category: send the answer and mark the ticket solved-pending (reopens if the customer replies)",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        190
+        2500,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 7. Send and log\nReply through the help desk so it appears in the normal conversation history with an “answered by assistant” tag agents can filter",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -125,15 +125,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2840,
-        190
+        2820,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 8. Learn from reopens\nDaily: tickets reopened after an automated answer are collected for review; the failing questions become new articles or corrections, and the confidence threshold is tuned from the data",
-        "height": 240,
-        "width": 620,
+        "height": 380,
+        "width": 540,
         "color": 7
       },
       "id": "support-ticket-deflection-section-8",
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        750
+        -60,
+        790
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 800,
         "width": 300,
         "color": 3
       },
@@ -157,8 +157,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -90
       ]
     },
     {
@@ -556,7 +556,7 @@
       "typeVersion": 1.4,
       "position": [
         0,
-        860
+        980
       ],
       "notes": "Learn from reopens\n\nDaily: tickets reopened after an automated answer are collected for review; the failing questions become new articles or corrections, and the confidence threshold is tuned from the data."
     },
@@ -570,7 +570,7 @@
       "typeVersion": 2,
       "position": [
         320,
-        860
+        980
       ],
       "notes": "Daily: tickets reopened after an automated answer are collected for review; the failing questions become new articles or corrections, and the confidence threshold is tuned from the data."
     }

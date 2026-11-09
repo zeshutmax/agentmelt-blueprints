@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Generate unit tests for GitHub pull requests with Claude and run them in CI\n\nEngineering teams with thin test coverage who want tests proposed automatically on every change.\n\n### How it works\nTrigger: PR events on the main repositories; a label can request generation on demand.\n1. Receive the PR and diff\n2. Find untested changed functions\n3. Assemble context\n4. Generate tests\n5. Run in CI\n6. Keep what passes and adds coverage\n7. Open the companion PR\n8. Learn from reviews\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus GitHub Actions / GitLab CI, Jest / pytest / Go test / JUnit.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the test framework and directories in the Config node; swap the GitHub nodes for GitLab if that is where the code lives.\nGuardrail to keep: Generated tests are proposed in a separate PR; nothing merges without an engineer's review.\n\nFull blueprint: https://agentmelt.com/workflows/unit-test-generation/",
-        "height": 900,
+        "height": 820,
         "width": 640,
         "color": 1
       },
@@ -13,15 +13,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 1. Receive the PR and diff\nChanged files and hunks; PRs from bots or with a skip label are ignored",
-        "height": 240,
-        "width": 620,
+        "height": 820,
+        "width": 300,
         "color": 7
       },
       "id": "unit-test-generation-section-1",
@@ -29,14 +29,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 2. Find untested changed functions\nCoverage report from CI mapped to the diff: functions and branches that changed and have no covering test",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -45,14 +45,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 3. Assemble context\nThe changed file, its imports, existing test files for the module (for conventions and fixtures), and the test framework config",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -61,15 +61,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        190
+        900,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 4. Generate tests\nTests per function in the repo's framework and style, covering the happy path, edge cases visible in the code, and error paths; structured output with one test file per source file",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "unit-test-generation-section-4",
@@ -77,14 +77,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        -30
+        1220,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 5. Run in CI\nGenerated tests pushed to a branch and run with the existing suite; results and the coverage delta collected",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1880,
-        190
+        1860,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 6. Keep what passes and adds coverage\nTests that fail are discarded (or retried once with the failure output); tests that pass but add no coverage are dropped; flaky tests (pass/fail on rerun) are dropped",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2200,
-        190
+        2180,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 7. Open the companion PR\nA PR against the original branch with the surviving tests, a summary of what they cover and the coverage delta, assigned to the original author",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -125,15 +125,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        190
+        2500,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 8. Learn from reviews\nWeekly: acceptance rate of generated tests, common edits reviewers make, and coverage trend on changed code; prompts adjusted from the edits",
-        "height": 240,
-        "width": 620,
+        "height": 360,
+        "width": 540,
         "color": 7
       },
       "id": "unit-test-generation-section-8",
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        750
+        -60,
+        790
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 820,
         "width": 300,
         "color": 3
       },
@@ -157,8 +157,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -110
       ]
     },
     {
@@ -513,7 +513,7 @@
       "typeVersion": 1.4,
       "position": [
         0,
-        860
+        960
       ],
       "notes": "Learn from reviews\n\nWeekly: acceptance rate of generated tests, common edits reviewers make, and coverage trend on changed code; prompts adjusted from the edits."
     },
@@ -527,7 +527,7 @@
       "typeVersion": 2,
       "position": [
         320,
-        860
+        960
       ],
       "notes": "Weekly: acceptance rate of generated tests, common edits reviewers make, and coverage trend on changed code; prompts adjusted from the edits."
     }

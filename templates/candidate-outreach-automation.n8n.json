@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Send personalized candidate outreach from Greenhouse projects with Claude and Gmail\n\nRecruiters who source in the ATS and write every first message by hand.\n\n### How it works\nTrigger: A candidate added to a sourcing project in the ATS or a row added to the outreach sheet starts a sequence for that person.\n1. Receive the candidate\n2. Research\n3. Pick the hook\n4. Draft the message\n5. Send from the recruiter\n6. Follow up twice\n7. Stop on reply\n8. Measure\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Greenhouse / Lever / Ashby, Gmail / Outlook, Google Sheets.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the outreach voice and the follow-up cadence in the Config node; swap Gmail for Outlook and Greenhouse for Lever or Ashby.\nGuardrail to keep: Only public, professional information is used; nothing personal, nothing inferred about protected characteristics.\n\nFull blueprint: https://agentmelt.com/workflows/candidate-outreach-automation/",
-        "height": 900,
+        "height": 820,
         "width": 640,
         "color": 1
       },
@@ -13,15 +13,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -70
       ]
     },
     {
       "parameters": {
         "content": "## 1. Receive the candidate\nName, current title and company, profile URL, and the role they are being sourced for",
-        "height": 240,
-        "width": 620,
+        "height": 780,
+        "width": 300,
         "color": 7
       },
       "id": "candidate-outreach-automation-section-1",
@@ -29,14 +29,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -70
       ]
     },
     {
       "parameters": {
         "content": "## 2. Research\nPublic profile, company page, recent talks or posts, open-source or portfolio work — three to five facts, with sources",
-        "height": 240,
+        "height": 780,
         "width": 300,
         "color": 7
       },
@@ -45,15 +45,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -70
       ]
     },
     {
       "parameters": {
         "content": "## 3. Pick the hook\nOne specific, recent, professional thing the candidate did that relates to the role",
-        "height": 680,
-        "width": 620,
+        "height": 780,
+        "width": 540,
         "color": 7
       },
       "id": "candidate-outreach-automation-section-3",
@@ -61,15 +61,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        -30
+        900,
+        -70
       ]
     },
     {
       "parameters": {
         "content": "## 4. Draft the message\nUnder 90 words: the hook, why the role is relevant to it, one question",
-        "height": 680,
-        "width": 620,
+        "height": 780,
+        "width": 540,
         "color": 7
       },
       "id": "candidate-outreach-automation-section-4",
@@ -77,14 +77,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        -30
+        1540,
+        -70
       ]
     },
     {
       "parameters": {
         "content": "## 5. Send from the recruiter\nFrom the recruiter's own address, spaced to stay under daily limits; the ATS gets the message logged against the candidate",
-        "height": 240,
+        "height": 780,
         "width": 300,
         "color": 7
       },
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2200,
-        190
+        2180,
+        -70
       ]
     },
     {
       "parameters": {
         "content": "## 6. Follow up twice\nDay 4 and day 10, each a different angle (the team, the problem, the timing), each shorter than the last",
-        "height": 240,
+        "height": 780,
         "width": 300,
         "color": 7
       },
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        190
+        2500,
+        -70
       ]
     },
     {
       "parameters": {
         "content": "## 7. Stop on reply\nAny reply ends the sequence and forwards the thread with the research to the recruiter; an out-of-office pauses it",
-        "height": 240,
+        "height": 400,
         "width": 300,
         "color": 7
       },
@@ -125,14 +125,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        750
+        -60,
+        790
       ]
     },
     {
       "parameters": {
         "content": "## 8. Measure\nPer role: sent, replied, positive, interviews — by hook type, so the recruiter learns which angles work for which roles",
-        "height": 240,
+        "height": 400,
         "width": 300,
         "color": 7
       },
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        280,
-        750
+        260,
+        790
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 780,
         "width": 300,
         "color": 3
       },
@@ -157,8 +157,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -70
       ]
     },
     {
@@ -518,7 +518,7 @@
       "typeVersion": 1.4,
       "position": [
         0,
-        860
+        1000
       ],
       "notes": "Stop on reply\n\nAny reply ends the sequence and forwards the thread with the research to the recruiter; an out-of-office pauses it."
     },
@@ -550,7 +550,7 @@
       "typeVersion": 4.7,
       "position": [
         320,
-        860
+        1000
       ],
       "notes": "Measure\n\nPer role: sent, replied, positive, interviews — by hook type, so the recruiter learns which angles work for which roles."
     }

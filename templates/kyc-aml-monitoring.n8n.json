@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Screen customers against sanctions lists with ComplyAdvantage and Claude\n\nCompliance teams at fintechs and payment companies that screen and re-screen by hand.\n\n### How it works\nTrigger: New customers screened at onboarding; the full book re-screened daily against list updates; transaction events evaluated in near real time.\n1. Screen the customer\n2. Pre-assess matches\n3. Evaluate transactions\n4. Build the case\n5. Route to the analyst\n6. Record the decision\n7. Continuous re-screening\n8. Regulatory reporting\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus ComplyAdvantage / Dow Jones / OpenSanctions, Postgres.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the screening sources and the match thresholds in the Config node; this template assumes self-hosted n8n and a Postgres audit table.\nGuardrail to keep: No case is closed without an analyst's recorded decision; the agent drafts, never decides.\n\nFull blueprint: https://agentmelt.com/workflows/kyc-aml-monitoring/",
-        "height": 900,
+        "height": 840,
         "width": 640,
         "color": 1
       },
@@ -13,30 +13,30 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -110
       ]
     },
     {
       "parameters": {
-        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
-        "height": 240,
-        "width": 620,
+        "content": "## Trigger\nThe entry point. The red note next to it marks the one node you edit.",
+        "height": 820,
+        "width": 300,
         "color": 7
       },
       "id": "kyc-aml-monitoring-section-0",
-      "name": "Section: Trigger and config",
+      "name": "Section: Trigger",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 1. Screen the customer\nName, DOB, nationality, addresses and beneficial owners screened against sanctions (OFAC, EU, UN, UK), PEP and adverse-media providers (ComplyAdvantage, Dow Jones, Refinitiv); results with match scores",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -45,15 +45,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 2. Pre-assess matches\nFor each hit the agent compares the customer profile to the list entry — dates, locations, identifiers, context — and drafts an assessment: likely true match, likely false positive, or needs more information, with the reasoning",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "kyc-aml-monitoring-section-2",
@@ -61,14 +61,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        -30
+        900,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 3. Evaluate transactions\nRule set (structuring patterns, velocity, high-risk corridors, unusual counterparties) applied to transaction events; rules versioned and owned by compliance",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -77,14 +77,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        190
+        1540,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 4. Build the case\nAlert, customer profile, screening evidence, transaction history and the agent's draft assembled into a case record",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -93,15 +93,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1880,
-        190
+        1860,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 5. Route to the analyst\nCases queued by risk score; low-risk likely-false-positives can be batch-cleared with a review sample; anything involving sanctions goes to a senior analyst",
-        "height": 460,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "kyc-aml-monitoring-section-5",
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2200,
-        -30
+        2180,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 6. Record the decision\nAnalyst decision, rationale, reviewer and timestamp recorded on the case in a tamper-evident log; SAR/STR drafts generated for confirmed suspicious cases",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -125,14 +125,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2840,
-        190
+        2820,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 7. Continuous re-screening\nDaily re-screen against list updates; changes in a customer's risk (new PEP status, adverse media) reopen a case automatically",
-        "height": 240,
+        "height": 420,
         "width": 300,
         "color": 7
       },
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        750
+        -60,
+        790
       ]
     },
     {
       "parameters": {
         "content": "## 8. Regulatory reporting\nMonthly MI: alerts by type, false-positive rate, clearance times, open cases by age, and the rule-tuning log",
-        "height": 240,
+        "height": 420,
         "width": 300,
         "color": 7
       },
@@ -157,14 +157,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        280,
-        750
+        260,
+        790
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 820,
         "width": 300,
         "color": 3
       },
@@ -173,8 +173,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -110
       ]
     },
     {
@@ -535,7 +535,7 @@
       "typeVersion": 1.4,
       "position": [
         0,
-        860
+        1020
       ],
       "notes": "Continuous re-screening\n\nDaily re-screen against list updates; changes in a customer's risk (new PEP status, adverse media) reopen a case automatically."
     },
@@ -553,7 +553,7 @@
       "typeVersion": 2,
       "position": [
         320,
-        860
+        1020
       ],
       "notes": "Regulatory reporting\n\nMonthly MI: alerts by type, false-positive rate, clearance times, open cases by age, and the rule-tuning log."
     }

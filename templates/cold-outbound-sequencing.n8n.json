@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Personalize cold outbound from Apollo lists with Claude and send via Instantly\n\nSales teams that send templated sequences and get templated results.\n\n### How it works\nTrigger: A daily run selects the next batch from the list; the sending tool reports replies, bounces and unsubscribes in real time.\n1. Build the batch\n2. Research each account\n3. Write the first line and email\n4. Quality gate\n5. Load into the sequencer\n6. Detect replies and classify\n7. Hand to a rep\n8. Report by angle and segment\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Apollo / Clay, Instantly / Smartlead / Lemlist, HubSpot / Salesforce.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the daily batch size and the personalization rules in the Config node; swap Instantly for Smartlead or Lemlist.\nGuardrail to keep: Daily volume per mailbox is capped and warm-up is respected; the workflow never sends outside the sequencer's limits.\n\nFull blueprint: https://agentmelt.com/workflows/cold-outbound-sequencing/",
-        "height": 900,
+        "height": 800,
         "width": 640,
         "color": 1
       },
@@ -13,30 +13,30 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -110
       ]
     },
     {
       "parameters": {
-        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
-        "height": 240,
-        "width": 620,
+        "content": "## Trigger\nThe entry point. The red note next to it marks the one node you edit.",
+        "height": 820,
+        "width": 300,
         "color": 7
       },
       "id": "cold-outbound-sequencing-section-0",
-      "name": "Section: Trigger and config",
+      "name": "Section: Trigger",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 1. Build the batch\nPulls prospects matching the ICP from Apollo or Clay that are not in the CRM, not suppressed, and not contacted in 90 days",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -45,15 +45,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 2. Research each account\nReads the company site, recent news, job postings and tech stack (via enrichment and a web-fetch tool) and writes a five-line research note: what they do, what changed recently, a plausible trigger for your offer",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "cold-outbound-sequencing-section-2",
@@ -61,15 +61,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        -30
+        900,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 3. Write the first line and email\nFrom the research note and your messaging playbook, writes the opening line and a sub-80-word email for the chosen angle",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "cold-outbound-sequencing-section-3",
@@ -77,14 +77,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        -30
+        1540,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 4. Quality gate\nEmails are checked for specificity (must reference the research note), banned phrases, and length",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2200,
-        190
+        2180,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 5. Load into the sequencer\nPushes the prospect and the personalised steps into Instantly, Smartlead, Lemlist or Outreach, which handle sending, warm-up and inbox rotation",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        190
+        2500,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 6. Detect replies and classify\nEvery reply is classified: interested, question, not now, wrong person (with a referral), unsubscribe, out of office",
-        "height": 240,
+        "height": 420,
         "width": 300,
         "color": 7
       },
@@ -125,14 +125,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        750
+        -60,
+        790
       ]
     },
     {
       "parameters": {
         "content": "## 7. Hand to a rep\nInterested and question replies go to the rep with the thread, the research note and a suggested response; 'not now' is scheduled for a follow-up; referrals create a new prospect",
-        "height": 240,
+        "height": 420,
         "width": 300,
         "color": 7
       },
@@ -141,15 +141,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        280,
-        750
+        260,
+        790
       ]
     },
     {
       "parameters": {
         "content": "## 8. Report by angle and segment\nWeekly: sent, replies, positive replies, meetings by segment, angle and mailbox; deliverability metrics from the sequencer; the losing angle is retired",
-        "height": 240,
-        "width": 620,
+        "height": 360,
+        "width": 540,
         "color": 7
       },
       "id": "cold-outbound-sequencing-section-8",
@@ -157,14 +157,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        1310
+        -60,
+        1290
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 820,
         "width": 300,
         "color": 3
       },
@@ -173,8 +173,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -110
       ]
     },
     {
@@ -559,7 +559,7 @@
       "typeVersion": 2.2,
       "position": [
         0,
-        860
+        1020
       ],
       "notes": "Detect replies and classify\n\nEvery reply is classified: interested, question, not now, wrong person (with a referral), unsubscribe, out of office. Sequences are stopped on any human reply.",
       "webhookId": "cold-outbound-sequencing-webhook"
@@ -583,7 +583,7 @@
       "typeVersion": 2.7,
       "position": [
         320,
-        860
+        1020
       ],
       "notes": "Hand to a rep\n\nInterested and question replies go to the rep with the thread, the research note and a suggested response; 'not now' is scheduled for a follow-up; referrals create a new prospect."
     },
@@ -605,7 +605,7 @@
       "typeVersion": 1.4,
       "position": [
         0,
-        1420
+        1460
       ],
       "notes": "Report by angle and segment\n\nWeekly: sent, replies, positive replies, meetings by segment, angle and mailbox; deliverability metrics from the sequencer; the losing angle is retired."
     },
@@ -619,7 +619,7 @@
       "typeVersion": 2,
       "position": [
         320,
-        1420
+        1460
       ],
       "notes": "Weekly: sent, replies, positive replies, meetings by segment, angle and mailbox; deliverability metrics from the sequencer; the losing angle is retired."
     }

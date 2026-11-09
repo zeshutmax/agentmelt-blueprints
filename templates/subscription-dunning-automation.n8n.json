@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Recover failed Stripe payments with Claude-written emails and Twilio SMS\n\nSaaS finance and growth teams losing revenue to expired cards and silent cancellations.\n\n### How it works\nTrigger: invoice.payment_failed, customer.subscription.updated, cancellation requested, trial ending, card expiring soon.\n1. Receive the billing event\n2. Choose the retry strategy\n3. Draft the dunning message\n4. Send across the sequence\n5. Handle plan changes and pauses\n6. Cancellation intercept\n7. Alert finance and the owner\n8. Weekly recovery report\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Stripe / Chargebee / Recurly, Gmail + Twilio + Intercom, Slack + Google Sheets.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nChange the retry schedule and the tone rules in the Config node; add Intercom or Slack for the high-value accounts.\nGuardrail to keep: Retry schedules respect card-network rules and the provider's limits.\n\nFull blueprint: https://agentmelt.com/workflows/subscription-dunning-automation/",
-        "height": 900,
+        "height": 840,
         "width": 640,
         "color": 1
       },
@@ -13,15 +13,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 1. Receive the billing event\nEvent type, customer, amount, decline code, card details (last 4, expiry), plan and tenure",
-        "height": 240,
-        "width": 620,
+        "height": 820,
+        "width": 300,
         "color": 7
       },
       "id": "subscription-dunning-automation-section-1",
@@ -29,14 +29,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 2. Choose the retry strategy\nDecline code decides: insufficient funds → retry on likely payday; expired card → no retry, update-card message; do-not-honour → one retry then message; fraud → stop and alert",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -45,15 +45,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 3. Draft the dunning message\nA short message for this exact situation and customer — amount, card ending, what happens next, one link to update payment — in your brand voice, with tone rules enforced",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "subscription-dunning-automation-section-3",
@@ -61,14 +61,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        -30
+        900,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 4. Send across the sequence\nEmail day 0, 3, 7; SMS on day 7 for accounts above a value threshold; in-app banner via Intercom if available",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -77,14 +77,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        190
+        1540,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 5. Handle plan changes and pauses\nDowngrade and pause requests are processed in the billing system with the right proration and a confirmation; upgrade requests route to the expansion workflow",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -93,15 +93,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1880,
-        190
+        1860,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 6. Cancellation intercept\nOn a cancellation request, the agent reads tenure, usage and stated reason and proposes one save offer from the approved set (pause, discount, downgrade, concierge call) — or none for customers who should simply be let go cleanly",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "subscription-dunning-automation-section-6",
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2200,
-        -30
+        2180,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 7. Alert finance and the owner\nHigh-value failures and cancellations alert the account owner with context; finance sees the daily failed/recovered tally",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -125,15 +125,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2840,
-        190
+        2820,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 8. Weekly recovery report\nFailed amount, recovered amount, recovery rate by decline code and by message step, cancellations saved, and losses by reason",
-        "height": 240,
-        "width": 620,
+        "height": 360,
+        "width": 540,
         "color": 7
       },
       "id": "subscription-dunning-automation-section-8",
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        750
+        -60,
+        790
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 820,
         "width": 300,
         "color": 3
       },
@@ -157,8 +157,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -110
       ]
     },
     {
@@ -571,7 +571,7 @@
       "typeVersion": 1.4,
       "position": [
         0,
-        860
+        960
       ],
       "notes": "Weekly recovery report\n\nFailed amount, recovered amount, recovery rate by decline code and by message step, cancellations saved, and losses by reason."
     },
@@ -585,7 +585,7 @@
       "typeVersion": 2,
       "position": [
         320,
-        860
+        960
       ],
       "notes": "Failed amount, recovered amount, recovery rate by decline code and by message step, cancellations saved, and losses by reason."
     }

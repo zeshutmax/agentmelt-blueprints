@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Migrate records between systems with Claude-assisted mapping and validation\n\nOps and engineering teams moving data from one CRM, help desk or database to another without a migration vendor.\n\n### How it works\nTrigger: Each phase — profile, map, validate, dry-run, cutover — starts on an explicit click; no phase runs unattended.\n1. Profile the source\n2. Propose the mapping\n3. Confirm the mapping\n4. Apply transformations\n5. Validate\n6. Dry run\n7. Cut over in batches\n8. Reconcile and hand over\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Postgres / BigQuery, Target APIs (HubSpot, Salesforce, Zendesk…).\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nPut the source and target schemas in the Config node; run each phase (profile, map, validate, dry-run, cutover) by hand from the manual trigger.\nGuardrail to keep: No phase runs without an explicit trigger; cutover requires a dry run that passed.\n\nFull blueprint: https://agentmelt.com/workflows/data-migration-automation/",
-        "height": 900,
+        "height": 860,
         "width": 640,
         "color": 1
       },
@@ -13,30 +13,30 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -110
       ]
     },
     {
       "parameters": {
-        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
-        "height": 240,
-        "width": 620,
+        "content": "## Trigger\nThe entry point. The red note next to it marks the one node you edit.",
+        "height": 820,
+        "width": 300,
         "color": 7
       },
       "id": "data-migration-automation-section-0",
-      "name": "Section: Trigger and config",
+      "name": "Section: Trigger",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 1. Profile the source\nTables, fields, types, null rates, distinct values and sample rows from the source system (database, CRM export, API)",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -45,15 +45,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 2. Propose the mapping\nReads source and target schemas with sample values and proposes field-by-field mappings with transformation notes (date formats, picklist translation, splits/merges) and a confidence per field",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "data-migration-automation-section-2",
@@ -61,14 +61,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        -30
+        900,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 3. Confirm the mapping\nThe mapping sheet is reviewed and edited by the migration owner; it becomes the versioned source of truth for every later step",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -77,14 +77,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        190
+        1540,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 4. Apply transformations\nTransformations generated from the mapping sheet — type conversions, lookups, deduplication rules — applied to a sample batch",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1880,
-        190
+        1860,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 5. Validate\nRecord counts, sums of numeric fields, referential integrity and picklist coverage compared between source and transformed target sample; failures listed per rule",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2200,
-        190
+        2180,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 6. Dry run\nFull transformed dataset loaded into a target sandbox; reconciliation report produced; errors per batch",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -125,14 +125,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        190
+        2500,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 7. Cut over in batches\nProduction load in batches with progress, per-record error capture and retry; the source stays read-only during cutover",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2840,
-        190
+        2820,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 8. Reconcile and hand over\nFinal reconciliation report, error log, the mapping sheet and the rollback procedure archived; the workflow can re-run deltas for late data",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -157,14 +157,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3160,
-        190
+        3140,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 820,
         "width": 300,
         "color": 3
       },
@@ -173,8 +173,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -110
       ]
     },
     {

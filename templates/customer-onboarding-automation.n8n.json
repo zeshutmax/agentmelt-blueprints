@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Guide new signups to activation with Claude using Segment and HubSpot\n\nProduct and success teams whose new customers stall between signup and first value.\n\n### How it works\nTrigger: The product or billing system posts new signups; a daily Schedule Trigger evaluates every account still in onboarding against milestone deadlines.\n1. Register the new account\n2. Track milestones from product events\n3. Detect stalls\n4. Send the right nudge\n5. Answer setup questions\n6. Escalate to a person\n7. Celebrate activation and hand over\n8. Report the funnel\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Segment / Mixpanel / PostHog, HubSpot / Intercom.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the milestones and the nudge timing in the Config node; replace Segment with Mixpanel or PostHog.\nGuardrail to keep: Nudges are sent only on stalls, with a cap of one per milestone; no message for customers making progress.\n\nFull blueprint: https://agentmelt.com/workflows/customer-onboarding-automation/",
-        "height": 900,
+        "height": 860,
         "width": 640,
         "color": 1
       },
@@ -13,15 +13,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 1. Register the new account\nAccount, plan, segment, signup source and the milestone set that applies (self-serve vs sales-assisted have different milestones and deadlines)",
-        "height": 240,
-        "width": 620,
+        "height": 800,
+        "width": 300,
         "color": 7
       },
       "id": "customer-onboarding-automation-section-1",
@@ -29,14 +29,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 2. Track milestones from product events\nReads the activation events from product analytics or the app's own API and marks milestones complete with timestamps",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -45,14 +45,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 3. Detect stalls\nA milestone past its expected day with no progress is a stall",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -61,15 +61,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        190
+        900,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 4. Send the right nudge\nThe agent writes a short message for this stall — the specific next step, one link, an offer to help — using the customer's plan and what they have already done",
-        "height": 680,
-        "width": 620,
+        "height": 800,
+        "width": 540,
         "color": 7
       },
       "id": "customer-onboarding-automation-section-4",
@@ -77,15 +77,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        -30
+        1220,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 5. Answer setup questions\nReplies to onboarding emails and in-app chat from the documentation with citations; questions it cannot answer become a ticket with the account's milestone context attached",
-        "height": 680,
-        "width": 620,
+        "height": 800,
+        "width": 540,
         "color": 7
       },
       "id": "customer-onboarding-automation-section-5",
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1880,
-        -30
+        1860,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 6. Escalate to a person\nTwo consecutive stalls, a negative reply, or a high-value account stalling on the first milestone alerts the CSM with the history and a suggested call agenda",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        190
+        2500,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 7. Celebrate activation and hand over\nOn the final milestone the account moves to 'activated', the CSM or the retention workflows take over, and the onboarding record is closed with its timeline",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -125,15 +125,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2840,
-        190
+        2820,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 8. Report the funnel\nWeekly milestone funnel by segment and signup source: where customers stall and how long each step takes, which is the product team's onboarding backlog",
-        "height": 240,
-        "width": 620,
+        "height": 360,
+        "width": 540,
         "color": 7
       },
       "id": "customer-onboarding-automation-section-8",
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        750
+        -60,
+        790
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 800,
         "width": 300,
         "color": 3
       },
@@ -157,8 +157,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -90
       ]
     },
     {
@@ -561,7 +561,7 @@
       "typeVersion": 1.4,
       "position": [
         0,
-        860
+        960
       ],
       "notes": "Report the funnel\n\nWeekly milestone funnel by segment and signup source: where customers stall and how long each step takes, which is the product team's onboarding backlog."
     },
@@ -575,7 +575,7 @@
       "typeVersion": 2,
       "position": [
         320,
-        860
+        960
       ],
       "notes": "Weekly milestone funnel by segment and signup source: where customers stall and how long each step takes, which is the product team's onboarding backlog."
     }

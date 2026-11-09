@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Generate proposals from HubSpot deals with Claude in Google Docs\n\nSales and operations teams that assemble proposals and statements of work from the last one, every time.\n\n### How it works\nTrigger: A 'new proposal' form, a deal moving to the proposal stage in the CRM, or an RFP document uploaded to a folder starts the run.\n1. Receive the request\n2. Pull the client record\n3. Parse the RFP or brief\n4. Retrieve past answers and case material\n5. Draft each section\n6. Consistency and compliance check\n7. Produce the document\n8. Route for review and learn\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Pinecone / Supabase, Google Docs / Microsoft Word, HubSpot / Salesforce.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nStore your section templates in the Config node; swap Google Docs for Microsoft Word and HubSpot for Salesforce.\nGuardrail to keep: Every reused answer is sourced to the document it came from; the writer can see what was adapted.\n\nFull blueprint: https://agentmelt.com/workflows/document-generation-automation/",
-        "height": 900,
+        "height": 840,
         "width": 640,
         "color": 1
       },
@@ -13,15 +13,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 1. Receive the request\nDocument type, client, scope notes, deadline and any source documents (RFP, brief, prior contract)",
-        "height": 240,
-        "width": 620,
+        "height": 820,
+        "width": 300,
         "color": 7
       },
       "id": "document-generation-automation-section-1",
@@ -29,14 +29,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 2. Pull the client record\nCompany details, contacts, deal size, history, prior documents and the account owner's notes from the CRM",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -45,15 +45,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 3. Parse the RFP or brief\nFor RFPs: every question and requirement, numbered, with the section, the format demanded and the deadline; for briefs: scope items, constraints and success criteria",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "document-generation-automation-section-3",
@@ -61,14 +61,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        -30
+        900,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 4. Retrieve past answers and case material\nThe answer library (previous RFP responses, proposals, case studies, security questionnaires) embedded and searched per question; top matches with their source document and date",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -77,15 +77,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        190
+        1540,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 5. Draft each section\nSection by section in your template: adapts the best past answer to this client's context, inserts CRM facts, applies pricing rules, and marks anything it could not source as a decision for the writer",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "document-generation-automation-section-5",
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1880,
-        -30
+        1860,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 6. Consistency and compliance check\nClient name and figures consistent throughout, required sections present, forbidden commitments absent, pricing arithmetic correct, page and word limits respected",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        190
+        2500,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 7. Produce the document\nGenerated in Google Docs or Word from the template with styles, tables and the decision list at the top; PDF export on approval",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -125,15 +125,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2840,
-        190
+        2820,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 8. Route for review and learn\nThe writer and the account owner review; approved sections are written back to the answer library with the client context, so the next document starts from better material",
-        "height": 460,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "document-generation-automation-section-8",
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3160,
-        -30
+        3140,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 820,
         "width": 300,
         "color": 3
       },
@@ -157,8 +157,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -110
       ]
     },
     {

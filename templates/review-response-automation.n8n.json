@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Draft replies to Google reviews with Claude and approve them in Slack\n\nLocal businesses and franchises that answer reviews late, or only the bad ones.\n\n### How it works\nTrigger: Polls each platform's API or a review-aggregation provider hourly; negative reviews trigger immediate alerts.\n1. Collect new reviews\n2. Classify\n3. Fetch context\n4. Draft the response\n5. Route negatives to a person first\n6. Approve and post\n7. Track resolution\n8. Monthly insight report\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Google Business Profile API / Birdeye / Podium, Slack / SMS.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet your tone rules and the escalation words in the Config node; connect Birdeye or Podium if you aggregate reviews there.\nGuardrail to keep: Negative and sensitive reviews are never answered publicly without a person's approval.\n\nFull blueprint: https://agentmelt.com/workflows/review-response-automation/",
-        "height": 900,
+        "height": 840,
         "width": 640,
         "color": 1
       },
@@ -13,30 +13,30 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -110
       ]
     },
     {
       "parameters": {
-        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
-        "height": 240,
-        "width": 620,
+        "content": "## Trigger\nThe entry point. The red note next to it marks the one node you edit.",
+        "height": 820,
+        "width": 300,
         "color": 7
       },
       "id": "review-response-automation-section-0",
-      "name": "Section: Trigger and config",
+      "name": "Section: Trigger",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 1. Collect new reviews\nGoogle Business Profile, Yelp, Trustpilot, Facebook, TripAdvisor and app stores, directly or via a provider such as Birdeye or Podium, per location",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -45,15 +45,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 2. Classify\nSentiment, star rating context, topics (service, product, wait time, staff, pricing, cleanliness), and whether it mentions a specific staff member or a resolvable issue",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "review-response-automation-section-2",
@@ -61,14 +61,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        -30
+        900,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 3. Fetch context\nFor businesses with a CRM or booking system: the customer's visit or order, so the reply can reference it and a complaint can be checked against what happened",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -77,15 +77,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        190
+        1540,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 4. Draft the response\nPositive: a specific thank-you that echoes what they praised, in the business voice, varied so replies never read as templated",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "review-response-automation-section-4",
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1880,
-        -30
+        1860,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 5. Route negatives to a person first\nReviews below a rating threshold or mentioning safety, discrimination or legal issues go to the manager with the draft and the context; nothing is posted until they decide",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        190
+        2500,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 6. Approve and post\nDrafts wait for one-click approval by the owner or location manager; approved replies post through the platform API",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -125,14 +125,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2840,
-        190
+        2820,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 7. Track resolution\nNegative reviews get a resolution status; follow-up reminders until closed; the reviewer's later rating change is recorded",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -141,15 +141,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3160,
-        190
+        3140,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 8. Monthly insight report\nPer location: rating trend, response rate and time, top praised and complained topics with examples, staff mentioned by name, and three operational suggestions drawn from the complaints",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "review-response-automation-section-8",
@@ -157,14 +157,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3480,
-        -30
+        3460,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 820,
         "width": 300,
         "color": 3
       },
@@ -173,8 +173,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -110
       ]
     },
     {

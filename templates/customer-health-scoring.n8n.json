@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Score customer health from Mixpanel and Zendesk data with Claude into HubSpot\n\nCustomer-success teams that manage renewals from gut feel and a quarterly spreadsheet.\n\n### How it works\nTrigger: Weekly scoring; immediate re-score on high-severity events such as a champion's user being deactivated, a payment failure, or a very negative ticket.\n1. Collect the components\n2. Score each component\n3. Analyse ticket sentiment\n4. Compute score and trend\n5. Detect drops and thresholds\n6. Draft the intervention\n7. Alert the owner and update the CRM\n8. Calibrate quarterly\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Mixpanel / Amplitude / PostHog, Zendesk / Intercom, HubSpot / Salesforce.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nAdjust the score inputs and thresholds in the Config node; swap Mixpanel for Amplitude and HubSpot for Salesforce.\nGuardrail to keep: Scores show their components; no black-box number.\n\nFull blueprint: https://agentmelt.com/workflows/customer-health-scoring/",
-        "height": 900,
+        "height": 820,
         "width": 640,
         "color": 1
       },
@@ -13,30 +13,30 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -110
       ]
     },
     {
       "parameters": {
-        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
-        "height": 240,
-        "width": 620,
+        "content": "## Trigger\nThe entry point. The red note next to it marks the one node you edit.",
+        "height": 820,
+        "width": 300,
         "color": 7
       },
       "id": "customer-health-scoring-section-0",
-      "name": "Section: Trigger and config",
+      "name": "Section: Trigger",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 1. Collect the components\nUsage (active users, sessions, key actions, trend vs previous 8 weeks), support (ticket volume, sentiment, resolution time), billing (late payments, downgrades), engagement (QBR attendance, email responses), and relationship (champion still active, number of contacts)",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -45,14 +45,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 2. Score each component\nEach component becomes a 0–100 sub-score with segment-specific thresholds (an enterprise account's normal usage differs from an SMB's)",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -61,15 +61,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        190
+        900,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 3. Analyse ticket sentiment\nRecent tickets are scored for sentiment and frustration markers; a single furious ticket outweighs three neutral ones",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "customer-health-scoring-section-3",
@@ -77,14 +77,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        -30
+        1220,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 4. Compute score and trend\nWeighted score, 8-week trend, and the top two components that changed",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1880,
-        190
+        1860,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 5. Detect drops and thresholds\nDrop above the threshold, or score crossing into red, creates an alert; accounts already in an active save play are not re-alerted",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -109,15 +109,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2200,
-        190
+        2180,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 6. Draft the intervention\nFrom the components and the account's history the agent drafts a check-in that names the observed change without sounding like surveillance, and suggests the play (re-onboard a new admin, executive check-in, training session)",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "customer-health-scoring-section-6",
@@ -125,14 +125,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        -30
+        2500,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 7. Alert the owner and update the CRM\nOwner gets the alert with score, cause and draft; the CRM health field and a timeline note are updated so the score is visible in every view",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -141,15 +141,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3160,
-        190
+        3140,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 8. Calibrate quarterly\nCompares scores from 90 days ago to actual churn and downgrades, reports precision/recall by score band, and proposes weight changes for RevOps to approve",
-        "height": 240,
-        "width": 620,
+        "height": 360,
+        "width": 540,
         "color": 7
       },
       "id": "customer-health-scoring-section-8",
@@ -157,14 +157,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        750
+        -60,
+        790
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 820,
         "width": 300,
         "color": 3
       },
@@ -173,8 +173,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -110
       ]
     },
     {
@@ -578,7 +578,7 @@
       "typeVersion": 1.4,
       "position": [
         0,
-        860
+        960
       ],
       "notes": "Calibrate quarterly\n\nCompares scores from 90 days ago to actual churn and downgrades, reports precision/recall by score band, and proposes weight changes for RevOps to approve."
     },
@@ -592,7 +592,7 @@
       "typeVersion": 2,
       "position": [
         320,
-        860
+        960
       ],
       "notes": "Compares scores from 90 days ago to actual churn and downgrades, reports precision/recall by score band, and proposes weight changes for RevOps to approve."
     }

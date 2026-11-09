@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Triage SIEM alerts with Claude, enrich with VirusTotal and page on-call via Slack\n\nSmall security teams drowning in alerts from Splunk, Sentinel or CrowdStrike.\n\n### How it works\nTrigger: Splunk, Sentinel, Elastic, CrowdStrike, SentinelOne, Wazuh or Google SecOps posts new alerts; tools that cannot push alerts are polled instead.\n1. Receive and normalise the alert\n2. Enrich entities\n3. Correlate with recent activity\n4. Score and classify\n5. Analyst-style assessment\n6. Auto-close or queue\n7. Notify and escalate\n8. Weekly tuning report\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Splunk / Sentinel / CrowdStrike, VirusTotal / AbuseIPDB / MISP, Slack / PagerDuty.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nEdit the severity rules and the enrichment sources in the Config node; add PagerDuty for critical findings.\nGuardrail to keep: The workflow never takes containment actions (isolate host, disable user) on its own; it recommends and a human executes, or a separate approved playbook runs with explicit authorisation.\n\nFull blueprint: https://agentmelt.com/workflows/security-alert-triage/",
-        "height": 900,
+        "height": 860,
         "width": 640,
         "color": 1
       },
@@ -13,15 +13,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 1. Receive and normalise the alert\nSource, rule, severity, entities (host, user, IP, hash, domain), timestamps and raw event, normalised into a common schema regardless of source",
-        "height": 240,
-        "width": 620,
+        "height": 840,
+        "width": 300,
         "color": 7
       },
       "id": "security-alert-triage-section-1",
@@ -29,14 +29,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 2. Enrich entities\nAsset owner and criticality from the CMDB, user role and recent auth activity from the identity provider, IP and domain reputation from threat-intel feeds, file hash lookups, and geolocation",
-        "height": 240,
+        "height": 840,
         "width": 300,
         "color": 7
       },
@@ -45,14 +45,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 3. Correlate with recent activity\nRelated alerts and events for the same entities in the last 24 hours, so a single alert is seen as part of a sequence when it is one",
-        "height": 240,
+        "height": 840,
         "width": 300,
         "color": 7
       },
@@ -61,14 +61,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        190
+        900,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 4. Score and classify\nDeterministic score from severity, asset criticality, user privilege, intel hits and correlation count; known-benign patterns (scheduled scans, approved admin tools, backup jobs) match against an allowlist maintained by the team",
-        "height": 240,
+        "height": 840,
         "width": 300,
         "color": 7
       },
@@ -77,15 +77,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        190
+        1220,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 5. Analyst-style assessment\nFor alerts above the noise threshold, the agent writes the assessment: what the activity looks like, what is unusual for this entity, the most likely benign and malicious explanations, and the first three investigation steps with the exact queries to run",
-        "height": 680,
-        "width": 620,
+        "height": 840,
+        "width": 540,
         "color": 7
       },
       "id": "security-alert-triage-section-5",
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        -30
+        1540,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 6. Auto-close or queue\nAllowlisted patterns close with the reason recorded; low scores close after the assessment confirms benign; everything else enters the queue ranked by score with the assessment attached",
-        "height": 240,
+        "height": 840,
         "width": 300,
         "color": 7
       },
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2200,
-        190
+        2180,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 7. Notify and escalate\nHigh-score alerts page the on-call analyst with the assessment; critical patterns (credential dumping, ransomware indicators) trigger the incident channel and the playbook immediately",
-        "height": 240,
+        "height": 840,
         "width": 300,
         "color": 7
       },
@@ -125,15 +125,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        190
+        2500,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 8. Weekly tuning report\nAlerts by rule, auto-close rate, analyst dispositions vs workflow scores, and the top ten noise-producing rules with suggested tuning",
-        "height": 240,
-        "width": 620,
+        "height": 360,
+        "width": 540,
         "color": 7
       },
       "id": "security-alert-triage-section-8",
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        750
+        -60,
+        790
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 840,
         "width": 300,
         "color": 3
       },
@@ -157,8 +157,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -130
       ]
     },
     {
@@ -480,7 +480,7 @@
       "typeVersion": 1.4,
       "position": [
         0,
-        860
+        960
       ],
       "notes": "Weekly tuning report\n\nAlerts by rule, auto-close rate, analyst dispositions vs workflow scores, and the top ten noise-producing rules with suggested tuning."
     },
@@ -494,7 +494,7 @@
       "typeVersion": 2,
       "position": [
         320,
-        860
+        960
       ],
       "notes": "Alerts by rule, auto-close rate, analyst dispositions vs workflow scores, and the top ten noise-producing rules with suggested tuning."
     }

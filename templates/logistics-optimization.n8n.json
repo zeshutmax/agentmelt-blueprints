@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Pick the cheapest carrier for shipped orders with EasyPost and Claude\n\nE-commerce operations teams that choose carriers by habit and answer 'where is my order' by hand.\n\n### How it works\nTrigger: The WMS or e-commerce platform (Shopify, NetSuite, ShipStation) posts when a shipment is packed.\n1. Receive the shipment\n2. Rate across carriers\n3. Select the service\n4. Book and label\n5. Track in flight\n6. Detect and explain delays\n7. Notify and escalate\n8. Audit carrier invoices\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus EasyPost / Shippo / carrier APIs, Gmail / Zendesk, Google Sheets / Postgres.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nPut your carrier accounts and service rules in the Config node; connect the order webhook to Shopify, NetSuite or ShipStation.\nGuardrail to keep: Customer messages for orders above a value threshold are approved by a person before sending.\n\nFull blueprint: https://agentmelt.com/workflows/logistics-optimization/",
-        "height": 900,
+        "height": 820,
         "width": 640,
         "color": 1
       },
@@ -13,15 +13,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        180
+        -780,
+        50
       ]
     },
     {
       "parameters": {
         "content": "## 1. Receive the shipment\nDestination, weight, dimensions, service promise (delivery date), declared value and any constraints (residential, hazmat, signature)",
-        "height": 240,
-        "width": 620,
+        "height": 440,
+        "width": 300,
         "color": 7
       },
       "id": "logistics-optimization-section-1",
@@ -29,14 +29,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        50
       ]
     },
     {
       "parameters": {
         "content": "## 2. Rate across carriers\nRequests rates from each contracted carrier (UPS, FedEx, DHL, USPS, regional) directly or via EasyPost/Shippo, applying your negotiated discounts and accessorials",
-        "height": 240,
+        "height": 440,
         "width": 300,
         "color": 7
       },
@@ -45,14 +45,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        50
       ]
     },
     {
       "parameters": {
         "content": "## 3. Select the service\nFilters to services meeting the promise date with a buffer from measured on-time performance per lane, then picks the cheapest",
-        "height": 240,
+        "height": 440,
         "width": 300,
         "color": 7
       },
@@ -61,14 +61,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        190
+        900,
+        50
       ]
     },
     {
       "parameters": {
         "content": "## 4. Book and label\nPurchases the label, writes the tracking number and chosen service back to the order, and prints to the pack station",
-        "height": 240,
+        "height": 440,
         "width": 300,
         "color": 7
       },
@@ -77,14 +77,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        190
+        1220,
+        50
       ]
     },
     {
       "parameters": {
         "content": "## 5. Track in flight\nPolls tracking for open shipments; each event is compared to the expected milestone times for that service and lane",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -93,15 +93,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        750
+        -60,
+        570
       ]
     },
     {
       "parameters": {
         "content": "## 6. Detect and explain delays\nWhen a milestone is late or an exception code appears, the agent reads the tracking history and drafts a plain-language customer update and, if the carrier's SLA was missed, a claim request with the evidence",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "logistics-optimization-section-6",
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        280,
-        530
+        260,
+        570
       ]
     },
     {
       "parameters": {
         "content": "## 7. Notify and escalate\nCustomer update sent from the support inbox (after a human click for high-value orders); internal alert to the logistics lead for exceptions",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -125,14 +125,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        750
+        900,
+        570
       ]
     },
     {
       "parameters": {
         "content": "## 8. Audit carrier invoices\nWeekly: carrier invoice lines matched to booked shipments; differences above tolerance become dispute items with the quote attached",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        750
+        1220,
+        570
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 440,
         "width": 300,
         "color": 3
       },
@@ -157,8 +157,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        50
       ]
     },
     {
@@ -328,7 +328,7 @@
       "typeVersion": 1.4,
       "position": [
         0,
-        860
+        980
       ],
       "notes": "Track in flight\n\nPolls tracking for open shipments; each event is compared to the expected milestone times for that service and lane."
     },
@@ -347,7 +347,7 @@
       "typeVersion": 3.1,
       "position": [
         320,
-        860
+        980
       ],
       "notes": "Detect and explain delays\n\nWhen a milestone is late or an exception code appears, the agent reads the tracking history and drafts a plain-language customer update and, if the carrier's SLA was missed, a claim request with the evidence."
     },
@@ -366,7 +366,7 @@
       "typeVersion": 1.6,
       "position": [
         320,
-        1080
+        1200
       ]
     },
     {
@@ -380,7 +380,7 @@
       "typeVersion": 1.3,
       "position": [
         500,
-        1080
+        1200
       ]
     },
     {
@@ -414,7 +414,7 @@
       "typeVersion": 2.4,
       "position": [
         640,
-        860
+        980
       ],
       "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
     },
@@ -426,7 +426,7 @@
       "typeVersion": 1,
       "position": [
         640,
-        640
+        760
       ],
       "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
     },
@@ -446,7 +446,7 @@
       "typeVersion": 2.2,
       "position": [
         960,
-        860
+        980
       ],
       "notes": "Notify and escalate\n\nCustomer update sent from the support inbox (after a human click for high-value orders); internal alert to the logistics lead for exceptions."
     },
@@ -468,7 +468,7 @@
       "typeVersion": 2.3,
       "position": [
         1280,
-        860
+        980
       ],
       "notes": "Audit carrier invoices\n\nWeekly: carrier invoice lines matched to booked shipments; differences above tolerance become dispute items with the quote attached."
     }

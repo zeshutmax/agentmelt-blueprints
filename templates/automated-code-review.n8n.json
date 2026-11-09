@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Review GitHub pull requests with Claude and post findings as PR comments\n\nEngineering teams that want a consistent first-pass review on every pull request before a human looks.\n\n### How it works\nTrigger: pull_request opened, synchronize and ready_for_review events; draft PRs are skipped unless labelled.\n1. Receive the PR event\n2. Fetch the diff and context\n3. Run static checks\n4. Analyse the change\n5. Filter to what matters\n6. Post inline comments and summary\n7. Label and route\n8. Learn from resolutions\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus GitHub / GitLab, CI (GitHub Actions, GitLab CI), Linear / Jira.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nTune the severity threshold and the file globs in the Config node; add a Linear or Jira node to open tickets for blocking findings.\nGuardrail to keep: The workflow never approves or merges; it reviews and labels.\n\nFull blueprint: https://agentmelt.com/workflows/automated-code-review/",
-        "height": 900,
+        "height": 820,
         "width": 640,
         "color": 1
       },
@@ -13,15 +13,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 1. Receive the PR event\nRepository, PR number, author, base and head, changed files, linked issue",
-        "height": 240,
-        "width": 620,
+        "height": 840,
+        "width": 300,
         "color": 7
       },
       "id": "automated-code-review-section-1",
@@ -29,14 +29,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 2. Fetch the diff and context\nThe unified diff plus the full content of changed files and the definitions they reference, the linked issue or ticket text, and the repo's CONTRIBUTING and standards docs",
-        "height": 240,
+        "height": 840,
         "width": 300,
         "color": 7
       },
@@ -45,14 +45,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 3. Run static checks\nLinters, type checks and secret scanning results from CI are collected so the model does not repeat what tooling already reported",
-        "height": 240,
+        "height": 840,
         "width": 300,
         "color": 7
       },
@@ -61,15 +61,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        190
+        900,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 4. Analyse the change\nWith the diff, context, standards and issue: does the change do what the issue asks; concrete bugs or edge cases; security issues (injection, auth, secrets, unsafe deserialisation); breaking API or schema changes; missing or weak tests; deviations from the written standards",
-        "height": 680,
-        "width": 620,
+        "height": 840,
+        "width": 540,
         "color": 7
       },
       "id": "automated-code-review-section-4",
@@ -77,14 +77,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        -30
+        1220,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 5. Filter to what matters\nFindings below a confidence threshold or classed as style-only are dropped or folded into the summary; only concrete, explained issues become inline comments",
-        "height": 240,
+        "height": 840,
         "width": 300,
         "color": 7
       },
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1880,
-        190
+        1860,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 6. Post inline comments and summary\nReview comments on the exact lines via the GitHub/GitLab API, plus a summary comment: what the PR does, risk level, test coverage of the change, and the two or three things a human should look at",
-        "height": 240,
+        "height": 840,
         "width": 300,
         "color": 7
       },
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2200,
-        190
+        2180,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 7. Label and route\nRisk label (low/medium/high), area labels, and — for high-risk changes touching auth, payments or data — a required reviewer from the CODEOWNERS group",
-        "height": 240,
+        "height": 840,
         "width": 300,
         "color": 7
       },
@@ -125,15 +125,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        190
+        2500,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 8. Learn from resolutions\nWeekly: which comments were resolved, dismissed or replied 'not an issue'; precision per finding type is reported and thresholds adjusted; recurring findings become proposals for a lint rule",
-        "height": 240,
-        "width": 620,
+        "height": 380,
+        "width": 540,
         "color": 7
       },
       "id": "automated-code-review-section-8",
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        750
+        -60,
+        790
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 840,
         "width": 300,
         "color": 3
       },
@@ -157,8 +157,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -130
       ]
     },
     {
@@ -499,7 +499,7 @@
       "typeVersion": 1.4,
       "position": [
         0,
-        860
+        980
       ],
       "notes": "Learn from resolutions\n\nWeekly: which comments were resolved, dismissed or replied 'not an issue'; precision per finding type is reported and thresholds adjusted; recurring findings become proposals for a lint rule."
     },
@@ -513,7 +513,7 @@
       "typeVersion": 2,
       "position": [
         320,
-        860
+        980
       ],
       "notes": "Weekly: which comments were resolved, dismissed or replied 'not an issue'; precision per finding type is reported and thresholds adjusted; recurring findings become proposals for a lint rule."
     }

@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Extract broker submissions from Gmail with Claude and triage them for underwriters\n\nCommercial underwriting teams that key submissions from email into the workbench by hand.\n\n### How it works\nTrigger: New emails to submissions@ with attachments; portal submissions arrive as they are filed.\n1. Capture and classify attachments\n2. Extract application data\n3. Check completeness\n4. Pull third-party data\n5. Apply appetite rules\n6. Indicative rating\n7. Assemble the file and questions\n8. Queue and track\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Policy admin / workbench (Duck Creek, Guidewire, Applied, or in-house), Third-party data providers, Outlook / Gmail.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nDefine the appetite rules and the required-fields list in the Config node; point the write-back node at your policy admin system.\nGuardrail to keep: No binding decisions are automated; the workflow triages and prepares.\n\nFull blueprint: https://agentmelt.com/workflows/insurance-underwriting-intake/",
-        "height": 900,
+        "height": 860,
         "width": 640,
         "color": 1
       },
@@ -13,15 +13,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 1. Capture and classify attachments\nEach attachment is classified — ACORD application, loss runs, schedule of values, financials, supplemental questionnaire, other — and stored against a new submission record",
-        "height": 240,
-        "width": 620,
+        "height": 820,
+        "width": 300,
         "color": 7
       },
       "id": "insurance-underwriting-intake-section-1",
@@ -29,15 +29,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 2. Extract application data\nInsured details, operations description, revenue, employees, locations with construction/occupancy/protection data, requested limits and coverages, prior carrier and premium, loss history by year — with confidence per field",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "insurance-underwriting-intake-section-2",
@@ -45,14 +45,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        -30
+        580,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 3. Check completeness\nRequired fields per line of business; missing items generate a broker request drafted by the agent with the exact list, sent after a human click or automatically below a size threshold",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -61,14 +61,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        190
+        1220,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 4. Pull third-party data\nProperty data (construction, roof age, flood zone), business verification, sanctions and OFAC checks, and loss-control reports where available; results attached to the file",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -77,14 +77,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        190
+        1540,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 5. Apply appetite rules\nClass of business, geography, revenue band, loss ratio and limits against the appetite guide",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1880,
-        190
+        1860,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 6. Indicative rating\nFor in-appetite risks, an indicative premium from the rating algorithm or rater API, with the factors listed so the underwriter sees what drove it",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -109,15 +109,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2200,
-        190
+        2180,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 7. Assemble the file and questions\nThe agent writes the submission summary — the risk in one paragraph, key exposures, loss history narrative, third-party findings, indicative rating — and the specific questions an underwriter would ask this broker about this account",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "insurance-underwriting-intake-section-7",
@@ -125,14 +125,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        -30
+        2500,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 8. Queue and track\nSubmission created in the policy admin or underwriting workbench with the data and documents; the underwriter is assigned by line and capacity; turnaround is tracked from receipt to quote",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3160,
-        190
+        3140,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 820,
         "width": 300,
         "color": 3
       },
@@ -157,8 +157,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -110
       ]
     },
     {

@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Triage a shared Gmail inbox with Claude and create tasks in Asana and Slack\n\nOperations teams and assistants who sort a shared inbox by hand and lose requests in the pile.\n\n### How it works\nTrigger: Polls the mailbox every minute for new messages via Gmail or Microsoft Outlook triggers; threads are handled as a unit.\n1. Receive and de-duplicate\n2. Classify\n3. Fetch context\n4. Extract tasks and dates\n5. Draft routine replies\n6. Route\n7. Approve and send\n8. Daily digest\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Gmail / Outlook, Asana / Linear / Notion, Slack.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nEdit the categories and the routing rules in the Config node; replace Asana with Linear or Notion.\nGuardrail to keep: Drafts require approval by default; auto-send is enabled per category by the inbox owner and logged.\n\nFull blueprint: https://agentmelt.com/workflows/email-triage-automation/",
-        "height": 900,
+        "height": 820,
         "width": 640,
         "color": 1
       },
@@ -13,15 +13,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 1. Receive and de-duplicate\nNew messages and thread updates; automated notifications and newsletters are recognised by sender patterns and handled by their own rules",
-        "height": 240,
-        "width": 620,
+        "height": 820,
+        "width": 300,
         "color": 7
       },
       "id": "email-triage-automation-section-1",
@@ -29,15 +29,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 2. Classify\nIntent (reply needed, task, meeting request, FYI, invoice, complaint, spam), urgency, and the internal owner if the inbox is shared",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "email-triage-automation-section-2",
@@ -45,14 +45,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        -30
+        580,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 3. Fetch context\nCRM record for the sender, open tickets or deals, prior thread history, and the calendar for meeting requests",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -61,15 +61,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        190
+        1220,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 4. Extract tasks and dates\nAny request with a deliverable and a date becomes a structured task with owner and deadline; ambiguous ones are flagged for confirmation",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "email-triage-automation-section-4",
@@ -77,15 +77,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        -30
+        1540,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 5. Draft routine replies\nFor categories with an approved playbook (pricing questions, scheduling, document requests, status updates) the agent drafts a reply in the owner's voice, grounded in the context fetched",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "email-triage-automation-section-5",
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2200,
-        -30
+        2180,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 6. Route\nDraft to the owner for one-click approval; tasks to Asana/Linear/Notion; meeting requests to a scheduling link or calendar hold; invoices to AP; complaints straight to a person with the thread summarised",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2840,
-        190
+        2820,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 7. Approve and send\nDrafts sit in a Slack or Gmail 'ready' label; approval sends from the owner's address",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -125,15 +125,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3160,
-        190
+        3140,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 8. Daily digest\nOne message at 8am: handled, waiting for you, extracted tasks, and anything the classifier was unsure about",
-        "height": 240,
-        "width": 620,
+        "height": 340,
+        "width": 540,
         "color": 7
       },
       "id": "email-triage-automation-section-8",
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        750
+        -60,
+        790
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 820,
         "width": 300,
         "color": 3
       },
@@ -157,8 +157,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -110
       ]
     },
     {
@@ -625,7 +625,7 @@
       "typeVersion": 1.4,
       "position": [
         0,
-        860
+        940
       ],
       "notes": "Daily digest\n\nOne message at 8am: handled, waiting for you, extracted tasks, and anything the classifier was unsure about."
     },
@@ -639,7 +639,7 @@
       "typeVersion": 2,
       "position": [
         320,
-        860
+        940
       ],
       "notes": "One message at 8am: handled, waiting for you, extracted tasks, and anything the classifier was unsure about."
     }

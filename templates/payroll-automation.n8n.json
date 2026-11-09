@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Prepare payroll from Gusto time data with Claude and approve in Slack\n\nSmall HR and finance teams that run payroll checks by hand every period and still find errors after the fact.\n\n### How it works\nTrigger: Runs on the cut-off date each period, plus a preview run three days earlier so managers can fix missing approvals.\n1. Collect period inputs\n2. Normalise into one employee ledger\n3. Validate against policy\n4. Anomaly review\n5. Send the exceptions report\n6. Wait for approval\n7. Push the run to the provider\n8. Reconcile after the run\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Gusto / ADP / Rippling / Deel, Slack, Google Sheets.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the pay-period rules and the anomaly thresholds in the Config node; connect Gusto, ADP, Rippling or Deel.\nGuardrail to keep: The workflow never submits without an explicit human approval; the Wait node is the control.\n\nFull blueprint: https://agentmelt.com/workflows/payroll-automation/",
-        "height": 900,
+        "height": 820,
         "width": 640,
         "color": 1
       },
@@ -13,30 +13,30 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -70
       ]
     },
     {
       "parameters": {
-        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
-        "height": 240,
-        "width": 620,
+        "content": "## Trigger\nThe entry point. The red note next to it marks the one node you edit.",
+        "height": 780,
+        "width": 300,
         "color": 7
       },
       "id": "payroll-automation-section-0",
-      "name": "Section: Trigger and config",
+      "name": "Section: Trigger",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -70
       ]
     },
     {
       "parameters": {
         "content": "## 1. Collect period inputs\nPulls approved hours from the time tracker (Deputy, Clockify, Harvest), leave from the HRIS, expense claims from Expensify or Ramp, and the change log (new hires, leavers, rate changes) from the HRIS",
-        "height": 240,
+        "height": 780,
         "width": 300,
         "color": 7
       },
@@ -45,14 +45,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -70
       ]
     },
     {
       "parameters": {
         "content": "## 2. Normalise into one employee ledger\nOne row per employee per period: base, hours, overtime, leave, allowances, deductions, one-offs",
-        "height": 240,
+        "height": 780,
         "width": 300,
         "color": 7
       },
@@ -61,14 +61,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        190
+        900,
+        -70
       ]
     },
     {
       "parameters": {
         "content": "## 3. Validate against policy\nDeterministic rules: missing approvals, hours above contract limits, rate changes without an HRIS record, leavers with active pay, starters missing tax details",
-        "height": 240,
+        "height": 780,
         "width": 300,
         "color": 7
       },
@@ -77,15 +77,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        190
+        1220,
+        -70
       ]
     },
     {
       "parameters": {
         "content": "## 4. Anomaly review\nCompares each employee's line to their last six periods and explains outliers in one sentence with the evidence",
-        "height": 680,
-        "width": 620,
+        "height": 780,
+        "width": 540,
         "color": 7
       },
       "id": "payroll-automation-section-4",
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        -30
+        1540,
+        -70
       ]
     },
     {
       "parameters": {
         "content": "## 5. Send the exceptions report\nPayroll manager receives the ledger summary and the exceptions list with approve/hold buttons; managers get their team's missing approvals",
-        "height": 240,
+        "height": 780,
         "width": 300,
         "color": 7
       },
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2200,
-        190
+        2180,
+        -70
       ]
     },
     {
       "parameters": {
         "content": "## 6. Wait for approval\nThe workflow pauses until the payroll manager approves in Slack or the sheet",
-        "height": 240,
+        "height": 780,
         "width": 300,
         "color": 7
       },
@@ -125,14 +125,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        190
+        2500,
+        -70
       ]
     },
     {
       "parameters": {
         "content": "## 7. Push the run to the provider\nUploads the approved ledger to Gusto, ADP, Rippling, Deel or Xero Payroll via API or the provider's import format, and stores the submitted file with a hash for audit",
-        "height": 240,
+        "height": 780,
         "width": 300,
         "color": 7
       },
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2840,
-        190
+        2820,
+        -70
       ]
     },
     {
       "parameters": {
         "content": "## 8. Reconcile after the run\nCompares the provider's processed totals to the submitted ledger and alerts on any difference before payslips go out",
-        "height": 240,
+        "height": 780,
         "width": 300,
         "color": 7
       },
@@ -157,14 +157,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3160,
-        190
+        3140,
+        -70
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 780,
         "width": 300,
         "color": 3
       },
@@ -173,8 +173,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -70
       ]
     },
     {

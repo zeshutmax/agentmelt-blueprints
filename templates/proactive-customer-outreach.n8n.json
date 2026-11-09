@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Reach out to at-risk customers from Stripe and Segment events with Claude\n\nSupport and success teams that hear about problems only when the customer complains or leaves.\n\n### How it works\nTrigger: Stripe/Chargebee (payment failed, trial ending), product analytics (Segment, Mixpanel, PostHog events), error monitoring (Sentry), shipping (tracking exceptions).\n1. Receive or detect the signal\n2. Load the customer's context\n3. Decide whether to reach out\n4. Draft the message\n5. Approve if sensitive\n6. Send on the right channel\n7. Log and watch the response\n8. Report what it prevented\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Stripe / Chargebee, Segment / PostHog / Mixpanel, HubSpot / Intercom.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nDefine the trigger events and the message templates in the Config node; send through HubSpot, Intercom or Gmail.\nGuardrail to keep: Frequency cap: one proactive message per customer per week across all scenarios.\n\nFull blueprint: https://agentmelt.com/workflows/proactive-customer-outreach/",
-        "height": 900,
+        "height": 860,
         "width": 640,
         "color": 1
       },
@@ -13,15 +13,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -70
       ]
     },
     {
       "parameters": {
         "content": "## 1. Receive or detect the signal\nEach covered scenario has a trigger: payment_failed, trial_ending_3d, error_rate_spike, feature_not_used_14d, shipment_delayed, usage_drop_50pct",
-        "height": 240,
-        "width": 620,
+        "height": 780,
+        "width": 300,
         "color": 7
       },
       "id": "proactive-customer-outreach-section-1",
@@ -29,14 +29,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -70
       ]
     },
     {
       "parameters": {
         "content": "## 2. Load the customer's context\nPlan, tenure, recent tickets, health score, account owner and communication preferences from the CRM",
-        "height": 240,
+        "height": 780,
         "width": 300,
         "color": 7
       },
@@ -45,14 +45,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -70
       ]
     },
     {
       "parameters": {
         "content": "## 3. Decide whether to reach out\nSuppression rules: not more than one proactive message per customer per week, not during an open incident, not to accounts a CSM owns unless the CSM is copied",
-        "height": 240,
+        "height": 780,
         "width": 300,
         "color": 7
       },
@@ -61,15 +61,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        190
+        900,
+        -70
       ]
     },
     {
       "parameters": {
         "content": "## 4. Draft the message\nFrom a scenario template and the context, the agent writes a short, specific message: what happened, what to do, one link",
-        "height": 680,
-        "width": 620,
+        "height": 780,
+        "width": 540,
         "color": 7
       },
       "id": "proactive-customer-outreach-section-4",
@@ -77,14 +77,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        -30
+        1220,
+        -70
       ]
     },
     {
       "parameters": {
         "content": "## 5. Approve if sensitive\nScenarios marked sensitive (large accounts, churn-risk, anything mentioning money) pause for a one-click approval in Slack; the rest send automatically",
-        "height": 240,
+        "height": 780,
         "width": 300,
         "color": 7
       },
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1880,
-        190
+        1860,
+        -70
       ]
     },
     {
       "parameters": {
         "content": "## 6. Send on the right channel\nEmail by default; in-app message via Intercom or SMS for time-critical scenarios like a delayed delivery",
-        "height": 240,
+        "height": 780,
         "width": 300,
         "color": 7
       },
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2200,
-        190
+        2180,
+        -70
       ]
     },
     {
       "parameters": {
         "content": "## 7. Log and watch the response\nThe outreach is logged on the contact; replies open a ticket routed to the right person; the covered event is tracked to see whether it resolved",
-        "height": 240,
+        "height": 780,
         "width": 300,
         "color": 7
       },
@@ -125,15 +125,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        190
+        2500,
+        -70
       ]
     },
     {
       "parameters": {
         "content": "## 8. Report what it prevented\nWeekly: for each scenario, messages sent, replies, resolution rate and — by comparison with the pre-workflow baseline — tickets avoided and payments recovered",
-        "height": 240,
-        "width": 620,
+        "height": 360,
+        "width": 540,
         "color": 7
       },
       "id": "proactive-customer-outreach-section-8",
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        750
+        -60,
+        790
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 780,
         "width": 300,
         "color": 3
       },
@@ -157,8 +157,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -70
       ]
     },
     {
@@ -475,7 +475,7 @@
       "typeVersion": 1.4,
       "position": [
         0,
-        860
+        960
       ],
       "notes": "Report what it prevented\n\nWeekly: for each scenario, messages sent, replies, resolution rate and — by comparison with the pre-workflow baseline — tickets avoided and payments recovered."
     },
@@ -489,7 +489,7 @@
       "typeVersion": 2,
       "position": [
         320,
-        860
+        960
       ],
       "notes": "Weekly: for each scenario, messages sent, replies, resolution rate and — by comparison with the pre-workflow baseline — tickets avoided and payments recovered."
     }

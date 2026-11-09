@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Compile a weekly report from BigQuery with Claude into Google Docs and Slack\n\nOperations leads who spend Monday morning assembling the same report from five dashboards.\n\n### How it works\nTrigger: Weekly run after data sources have closed the week; on-demand run for ad-hoc periods.\n1. Run the metric queries\n2. Assemble the metrics table\n3. Pull context\n4. Draft the narrative\n5. Render the report\n6. Approve\n7. Distribute\n8. Maintain the catalogue\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus BigQuery / Snowflake / Postgres, Google Docs + Slack.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nList the metrics and their queries in the Config node; replace BigQuery with Snowflake or Postgres.\nGuardrail to keep: Every number in the narrative must appear in the metrics table; the agent cannot introduce figures.\n\nFull blueprint: https://agentmelt.com/workflows/weekly-reporting-automation/",
-        "height": 900,
+        "height": 840,
         "width": 640,
         "color": 1
       },
@@ -13,30 +13,30 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -110
       ]
     },
     {
       "parameters": {
-        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
-        "height": 240,
-        "width": 620,
+        "content": "## Trigger\nThe entry point. The red note next to it marks the one node you edit.",
+        "height": 820,
+        "width": 300,
         "color": 7
       },
       "id": "weekly-reporting-automation-section-0",
-      "name": "Section: Trigger and config",
+      "name": "Section: Trigger",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 1. Run the metric queries\nEach metric defined once in a query catalogue (SQL, API call or sheet range) with owner and target; the run executes all of them for the period and the comparison periods",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -45,14 +45,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 2. Assemble the metrics table\nCurrent, previous week, same week last year and target per metric; deltas and flags for metrics outside their tolerance band",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -61,14 +61,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        190
+        900,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 3. Pull context\nNotable events from the week — releases, campaigns, incidents, holidays — from the calendar, changelog and incident tracker, so the narrative can explain moves",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -77,15 +77,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        190
+        1220,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 4. Draft the narrative\nFrom the table, the context and last week's approved report, the agent writes the summary: the three biggest moves with likely causes from the context, metrics off target, and what to watch",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "weekly-reporting-automation-section-4",
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        -30
+        1540,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 5. Render the report\nTemplate filled with the table, charts generated from the numbers, and the narrative; also a Slack-ready short version",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2200,
-        190
+        2180,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 6. Approve\nOwner reviews in Slack — approve, or edit the doc and approve; edits are kept for next week's prompt context",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -125,14 +125,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        190
+        2500,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 7. Distribute\nPosted to the leadership channel and emailed to the list; the doc archived by week",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2840,
-        190
+        2820,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 8. Maintain the catalogue\nMetric definitions, owners and targets live in a sheet; adding a metric is a row, and broken queries alert their owner rather than silently dropping out",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -157,14 +157,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3160,
-        190
+        3140,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 820,
         "width": 300,
         "color": 3
       },
@@ -173,8 +173,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -110
       ]
     },
     {

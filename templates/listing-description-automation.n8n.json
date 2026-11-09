@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Write real estate listing descriptions with Claude from Follow Up Boss\n\nReal-estate agents and teams that write every listing description and social post from scratch.\n\n### How it works\nTrigger: Follow Up Boss, kvCORE, a Google Form, or a change in the MLS feed for the agent's listings starts the run.\n1. Receive the listing\n2. Describe the photos\n3. Draft the MLS description\n4. Draft the derivatives\n5. Compliance and brand check\n6. Review and approve\n7. Publish\n8. Track\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Follow Up Boss / kvCORE, Mailchimp / Constant Contact, Buffer / Meta API.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nPut your voice rules and fair-housing checklist in the Config node; publish through Mailchimp, Buffer or the Meta API.\nGuardrail to keep: Fair-housing language check runs on every asset before review; flagged copy cannot be approved without an edit.\n\nFull blueprint: https://agentmelt.com/workflows/listing-description-automation/",
-        "height": 900,
+        "height": 840,
         "width": 640,
         "color": 1
       },
@@ -13,15 +13,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 1. Receive the listing\nAddress, price, beds/baths, square footage, lot, year built, features, HOA, school district, agent notes and photo URLs",
-        "height": 240,
-        "width": 620,
+        "height": 800,
+        "width": 300,
         "color": 7
       },
       "id": "listing-description-automation-section-1",
@@ -29,15 +29,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 2. Describe the photos\nA vision-capable model describes each photo (kitchen with quartz island, west-facing deck, finished basement) so the copy references what buyers will actually see",
-        "height": 680,
-        "width": 620,
+        "height": 800,
+        "width": 540,
         "color": 7
       },
       "id": "listing-description-automation-section-2",
@@ -45,15 +45,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        -30
+        580,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 3. Draft the MLS description\nWithin the MLS character limit, in the agent's voice, leading with the strongest feature, with a fair-housing compliance check for protected-class language",
-        "height": 680,
-        "width": 620,
+        "height": 800,
+        "width": 540,
         "color": 7
       },
       "id": "listing-description-automation-section-3",
@@ -61,15 +61,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        -30
+        1220,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 4. Draft the derivatives\nInstagram and Facebook captions, a 'just listed' story script, a buyer-list email with the three best photos, and a 60-second virtual-tour narration script",
-        "height": 680,
-        "width": 620,
+        "height": 800,
+        "width": 540,
         "color": 7
       },
       "id": "listing-description-automation-section-4",
@@ -77,14 +77,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1880,
-        -30
+        1860,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 5. Compliance and brand check\nFair-housing wordlist, brokerage disclaimer, required MLS phrases, and price/feature consistency against the source data",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -93,15 +93,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        190
+        2500,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 6. Review and approve\nThe agent gets one message with every asset; approve, edit or regenerate a single asset from the phone",
-        "height": 460,
-        "width": 620,
+        "height": 800,
+        "width": 540,
         "color": 7
       },
       "id": "listing-description-automation-section-6",
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2840,
-        -30
+        2820,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 7. Publish\nMLS description to the CRM/MLS field, social posts scheduled, the email queued in the ESP to the buyer segment matching price band and area",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -125,14 +125,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3480,
-        190
+        3460,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 8. Track\nEvery listing's assets, approval time and (from the CRM) showings and days on market, so the brokerage can compare marketed vs unmarketed listings",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3800,
-        190
+        3780,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 800,
         "width": 300,
         "color": 3
       },
@@ -157,8 +157,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -90
       ]
     },
     {

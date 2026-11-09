@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Recommend reorder quantities from ERP stock levels with Claude and approve in Slack\n\nOperations teams that decide reorders from a spreadsheet and want the maths and the exceptions done for them.\n\n### How it works\nTrigger: Runs after the demand-forecasting workflow writes new forecasts; a daily run checks stock positions against reorder points.\n1. Read forecasts and error\n2. Read inventory and open orders\n3. Measure supplier lead times\n4. Compute safety stock and reorder points\n5. Classify SKUs\n6. Generate purchase suggestions\n7. Explain parameter changes\n8. Publish to buyers and the ERP\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus ERP / WMS (NetSuite, SAP B1, Cin7, Fishbowl), Google Sheets.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nPut your service levels and lead times in the Config node; connect the ERP node to NetSuite, SAP B1, Cin7 or Fishbowl.\nGuardrail to keep: Draft POs only — a buyer approves before anything is sent to a supplier.\n\nFull blueprint: https://agentmelt.com/workflows/inventory-optimization/",
-        "height": 900,
+        "height": 820,
         "width": 640,
         "color": 1
       },
@@ -13,30 +13,30 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -90
       ]
     },
     {
       "parameters": {
-        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
-        "height": 240,
-        "width": 620,
+        "content": "## Trigger\nThe entry point. The red note next to it marks the one node you edit.",
+        "height": 800,
+        "width": 300,
         "color": 7
       },
       "id": "inventory-optimization-section-0",
-      "name": "Section: Trigger and config",
+      "name": "Section: Trigger",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 1. Read forecasts and error\np50 forecast and p90–p50 spread per SKU-location-week from the forecast table, plus measured forecast error by SKU segment",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -45,14 +45,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 2. Read inventory and open orders\nOn-hand, allocated, in-transit and open PO quantities from the ERP or WMS, and receipt history for lead-time measurement",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -61,14 +61,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        190
+        900,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 3. Measure supplier lead times\nMean and variance of actual lead time per supplier-SKU from PO created → received, replacing the ERP's static lead-time field",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -77,14 +77,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        190
+        1220,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 4. Compute safety stock and reorder points\nSafety stock from the service-level target, forecast error and lead-time variability; reorder point = lead-time demand + safety stock; order quantity from EOQ or supplier minimums and pack sizes",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        190
+        1540,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 5. Classify SKUs\nABC by revenue and XYZ by demand variability, so service-level targets differ by class (e.g",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1880,
-        190
+        1860,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 6. Generate purchase suggestions\nEvery SKU-location whose projected position (on-hand + in-transit − forecast over lead time) falls below the reorder point becomes a suggestion, grouped by supplier into a draft PO",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -125,15 +125,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2200,
-        190
+        2180,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 7. Explain parameter changes\nWhere a reorder point moved more than 20%, the agent states why in one line: forecast up, lead time slipped, error widened",
-        "height": 680,
-        "width": 620,
+        "height": 800,
+        "width": 540,
         "color": 7
       },
       "id": "inventory-optimization-section-7",
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        -30
+        2500,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 8. Publish to buyers and the ERP\nSuggestions go to the buyer sheet with approve/adjust; approved lines are pushed to the ERP as draft POs via API",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -157,14 +157,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3160,
-        190
+        3140,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 800,
         "width": 300,
         "color": 3
       },
@@ -173,8 +173,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -90
       ]
     },
     {

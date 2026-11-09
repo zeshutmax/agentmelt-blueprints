@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Resolve IT requests from Slack with Claude, Okta and Jira Service Management\n\nSmall IT teams that answer password resets and access requests all day.\n\n### How it works\nTrigger: Messages to the IT bot or #it-help channel, and new tickets in Jira Service Management, Freshservice or ServiceNow.\n1. Receive the request\n2. Classify the request\n3. Answer from the knowledge base\n4. Self-service actions with approval\n5. Execute through the systems\n6. Create or update the ticket\n7. Route unresolved requests\n8. Improve the knowledge base\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Okta / Entra ID / Google Workspace, Jamf / Intune, Jira Service Management / Freshservice.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nEdit the request types and the self-service rules in the Config node; add Jamf or Intune for device actions.\nGuardrail to keep: Identity is taken from the chat platform's SSO, never from the message; sensitive actions require a fresh MFA step.\n\nFull blueprint: https://agentmelt.com/workflows/it-helpdesk-automation/",
-        "height": 900,
+        "height": 800,
         "width": 640,
         "color": 1
       },
@@ -13,15 +13,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 1. Receive the request\nMessage text, requester identity (verified through the chat platform's SSO), device and location from the MDM where available",
-        "height": 240,
-        "width": 620,
+        "height": 800,
+        "width": 300,
         "color": 7
       },
       "id": "it-helpdesk-automation-section-1",
@@ -29,15 +29,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 2. Classify the request\nPassword/MFA, access request, software/licence, hardware, how-to, outage report, other — with urgency",
-        "height": 680,
-        "width": 620,
+        "height": 800,
+        "width": 540,
         "color": 7
       },
       "id": "it-helpdesk-automation-section-2",
@@ -45,15 +45,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        -30
+        580,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 3. Answer from the knowledge base\nHow-to questions are answered from the IT knowledge base with the steps and a link; the agent asks a clarifying question when the request is ambiguous",
-        "height": 680,
-        "width": 620,
+        "height": 800,
+        "width": 540,
         "color": 7
       },
       "id": "it-helpdesk-automation-section-3",
@@ -61,14 +61,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        -30
+        1220,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 4. Self-service actions with approval\nPassword reset → identity-provider API after MFA verification",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -77,14 +77,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1880,
-        190
+        1860,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 5. Execute through the systems\nOkta/Entra ID/Google Workspace for identity actions, Jamf/Intune for software deployment, the licence platform for seat assignment — each call logged with requester, approver and timestamp",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2200,
-        190
+        2180,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 6. Create or update the ticket\nEvery request, resolved or not, becomes a ticket with the classification, the actions taken and the conversation, so metrics and audits are complete",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        190
+        2500,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 7. Route unresolved requests\nAnything the bot cannot resolve is assigned to the right IT queue with the context and a summary; the requester is told who has it and the expected time",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -125,15 +125,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2840,
-        190
+        2820,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 8. Improve the knowledge base\nWeekly: questions the agent could not answer, grouped by topic, become draft KB articles for IT to approve; resolved-by-bot rate and time-to-resolve reported per category",
-        "height": 240,
-        "width": 620,
+        "height": 380,
+        "width": 540,
         "color": 7
       },
       "id": "it-helpdesk-automation-section-8",
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        750
+        -60,
+        790
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 800,
         "width": 300,
         "color": 3
       },
@@ -157,8 +157,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -90
       ]
     },
     {
@@ -574,7 +574,7 @@
       "typeVersion": 1.4,
       "position": [
         0,
-        860
+        980
       ],
       "notes": "Improve the knowledge base\n\nWeekly: questions the agent could not answer, grouped by topic, become draft KB articles for IT to approve; resolved-by-bot rate and time-to-resolve reported per category."
     },
@@ -588,7 +588,7 @@
       "typeVersion": 2,
       "position": [
         320,
-        860
+        980
       ],
       "notes": "Weekly: questions the agent could not answer, grouped by topic, become draft KB articles for IT to approve; resolved-by-bot rate and time-to-resolve reported per category."
     }

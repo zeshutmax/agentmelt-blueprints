@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Prepare prior authorization requests from EHR orders with Claude\n\nClinic and practice staff who spend hours a day on payer portals and phone queues.\n\n### How it works\nTrigger: New orders and referrals from the EHR (via FHIR, HL7 or a daily export) are checked against payer rules; status polling runs twice daily.\n1. Detect auth requirement\n2. Gather documentation\n3. Check completeness against criteria\n4. Draft the medical-necessity summary\n5. Submit\n6. Track status\n7. Draft appeals\n8. Report\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus EHR (Epic, athenahealth, eClinicalWorks…), Availity / payer portals.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nKeep the payer rules in the Config node; this template assumes self-hosted n8n and a model under a BAA — set both before running on patient data.\nGuardrail to keep: Every submission and appeal is reviewed and signed by a clinician or authorised staff member; nothing is sent automatically.\n\nFull blueprint: https://agentmelt.com/workflows/prior-authorization-automation/",
-        "height": 900,
+        "height": 860,
         "width": 640,
         "color": 1
       },
@@ -13,30 +13,30 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -110
       ]
     },
     {
       "parameters": {
-        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
-        "height": 240,
-        "width": 620,
+        "content": "## Trigger\nThe entry point. The red note next to it marks the one node you edit.",
+        "height": 820,
+        "width": 300,
         "color": 7
       },
       "id": "prior-authorization-automation-section-0",
-      "name": "Section: Trigger and config",
+      "name": "Section: Trigger",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 1. Detect auth requirement\nOrder type, CPT/HCPCS code, payer and plan checked against the payer rules table (maintained from payer bulletins) to decide whether auth is needed and which form or portal applies",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -45,14 +45,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 2. Gather documentation\nRelevant encounter notes, labs, imaging reports, prior treatments and diagnoses pulled from the EHR for the order's criteria checklist",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -61,14 +61,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        190
+        900,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 3. Check completeness against criteria\nEach payer criterion (e.g",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -77,15 +77,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        190
+        1220,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 4. Draft the medical-necessity summary\nA structured summary mapping the documentation to each criterion in the payer's own language, with citations to the source notes; the clinician reviews and signs",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "prior-authorization-automation-section-4",
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        -30
+        1540,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 5. Submit\nThrough the payer portal API, a clearinghouse (Availity, Change Healthcare) or fax, after a staff member's click; the submission id and packet stored",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2200,
-        190
+        2180,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 6. Track status\nTwice-daily status checks; approvals written to the EHR and scheduling notified; pends trigger a documentation follow-up; denials trigger the appeal path",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -125,15 +125,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        750
+        -60,
+        790
       ]
     },
     {
       "parameters": {
         "content": "## 7. Draft appeals\nOn denial, the agent reads the denial reason and drafts an appeal addressing it point by point with the evidence, for the clinician's review and signature",
-        "height": 680,
-        "width": 620,
+        "height": 800,
+        "width": 540,
         "color": 7
       },
       "id": "prior-authorization-automation-section-7",
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        280,
-        530
+        260,
+        790
       ]
     },
     {
       "parameters": {
         "content": "## 8. Report\nTurnaround, first-pass approval rate, denial reasons by payer, and appeal outcomes — the data for payer negotiations and process fixes",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -157,14 +157,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        750
+        900,
+        790
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 820,
         "width": 300,
         "color": 3
       },
@@ -173,8 +173,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -110
       ]
     },
     {
@@ -457,7 +457,7 @@
       "typeVersion": 1.4,
       "position": [
         0,
-        860
+        1180
       ],
       "notes": "Track status\n\nTwice-daily status checks; approvals written to the EHR and scheduling notified; pends trigger a documentation follow-up; denials trigger the appeal path."
     },
@@ -476,7 +476,7 @@
       "typeVersion": 3.1,
       "position": [
         320,
-        860
+        1180
       ],
       "notes": "Draft appeals\n\nOn denial, the agent reads the denial reason and drafts an appeal addressing it point by point with the evidence, for the clinician's review and signature."
     },
@@ -495,7 +495,7 @@
       "typeVersion": 1.6,
       "position": [
         320,
-        1080
+        1400
       ]
     },
     {
@@ -509,7 +509,7 @@
       "typeVersion": 1.3,
       "position": [
         500,
-        1080
+        1400
       ]
     },
     {
@@ -543,7 +543,7 @@
       "typeVersion": 2.4,
       "position": [
         640,
-        860
+        1180
       ],
       "notes": "True = the AI step was not sure or flagged the item → dead letter, a person looks. False = continue. Wire the dead letter to a Slack message or a sheet so nothing fails silently."
     },
@@ -555,7 +555,7 @@
       "typeVersion": 1,
       "position": [
         640,
-        640
+        960
       ],
       "notes": "Dead letter. Replace this no-op with a Slack message or a sheet row that carries the raw item and the reason — silent failures are the ones that cost."
     },
@@ -587,7 +587,7 @@
       "typeVersion": 4.7,
       "position": [
         960,
-        860
+        1180
       ],
       "notes": "Report\n\nTurnaround, first-pass approval rate, denial reasons by payer, and appeal outcomes — the data for payer negotiations and process fixes."
     }

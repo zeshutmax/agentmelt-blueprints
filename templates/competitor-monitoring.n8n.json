@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Track competitor pages with Firecrawl and Claude and post a weekly brief to Notion\n\nMarketing and product teams that check competitor sites by hand, or not at all.\n\n### How it works\nTrigger: Daily snapshots of monitored pages and feeds; the brief compiles weekly, with instant alerts for pricing changes.\n1. Snapshot monitored pages\n2. Collect feeds\n3. Detect material changes\n4. Classify and assess\n5. Instant alerts for pricing\n6. Write the weekly brief\n7. Update battle cards\n8. Distribute and log\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Browserless / Firecrawl, Notion + Slack.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nList the pages and the change types you care about in the Config node; send the brief to Slack instead of Notion if you prefer.\nGuardrail to keep: Only public sources are monitored; no login walls, no scraping in violation of terms.\n\nFull blueprint: https://agentmelt.com/workflows/competitor-monitoring/",
-        "height": 900,
+        "height": 820,
         "width": 640,
         "color": 1
       },
@@ -13,30 +13,30 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -90
       ]
     },
     {
       "parameters": {
-        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
-        "height": 240,
-        "width": 620,
+        "content": "## Trigger\nThe entry point. The red note next to it marks the one node you edit.",
+        "height": 800,
+        "width": 300,
         "color": 7
       },
       "id": "competitor-monitoring-section-0",
-      "name": "Section: Trigger and config",
+      "name": "Section: Trigger",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 1. Snapshot monitored pages\nPricing, features, changelog and careers pages for each competitor fetched daily (via a headless fetch service for JavaScript-heavy pages) and stored with a hash",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -45,14 +45,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 2. Collect feeds\nRelease-note RSS, job boards, G2/Capterra/app-store reviews, LinkedIn company posts, Meta and Google ad libraries, and news APIs per competitor",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -61,14 +61,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        190
+        900,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 3. Detect material changes\nDiffs on page text; noise rules drop cosmetic changes; pricing tables parsed into numbers so a price change is a data event, not a text diff",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -77,15 +77,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        190
+        1220,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 4. Classify and assess\nEach change classified (pricing, packaging, feature, positioning, hiring signal, sentiment) and assessed: what it likely means and which of your segments or deals it affects",
-        "height": 680,
-        "width": 620,
+        "height": 800,
+        "width": 540,
         "color": 7
       },
       "id": "competitor-monitoring-section-4",
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        -30
+        1540,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 5. Instant alerts for pricing\nPricing and packaging changes alert the product-marketing channel immediately with the before/after",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -109,15 +109,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2200,
-        190
+        2180,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 6. Write the weekly brief\nRanked changes with evidence links and snapshots, a short read on each competitor's direction, and suggested actions for sales, product and marketing",
-        "height": 680,
-        "width": 620,
+        "height": 800,
+        "width": 540,
         "color": 7
       },
       "id": "competitor-monitoring-section-6",
@@ -125,14 +125,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        -30
+        2500,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 7. Update battle cards\nCompetitor pages in the wiki updated with the new facts and dated; sales sees the change history",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3160,
-        190
+        3140,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 8. Distribute and log\nBrief posted and emailed; every change stored so quarterly reviews can show trends",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -157,14 +157,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3480,
-        190
+        3460,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 800,
         "width": 300,
         "color": 3
       },
@@ -173,8 +173,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -90
       ]
     },
     {

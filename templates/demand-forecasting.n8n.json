@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Forecast weekly demand from sales data with Claude and publish to Google Sheets\n\nOperations and supply-chain planners who forecast in spreadsheets and want a repeatable weekly run with explanations.\n\n### How it works\nTrigger: Runs Sunday night after the ERP's weekly close.\n1. Pull sales history\n2. Pull the signals\n3. Clean and align\n4. Run the forecasting model\n5. Score last week's forecast\n6. Write forecasts to the planning system\n7. Explain the exceptions\n8. Publish the weekly review\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus LightGBM / Chronos / TimesFM / TimeGPT, BigQuery / Snowflake / Postgres, Google Sheets / planning tool.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nChange the horizon and aggregation level in the Config node; replace the statistical model step with your own endpoint if you already run one.\nGuardrail to keep: The model forecasts; the agent explains.\n\nFull blueprint: https://agentmelt.com/workflows/demand-forecasting/",
-        "height": 900,
+        "height": 800,
         "width": 640,
         "color": 1
       },
@@ -13,30 +13,30 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -110
       ]
     },
     {
       "parameters": {
-        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
-        "height": 240,
-        "width": 620,
+        "content": "## Trigger\nThe entry point. The red note next to it marks the one node you edit.",
+        "height": 820,
+        "width": 300,
         "color": 7
       },
       "id": "demand-forecasting-section-0",
-      "name": "Section: Trigger and config",
+      "name": "Section: Trigger",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 1. Pull sales history\nUnits sold per SKU per location per week from the ERP or data warehouse (NetSuite, SAP, Dynamics, BigQuery, Snowflake), including returns and stockout flags so lost sales are not read as low demand",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -45,14 +45,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 2. Pull the signals\nPromotion calendar, price history, marketing spend, web sessions per product, weather for store regions, public holidays, and competitor price feeds where you have them",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -61,14 +61,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        190
+        900,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 3. Clean and align\nFills gaps, corrects stockout weeks (censored demand), maps promotions to weeks, and produces one wide table per SKU-location",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -77,14 +77,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        190
+        1220,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 4. Run the forecasting model\nCalls the forecasting service — a gradient-boosted model (LightGBM) or a foundation time-series model (Chronos, TimesFM) hosted as an endpoint, or Nixtla's TimeGPT API for teams that do not want to host",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        190
+        1540,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 5. Score last week's forecast\nCompares the forecast made a week ago to the actuals that just arrived and computes WAPE, bias and forecast-value-added by segment, so the workflow reports its own accuracy every run",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1880,
-        190
+        1860,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 6. Write forecasts to the planning system\nStores forecasts and quantiles by SKU-location-week, with a run id, in the table the planning tool or replenishment sheet reads",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -125,15 +125,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2200,
-        190
+        2180,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 7. Explain the exceptions\nFor SKUs where the forecast moved by more than a threshold or error was worst, the agent reads the feature changes (a new promotion, a price drop, a stockout) and writes a one-line explanation with the numbers",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "demand-forecasting-section-7",
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        -30
+        2500,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 8. Publish the weekly review\nPosts the accuracy scorecard, the top exceptions with explanations, and a link to the planning sheet",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -157,14 +157,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3160,
-        190
+        3140,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 820,
         "width": 300,
         "color": 3
       },
@@ -173,8 +173,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -110
       ]
     },
     {

@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Offboard leavers from the HRIS to Okta, Jira and Google Workspace with Claude\n\nIT and HR teams that revoke access and collect equipment from a checklist that is never quite complete.\n\n### How it works\nTrigger: The HRIS fires when an employment end date is set.\n1. Receive the termination record\n2. Assemble the leaver's access map\n3. Open revocation tickets with deadlines\n4. Schedule equipment return\n5. Generate the knowledge-transfer checklist\n6. Hand off to finance and payroll\n7. Send the exit survey\n8. Confirm closure\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Okta / Entra ID / Google Workspace, Jira Service Management / ServiceNow, Typeform / Google Forms.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nEdit the access-revocation order and the exit-survey questions in the Config node; add your own SaaS admin APIs as extra revocation nodes.\nGuardrail to keep: The workflow requests revocation; IT executes it.\n\nFull blueprint: https://agentmelt.com/workflows/employee-offboarding-automation/",
-        "height": 900,
+        "height": 820,
         "width": 640,
         "color": 1
       },
@@ -13,15 +13,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 1. Receive the termination record\nEmployee, role, last working day, reason category (voluntary/involuntary), manager and location",
-        "height": 240,
-        "width": 620,
+        "height": 840,
+        "width": 300,
         "color": 7
       },
       "id": "employee-offboarding-automation-section-1",
@@ -29,14 +29,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 2. Assemble the leaver's access map\nQueries the identity provider and the tracking board from onboarding for every system this person was granted, so nothing is guessed",
-        "height": 240,
+        "height": 840,
         "width": 300,
         "color": 7
       },
@@ -45,14 +45,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 3. Open revocation tickets with deadlines\nOne ticket per system, due at the agreed time on the last day (or immediately for involuntary exits), assigned to IT with the account identifiers pre-filled",
-        "height": 240,
+        "height": 840,
         "width": 300,
         "color": 7
       },
@@ -61,14 +61,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        190
+        900,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 4. Schedule equipment return\nSends the return instructions or courier label, records the asset tags, and adds a follow-up task if the equipment is not back within 7 days",
-        "height": 240,
+        "height": 840,
         "width": 300,
         "color": 7
       },
@@ -77,15 +77,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        190
+        1220,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 5. Generate the knowledge-transfer checklist\nDrafts a handover document for the manager from the role description and recent project data (Jira, Notion, Drive): open items, recurring responsibilities, systems owned, people to introduce",
-        "height": 680,
-        "width": 620,
+        "height": 840,
+        "width": 540,
         "color": 7
       },
       "id": "employee-offboarding-automation-section-5",
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        -30
+        1540,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 6. Hand off to finance and payroll\nCreates the final-pay task with last day, accrued leave and pending expenses, and notifies payroll with a deadline that respects local rules",
-        "height": 240,
+        "height": 840,
         "width": 300,
         "color": 7
       },
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2200,
-        190
+        2180,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 7. Send the exit survey\nTypeform or Google Form sent on the last day, results stored on the board and summarised quarterly by department",
-        "height": 240,
+        "height": 840,
         "width": 300,
         "color": 7
       },
@@ -125,15 +125,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        190
+        2500,
+        -130
       ]
     },
     {
       "parameters": {
         "content": "## 8. Confirm closure\nDaily run checks every revocation ticket is closed and every asset is back; escalates open items to the IT lead and HR after the deadline",
-        "height": 240,
-        "width": 620,
+        "height": 360,
+        "width": 540,
         "color": 7
       },
       "id": "employee-offboarding-automation-section-8",
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        750
+        -60,
+        790
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 840,
         "width": 300,
         "color": 3
       },
@@ -157,8 +157,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -130
       ]
     },
     {
@@ -475,7 +475,7 @@
       "typeVersion": 1.4,
       "position": [
         0,
-        860
+        960
       ],
       "notes": "Confirm closure\n\nDaily run checks every revocation ticket is closed and every asset is back; escalates open items to the IT lead and HR after the deadline."
     },
@@ -489,7 +489,7 @@
       "typeVersion": 2,
       "position": [
         320,
-        860
+        960
       ],
       "notes": "Daily run checks every revocation ticket is closed and every asset is back; escalates open items to the IT lead and HR after the deadline."
     }

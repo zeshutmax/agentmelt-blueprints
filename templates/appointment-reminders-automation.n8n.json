@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Send appointment reminders and handle replies with Twilio and Claude\n\nClinics, salons and service businesses losing revenue to no-shows.\n\n### How it works\nTrigger: Hourly scan of upcoming appointments in the scheduling system; instant triggers for new bookings, cancellations and inbound SMS replies.\n1. Pull upcoming appointments\n2. Decide the cadence and channel\n3. Send the reminder\n4. Understand replies\n5. Book reschedules from real availability\n6. Fill cancellations from the waitlist\n7. Update the record and the desk\n8. Report weekly\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Twilio, Scheduling system (Dentrix, Cliniko, Acuity, Calendly…).\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the reminder timing and the reschedule rules in the Config node; connect your scheduling system (Acuity, Calendly, Cliniko…).\nGuardrail to keep: Only patients with recorded consent for SMS or automated calls are messaged; opt-out words stop the sequence immediately.\n\nFull blueprint: https://agentmelt.com/workflows/appointment-reminders-automation/",
-        "height": 900,
+        "height": 840,
         "width": 640,
         "color": 1
       },
@@ -13,30 +13,30 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -110
       ]
     },
     {
       "parameters": {
-        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
-        "height": 240,
-        "width": 620,
+        "content": "## Trigger\nThe entry point. The red note next to it marks the one node you edit.",
+        "height": 820,
+        "width": 300,
         "color": 7
       },
       "id": "appointment-reminders-automation-section-0",
-      "name": "Section: Trigger and config",
+      "name": "Section: Trigger",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 1. Pull upcoming appointments\nAppointments in the next 7 days with patient contact preferences, provider, location and appointment type from the practice management or booking system (Dentrix, athenahealth, Cliniko, Acuity, Calendly)",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -45,14 +45,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 2. Decide the cadence and channel\nReminder schedule per appointment type (a 2-hour procedure gets more notice than a 15-minute check) and per patient preference; quiet hours and time zones respected",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -61,14 +61,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        190
+        900,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 3. Send the reminder\nSMS via Twilio, email via the practice's sender, or a voice call for patients who prefer it, with a one-tap confirm and a reply-to-reschedule option",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -77,15 +77,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        190
+        1220,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 4. Understand replies\nFree-text replies are classified — confirm, cancel, reschedule (with the proposed time extracted), question — and the agent drafts a short reply; ambiguous messages go to the front desk",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "appointment-reminders-automation-section-4",
@@ -93,14 +93,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        -30
+        1540,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 5. Book reschedules from real availability\nFor reschedule requests, the workflow reads open slots for the same provider and type, offers the nearest three, and books the one the patient picks",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2200,
-        190
+        2180,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 6. Fill cancellations from the waitlist\nA cancelled slot triggers offers to waitlisted patients in priority order, first to accept gets it; the rest are told the slot is gone",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -125,14 +125,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        190
+        2500,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 7. Update the record and the desk\nConfirmation status written back to the scheduling system; the day sheet in Slack or email shows confirmed, unconfirmed and rescheduled, so the desk calls only the unconfirmed",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -141,15 +141,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2840,
-        190
+        2820,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 8. Report weekly\nNo-show rate by provider and appointment type, confirmation rate by channel, slots recovered from the waitlist, and reply-handling accuracy",
-        "height": 240,
-        "width": 620,
+        "height": 360,
+        "width": 540,
         "color": 7
       },
       "id": "appointment-reminders-automation-section-8",
@@ -157,14 +157,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        750
+        -60,
+        790
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 820,
         "width": 300,
         "color": 3
       },
@@ -173,8 +173,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -110
       ]
     },
     {
@@ -505,7 +505,7 @@
       "typeVersion": 1.4,
       "position": [
         0,
-        860
+        960
       ],
       "notes": "Report weekly\n\nNo-show rate by provider and appointment type, confirmation rate by channel, slots recovered from the waitlist, and reply-handling accuracy."
     },
@@ -519,7 +519,7 @@
       "typeVersion": 2,
       "position": [
         320,
-        860
+        960
       ],
       "notes": "No-show rate by provider and appointment type, confirmation rate by channel, slots recovered from the waitlist, and reply-handling accuracy."
     }

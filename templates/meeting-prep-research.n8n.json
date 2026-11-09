@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Prepare meeting briefs from Google Calendar with Claude, HubSpot and Clay\n\nSales reps and founders who walk into external meetings with two minutes of research.\n\n### How it works\nTrigger: Google or Microsoft calendar scanned for meetings with external attendees in the next 24 hours; new bookings as they land.\n1. Find upcoming external meetings\n2. Identify attendees and account\n3. Research the company\n4. Research the people\n5. Write the brief\n6. Deliver\n7. Capture the outcome\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus HubSpot / Salesforce, Clay / Apollo.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the lookahead window and the brief sections in the Config node; swap HubSpot for Salesforce.\nGuardrail to keep: Only public and first-party data; no scraping behind logins, no personal data beyond professional role.\n\nFull blueprint: https://agentmelt.com/workflows/meeting-prep-research/",
-        "height": 900,
+        "height": 800,
         "width": 640,
         "color": 1
       },
@@ -13,30 +13,30 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -110
       ]
     },
     {
       "parameters": {
-        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
-        "height": 240,
-        "width": 620,
+        "content": "## Trigger\nThe entry point. The red note next to it marks the one node you edit.",
+        "height": 820,
+        "width": 300,
         "color": 7
       },
       "id": "meeting-prep-research-section-0",
-      "name": "Section: Trigger and config",
+      "name": "Section: Trigger",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 1. Find upcoming external meetings\nMeetings in the next 24 hours with attendees outside the company domain; internal-only meetings are ignored",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -45,14 +45,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 2. Identify attendees and account\nContacts and company matched in the CRM; deal stage, owner, open tickets and last interactions pulled",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -61,14 +61,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        190
+        900,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 3. Research the company\nCompany site (about, product, pricing pages), recent news, funding and hiring signals from enrichment and news APIs; product usage or billing signals for existing customers",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -77,14 +77,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        190
+        1220,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 4. Research the people\nRole, tenure and public professional profile per attendee from enrichment providers; recent public posts where available",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -93,15 +93,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        190
+        1540,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 5. Write the brief\nOne page: company in two lines, what changed recently, attendees and roles, relationship history and open items, live account signals, and three suggested angles tied to the evidence",
-        "height": 680,
-        "width": 620,
+        "height": 820,
+        "width": 540,
         "color": 7
       },
       "id": "meeting-prep-research-section-5",
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1880,
-        -30
+        1860,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 6. Deliver\nPosted as a DM to the rep an hour before, and attached to the calendar event and the CRM deal",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -125,14 +125,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        190
+        2500,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## 7. Capture the outcome\nAfter the meeting a one-question prompt ('how did it go, next step?'); the answer is logged to the CRM so the next brief includes it",
-        "height": 240,
+        "height": 820,
         "width": 300,
         "color": 7
       },
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2840,
-        190
+        2820,
+        -110
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 820,
         "width": 300,
         "color": 3
       },
@@ -157,8 +157,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -110
       ]
     },
     {

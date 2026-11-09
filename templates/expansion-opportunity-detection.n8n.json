@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Detect expansion signals in Amplitude and HubSpot with Claude and alert account owners\n\nCustomer-success and sales teams that learn about upsell moments too late, if at all.\n\n### How it works\nTrigger: Weekly scoring run; instant triggers for high-value signals like hitting a plan limit or a pricing-page visit by an admin.\n1. Pull usage and account data\n2. Pull engagement and buying signals\n3. Compute the readiness score\n4. Match to a play\n5. Draft the opener\n6. Route to the owner\n7. Track outcomes by signal\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus Amplitude / Mixpanel / Pendo, HubSpot / Salesforce, Google Sheets.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nAdjust the signal weights and the minimum ARR in the Config node; route alerts to Slack or straight into HubSpot tasks.\nGuardrail to keep: Scores explain themselves — each account shows the signals behind it.\n\nFull blueprint: https://agentmelt.com/workflows/expansion-opportunity-detection/",
-        "height": 900,
+        "height": 820,
         "width": 640,
         "color": 1
       },
@@ -13,30 +13,30 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -90
       ]
     },
     {
       "parameters": {
-        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
-        "height": 240,
-        "width": 620,
+        "content": "## Trigger\nThe entry point. The red note next to it marks the one node you edit.",
+        "height": 800,
+        "width": 300,
         "color": 7
       },
       "id": "expansion-opportunity-detection-section-0",
-      "name": "Section: Trigger and config",
+      "name": "Section: Trigger",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 1. Pull usage and account data\nActive users, seats used vs",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -45,14 +45,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 2. Pull engagement and buying signals\nPricing-page visits, webinar attendance, support questions about premium features, new integrations connected, and firmographic changes (funding, hiring) from enrichment tools",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -61,14 +61,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        190
+        900,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 3. Compute the readiness score\nWeighted score per account from usage growth, limit proximity, adoption breadth, engagement and buying signals; weights per segment live in a sheet the RevOps lead can tune",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -77,14 +77,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        190
+        1220,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 4. Match to a play\nSignal pattern → play: seat expansion, tier upgrade, add-on module, multi-year, or a 'not yet' hold",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -93,15 +93,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        190
+        1540,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 5. Draft the opener\nFor each account on the list the agent writes a three-sentence opener for the CSM, grounded in the account's actual usage and phrased as help, not a pitch",
-        "height": 680,
-        "width": 620,
+        "height": 800,
+        "width": 540,
         "color": 7
       },
       "id": "expansion-opportunity-detection-section-5",
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1880,
-        -30
+        1860,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 6. Route to the owner\nCreates or updates an expansion opportunity on the account with the score, signals and play; posts the CSM's weekly list to Slack",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -125,14 +125,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        190
+        2500,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 7. Track outcomes by signal\nEvery surfaced opportunity is tracked to won/lost/ignored, so the score weights are tuned quarterly from what actually converted",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -141,14 +141,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2840,
-        190
+        2820,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 800,
         "width": 300,
         "color": 3
       },
@@ -157,8 +157,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -90
       ]
     },
     {

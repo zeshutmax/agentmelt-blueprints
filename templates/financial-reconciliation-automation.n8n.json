@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Reconcile Stripe payouts against NetSuite with Claude and flag exceptions in Slack\n\nFinance teams that match bank feeds, processor payouts and the ledger in spreadsheets every morning.\n\n### How it works\nTrigger: Daily run at 6am after bank and processor feeds update; on-demand run before close.\n1. Pull the three sides\n2. Match deterministically\n3. Classify the breaks\n4. Explain the unknowns\n5. Route for approval\n6. Post approved entries\n7. Maintain the reconciliation file\n8. Close-readiness report\nEvery AI step is followed by a \"Needs a person?\" gate that parks low-confidence items; the write-back waits for an approval.\n\n### Setup\n1. Open \"Config (edit me)\" and fill in the fields (names, approver, quiet hours, thresholds).\n2. Add credentials: Anthropic, plus NetSuite / Xero / QuickBooks, Stripe / Adyen + Plaid.\n3. Run once with test_mode on, read the output, then switch the trigger on.\n\n### Customization tips\nSet the matching tolerances and the exception owners in the Config node; swap NetSuite for Xero or QuickBooks.\nGuardrail to keep: Nothing posts to the ledger without an accountant's approval; auto-matching only marks, it does not create entries.\n\nFull blueprint: https://agentmelt.com/workflows/financial-reconciliation-automation/",
-        "height": 900,
+        "height": 840,
         "width": 640,
         "color": 1
       },
@@ -13,30 +13,30 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -720,
-        -40
+        -780,
+        -90
       ]
     },
     {
       "parameters": {
-        "content": "## Trigger and config\nThe entry point and the one node you edit: names, approver, quiet hours, test mode.",
-        "height": 240,
-        "width": 620,
+        "content": "## Trigger\nThe entry point. The red note next to it marks the one node you edit.",
+        "height": 800,
+        "width": 300,
         "color": 7
       },
       "id": "financial-reconciliation-automation-section-0",
-      "name": "Section: Trigger and config",
+      "name": "Section: Trigger",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        190
+        -60,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 1. Pull the three sides\nBank transactions (Plaid or bank API), processor payouts and transaction detail (Stripe, Adyen, PayPal), and ledger entries (NetSuite, Xero, QuickBooks, Sage) for the period",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -45,14 +45,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        600,
-        190
+        580,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 2. Match deterministically\nExact matches on amount and reference; one-to-many for processor payouts (payout = sum of transactions − fees − refunds); tolerance matching for FX; each match tagged with the rule that made it",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -61,14 +61,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        190
+        900,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 3. Classify the breaks\nUnmatched items grouped: timing (in transit), fees, refunds, chargebacks, duplicates, unknown",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -77,15 +77,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1240,
-        190
+        1220,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 4. Explain the unknowns\nFor remaining breaks the agent reads the descriptions, amounts, dates and nearby transactions and writes the most likely explanation with the evidence — never posting anything",
-        "height": 680,
-        "width": 620,
+        "height": 800,
+        "width": 540,
         "color": 7
       },
       "id": "financial-reconciliation-automation-section-4",
@@ -93,15 +93,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1560,
-        -30
+        1540,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 5. Route for approval\nProposed entries and explanations to the accountant with approve / edit / investigate buttons; anything above a threshold goes to the controller",
-        "height": 460,
-        "width": 620,
+        "height": 800,
+        "width": 540,
         "color": 7
       },
       "id": "financial-reconciliation-automation-section-5",
@@ -109,14 +109,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2200,
-        -30
+        2180,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 6. Post approved entries\nApproved journal entries posted to the ledger with the match evidence attached; the reconciliation report updated",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -125,14 +125,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2840,
-        190
+        2820,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 7. Maintain the reconciliation file\nA living reconciliation per account: matched, proposed, open, aged — the file auditors ask for, always current",
-        "height": 240,
+        "height": 800,
         "width": 300,
         "color": 7
       },
@@ -141,15 +141,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3160,
-        190
+        3140,
+        -90
       ]
     },
     {
       "parameters": {
         "content": "## 8. Close-readiness report\nDaily count and value of open breaks by age and type; a red flag when an item passes 5 days unexplained",
-        "height": 240,
-        "width": 620,
+        "height": 340,
+        "width": 540,
         "color": 7
       },
       "id": "financial-reconciliation-automation-section-8",
@@ -157,14 +157,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        750
+        -60,
+        790
       ]
     },
     {
       "parameters": {
         "content": "## Fill this in first\nEvery later node reads these values. Keep test_mode on for the first week.",
-        "height": 300,
+        "height": 800,
         "width": 300,
         "color": 3
       },
@@ -173,8 +173,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        270,
-        180
+        260,
+        -90
       ]
     },
     {
@@ -566,7 +566,7 @@
       "typeVersion": 1.4,
       "position": [
         0,
-        860
+        940
       ],
       "notes": "Close-readiness report\n\nDaily count and value of open breaks by age and type; a red flag when an item passes 5 days unexplained."
     },
@@ -580,7 +580,7 @@
       "typeVersion": 2,
       "position": [
         320,
-        860
+        940
       ],
       "notes": "Daily count and value of open breaks by age and type; a red flag when an item passes 5 days unexplained."
     }
