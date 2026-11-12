@@ -531,7 +531,7 @@
       "id": "support-ticket-deflection-07",
       "name": "Zendesk: Send and log",
       "type": "n8n-nodes-base.zendesk",
-      "typeVersion": 1,
+      "typeVersion": 1.1,
       "position": [
         2880,
         300

@@ -291,7 +291,7 @@
       "id": "customer-feedback-analysis-01",
       "name": "Zendesk: Collect feedback",
       "type": "n8n-nodes-base.zendesk",
-      "typeVersion": 1,
+      "typeVersion": 1.1,
       "position": [
         640,
         300
